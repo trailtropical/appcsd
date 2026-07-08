@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Corredor Sem Dor — O método que resolve a causa do ciclo de dor na corrida. Protocolo da Corrida Funcional por Nathan Gossenheimer.">
+    <meta property="og:title" content="Corredor Sem Dor — Nathan Gossenheimer">
+    <meta property="og:description" content="O método que resolve a causa do ciclo de dor — não apenas o sintoma onde ela aparece.">
+    <title>Corredor Sem Dor — Nathan Gossenheimer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .font-montserrat { font-family: 'Montserrat', sans-serif; }
+      @keyframes pulse-slow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.85; }
+      }
+      .animate-pulse-slow {
+        animation: pulse-slow 3s ease-in-out infinite;
+      }
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      .sticky-hidden { display: none; }
+      #locked-content { display: none; }
+      #locked-content.unlocked { display: block; }
+      #locked-content.unlocked .fade-in-section {
+        animation: fadeUp 0.6s ease both;
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- URGENCY BANNER -->
+    <div class="w-full bg-gradient-to-r from-[#FF5C00] to-[#E04800] py-3 px-4 text-center">
+      <p class="uppercase tracking-wider text-black text-lg md:text-lg font-montserrat font-bold" id="urgency-text"></p>
+    </div>
+
+    <!-- VSL (VIDEO) -->
+    <section class="flex flex-col items-center justify-center min-h-[70vh] px-4 py-12">
+      <div class="w-full max-w-[480px]" id="vsl-container"></div>
+    </section>
+
+    <!-- LOCKED CONTENT: só aparece após 15:19 do vídeo -->
+    <div id="locked-content">
+
+    <!-- TESTIMONIALS (primeira seção ao destravar) -->
+    <section id="testimonials-section" class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00]">Resultados reais</span>
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2 leading-tight">Corredores que aplicaram o protocolo.</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="testimonials-grid"></div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- PAIN CYCLE -->
+    <section class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00]">O problema real</span>
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2 leading-tight">Você conhece esse ciclo de cor.</h2>
+      </div>
+      <div class="relative">
+        <div class="space-y-2" id="pain-cycle-steps"></div>
+        <div class="mt-3 flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-5 py-4">
+          <span class="text-2xl">↩</span>
+          <p class="text-sm font-bold text-red-600">Recomeça. De novo.</p>
+        </div>
+      </div>
+      <div class="mt-10 grid md:grid-cols-2 gap-4">
+        <div class="bg-gray-50 rounded-2xl p-6">
+          <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">O que acontece</p>
+          <p class="text-sm text-gray-700 leading-relaxed">Seu corpo redistribui o esforço quando uma parte falha. O joelho faz o trabalho do quadril. O tornozelo faz o trabalho do pé.</p>
+        </div>
+        <div class="bg-gray-900 rounded-2xl p-6">
+          <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">O resultado</p>
+          <p class="text-sm text-gray-300 leading-relaxed">Você trata <strong class="text-white">onde dói</strong>. A causa continua lá — esperando o próximo pico de treino.</p>
+        </div>
+      </div>
+      <div class="mt-6 border-l-4 border-[#FF5C00] pl-5 py-2">
+        <p class="text-base font-bold text-gray-900 italic">"Síndrome da Compensação Silenciosa"</p>
+        <p class="text-sm text-gray-500 mt-1">O verdadeiro motivo pelo qual a dor não vai embora de vez.</p>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- DIFFERENTIALS -->
+    <section class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00]">Por que o resto não funciona</span>
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2 leading-tight">Você já tentou isso tudo.</h2>
+        <p class="text-gray-500 text-base mt-3 max-w-md mx-auto">Nenhuma dessas abordagens resolve a causa. Elas tratam a vítima.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3" id="differentials-grid"></div>
+      <div class="mt-8 bg-[#FF5C00] rounded-2xl px-6 py-6 text-white text-center">
+        <p class="text-lg font-black leading-snug">O problema não está onde dói.<br><span class="font-normal text-orange-100">Está onde o corpo parou de funcionar.</span></p>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- PROTOCOL STEPS -->
+    <section class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00]">A solução</span>
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2 leading-tight">O Protocolo da Corrida Funcional.</h2>
+        <p class="text-gray-500 text-base mt-3 max-w-sm mx-auto">Fazer o corpo parar de compensar — na ordem certa.</p>
+      </div>
+      <div class="space-y-4" id="protocol-steps"></div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- NATHAN STORY -->
+    <section class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-[#FF5C00]/40">
+          <img src="https://media.base44.com/images/public/6a39f02b1c5bc71f3c0af38d/f3b1026eb_Captura_de_tela_2026-02-23_122818.png" alt="Nathan Gossenheimer" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <p class="text-base font-black text-gray-900">Nathan Gossenheimer</p>
+          <p class="text-xs text-gray-500">Quiropraxista · Fisiologia do Exercício · Rio de Janeiro</p>
+        </div>
+      </div>
+      <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00] block mb-3">De onde veio o método</span>
+      <h2 class="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-6">Fui meu primeiro paciente.</h2>
+      <div class="bg-gray-900 text-white rounded-2xl px-7 py-6 mb-6">
+        <p class="text-base italic font-medium leading-relaxed text-gray-200">"Com um tornozelo assim, você não deveria voltar a correr."</p>
+        <p class="text-xs text-gray-500 mt-3">— Médico, início da minha trajetória na corrida</p>
+      </div>
+      <div class="space-y-4">
+        <div class="flex gap-3 items-start">
+          <span class="text-[#FF5C00] font-black mt-0.5">→</span>
+          <p class="text-sm text-gray-700 leading-relaxed">Diminuí o treino. A dor melhorou. Voltei a correr. A dor voltou. Troquei de tênis. Continuei com dor.</p>
+        </div>
+        <div class="flex gap-3 items-start">
+          <span class="text-[#FF5C00] font-black mt-0.5">→</span>
+          <p class="text-sm text-gray-700 leading-relaxed">Decidi parar de tratar onde dói e entender <strong class="text-gray-900">por que a dor estava ali.</strong></p>
+        </div>
+        <div class="flex gap-3 items-start">
+          <span class="text-[#FF5C00] font-black mt-0.5">→</span>
+          <p class="text-sm text-gray-700 leading-relaxed">O padrão ficou claro: corredores sem dor não aguentavam mais — tinham <strong class="text-gray-900">menos compensações.</strong></p>
+        </div>
+        <div class="flex gap-3 items-start">
+          <span class="text-emerald-500 font-black mt-0.5">✓</span>
+          <p class="text-sm text-gray-700 leading-relaxed">Quando corrigi em mim — não o lugar da dor, mas onde estava falhando — a dor foi embora. E quando apliquei nos meus pacientes, <strong class="text-gray-900">o resultado se repetia. Sempre.</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- INSIDE APP -->
+    <section class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00]">Como funciona na prática</span>
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2 leading-tight">Por dentro do app.</h2>
+      </div>
+      <div class="bg-gray-900 rounded-2xl overflow-hidden shadow-xl">
+        <div class="bg-gray-800 px-5 py-3 flex items-center gap-2">
+          <div class="flex gap-1.5">
+            <div class="w-3 h-3 rounded-full bg-red-500/70"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500/70"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500/70"></div>
+          </div>
+          <div class="flex-1 text-center"><span class="text-xs text-gray-500 font-medium">Corredor Sem Dor</span></div>
+        </div>
+        <div id="app-steps"></div>
+        <div class="px-6 py-4 bg-[#FF5C00]/10 border-t border-[#FF5C00]/20">
+          <p class="text-xs text-[#FF5C00] font-semibold text-center">⚡ Acesso imediato após a confirmação de compra</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- OFFER -->
+    <section id="oferta" class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="text-center mb-8">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00]">Invista no programa</span>
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2 leading-tight">Tudo o que você recebe hoje.</h2>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-lg">
+        <div class="bg-gray-900 px-6 py-8 text-center">
+          <p class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-3">Acesso completo · Corredor Sem Dor</p>
+          <p class="text-sm text-gray-600 line-through mb-1">De R$497</p>
+          <p class="text-5xl md:text-6xl font-black text-white leading-none">12x <span class="text-[#FF5C00]">R$29,68</span></p>
+          <p class="text-sm text-gray-500 mt-3">ou R$297 à vista · Acesso vitalício</p>
+        </div>
+        <div class="px-6 py-4" id="offer-items"></div>
+        <div class="px-6 pb-8 pt-4 bg-gray-50 border-t border-gray-100">
+          <div class="text-center" id="offer-cta"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- GUARANTEE -->
+    <div class="px-5 max-w-[760px] mx-auto pb-10">
+      <div class="bg-emerald-600 rounded-2xl px-6 py-8 text-center text-white">
+        <p class="text-4xl mb-3">🛡️</p>
+        <h4 class="text-xl font-black mb-2">14 dias de garantia absoluta</h4>
+        <p class="text-sm text-emerald-100 leading-relaxed max-w-md mx-auto">Entra no app, aplica o protocolo. Se em 14 dias não sentir diferença — ou por qualquer motivo — reembolso direto na plataforma. Sem perguntas. <strong class="text-white">O risco é todo meu.</strong></p>
+      </div>
+    </div>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- FAQ -->
+    <section class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00]">Dúvidas frequentes</span>
+        <h2 class="text-3xl md:text-4xl font-black text-gray-900 mt-2">Perguntas comuns.</h2>
+      </div>
+      <div class="space-y-2" id="faq-list"></div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- FINAL CTA -->
+    <section class="py-16 md:py-20 px-5 max-w-[760px] mx-auto">
+      <div class="bg-gray-900 rounded-3xl px-8 py-12 text-center">
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-[#FF5C00] block mb-4">A decisão</span>
+        <h2 class="text-3xl md:text-4xl font-black text-white leading-tight mb-4">Dois caminhos.</h2>
+        <div class="grid sm:grid-cols-2 gap-4 my-8 text-left">
+          <div class="bg-gray-800 rounded-xl p-5">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Continuar assim</p>
+            <ul class="space-y-2">
+              <li class="text-xs text-gray-400 flex gap-2"><span class="text-red-500 flex-shrink-0">✕</span>Dói → Para → Melhora → Volta → Dói</li>
+              <li class="text-xs text-gray-400 flex gap-2"><span class="text-red-500 flex-shrink-0">✕</span>Tratar onde dói. A causa fica.</li>
+              <li class="text-xs text-gray-400 flex gap-2"><span class="text-red-500 flex-shrink-0">✕</span>Cada ciclo te afasta da corrida</li>
+            </ul>
+          </div>
+          <div class="bg-[#FF5C00]/10 border border-[#FF5C00]/30 rounded-xl p-5">
+            <p class="text-xs font-bold uppercase tracking-wider text-[#FF5C00] mb-2">Com o protocolo</p>
+            <ul class="space-y-2">
+              <li class="text-xs text-gray-300 flex gap-2"><span class="text-emerald-400 flex-shrink-0">✓</span>Descobrir onde o corpo está falhando</li>
+              <li class="text-xs text-gray-300 flex gap-2"><span class="text-emerald-400 flex-shrink-0">✓</span>Corrigir a causa — não o sintoma</li>
+              <li class="text-xs text-gray-300 flex gap-2"><span class="text-emerald-400 flex-shrink-0">✓</span>Voltar a correr de vez</li>
+            </ul>
+          </div>
+        </div>
+        <div class="text-center" id="final-cta"></div>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER -->
+    <div class="max-w-[760px] mx-auto px-5">
+      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-200 bg-white py-10 px-5 max-w-[760px] mx-auto text-center">
+      <p class="text-xs text-gray-500 font-semibold">Corredor Sem Dor · Nathan Gossenheimer · Quiropraxista</p>
+      <p class="text-xs text-gray-400 mt-2">
+        <a href="#" class="hover:text-gray-600 transition-colors">Termos de uso</a>
+        <span> · </span>
+        <a href="#" class="hover:text-gray-600 transition-colors">Política de privacidade</a>
+        <span> · </span>
+        <a href="#" class="hover:text-gray-600 transition-colors">Contato</a>
+      </p>
+      <p class="text-[10px] text-gray-400 mt-4 max-w-md mx-auto leading-relaxed">Os resultados apresentados são individuais e podem variar. Este programa não substitui acompanhamento médico ou fisioterapêutico.</p>
+    </footer>
+
+      <!-- STICKY MOBILE CTA (aparece só após passar dos depoimentos) -->
+      <div class="fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/95 backdrop-blur-sm border-t border-[#2A2A2A] p-3 z-50 md:hidden sticky-hidden" id="sticky-cta"></div>
+
+    </div><!-- /locked-content -->
+
+    <!-- SCRIPTS -->
+    <script>
+      var CHECKOUT_URL = "https://pay.hotmart.com/I98276864D?bid=1779716323144&utm_source=organic&utm_campaign=&utm_medium=&utm_content=&utm_term=&xcod=&sck=v3_cab0577f-38a2-4131-b11e-546c1a7d034a_69bca4beb1f8e9f7f4f0715d_0_t-11_s-4";
+    </script>
+    <script>
+      // Urgency Banner
+      (function() {
+        var d = new Date();
+        var day = String(d.getDate()).padStart(2, "0");
+        var month = String(d.getMonth() + 1).padStart(2, "0");
+        document.getElementById("urgency-text").textContent = "⚠️ ESSE VÍDEO SAIRÁ DO AR HOJE, " + day + "/" + month + "!";
+      })();
+
+      // CTA Button factory
+      function createCTA(text, block, note) {
+        var div = document.createElement("div");
+        if (block) div.className = "text-center";
+        else div.className = "inline-block";
+
+        var a = document.createElement("a");
+        a.href = CHECKOUT_URL;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.className = "inline-block bg-[#FF5C00] text-white font-bold text-base px-10 py-4 rounded-full hover:bg-[#E04800] hover:shadow-[0_0_30px_rgba(255,92,0,0.35)] transition-all duration-300 animate-pulse-slow";
+        if (block) a.className += " w-full text-center";
+        a.style.boxShadow = "inset 0 2px 4px rgba(255,255,255,0.15), 0 4px 20px rgba(255,92,0,0.2)";
+        a.textContent = text || "QUERO CORRER SEM DOR AGORA";
+        div.appendChild(a);
+
+        if (note) {
+          var p = document.createElement("p");
+          p.className = "mt-3 text-xs text-[#888]";
+          p.textContent = note;
+          div.appendChild(p);
+        }
+        return div;
+      }
+
+      // Pain Cycle
+      (function() {
+        var steps = [
+          { icon: "😣", text: "Dor durante ou após a corrida" },
+          { icon: "🧊", text: "Descansa. Gelo. Anti-inflamatório." },
+          { icon: "✅", text: "Melhora. Volta a correr." },
+          { icon: "📈", text: "Aumenta o volume aos poucos." },
+          { icon: "🔄", text: "A dor volta — igual ou em outro lugar." }
+        ];
+        var container = document.getElementById("pain-cycle-steps");
+        steps.forEach(function(s, i) {
+          var div = document.createElement("div");
+          div.className = "flex items-center gap-4 bg-white border border-gray-100 rounded-xl px-5 py-4 shadow-sm";
+          var arrow = i < steps.length - 1 ? '<div class="ml-auto text-gray-300 text-lg">↓</div>' : "";
+          div.innerHTML = '<span class="text-2xl">' + s.icon + '</span><p class="text-sm font-semibold text-gray-800">' + s.text + '</p>' + arrow;
+          container.appendChild(div);
+        });
+      })();
+
+      // Differentials
+      (function() {
+        var items = [
+          { icon: "💊", label: "Anti-inflamatório", problem: "Reduz a dor. Não resolve a causa." },
+          { icon: "🏥", label: "Fisioterapia convencional", problem: "Trata onde dói. A origem está em outro lugar." },
+          { icon: "🏋️", label: "Fortalecimento genérico", problem: "Fortalece em cima de uma compensação. Piora." },
+          { icon: "👟", label: "Troca de tênis", problem: "Muda a superfície. Não muda o padrão de movimento." }
+        ];
+        var container = document.getElementById("differentials-grid");
+        items.forEach(function(item) {
+          var div = document.createElement("div");
+          div.className = "bg-gray-50 border border-gray-200 rounded-xl p-5";
+          div.innerHTML = '<span class="text-2xl block mb-3">' + item.icon + '</span><p class="text-sm font-bold text-gray-900 mb-1">' + item.label + '</p><p class="text-xs text-gray-500 leading-relaxed">' + item.problem + '</p>';
+          container.appendChild(div);
+        });
+      })();
+
+      // Protocol Steps
+      (function() {
+        var steps = [
+          { num: "01", color: "bg-[#FF5C00]", title: "Descobrir onde o corpo está falhando", bullets: ["7 testes de movimento simples direto do app", "Sem aparelho, sem clínica", "Revela onde está a compensação — não onde dói"] },
+          { num: "02", color: "bg-gray-900", title: "Reativar o que foi desligado", bullets: ["Exercícios específicos para os seus pontos de falha", "Não uma lista genérica — personalizado pelo check-up", "Cada estrutura volta a fazer o que é dela"] },
+          { num: "03", color: "bg-emerald-600", title: "20 min · 3x por semana · Em casa", bullets: ["Sem academia ou equipamentos", "Encaixa na sua rotina de treino atual", "Você segue. O corpo muda."] }
+        ];
+        var container = document.getElementById("protocol-steps");
+        steps.forEach(function(s) {
+          var div = document.createElement("div");
+          div.className = "flex gap-5 items-start bg-white border border-gray-100 rounded-2xl p-6 shadow-sm";
+          var bulletsHtml = "";
+          s.bullets.forEach(function(b) {
+            bulletsHtml += '<li class="flex items-start gap-2 text-sm text-gray-600"><span class="text-[#FF5C00] font-bold mt-0.5 flex-shrink-0">·</span>' + b + '</li>';
+          });
+          div.innerHTML = '<div class="' + s.color + ' text-white text-sm font-black rounded-xl px-3 py-2 flex-shrink-0">' + s.num + '</div><div><h3 class="text-base font-black text-gray-900 mb-3">' + s.title + '</h3><ul class="space-y-1.5">' + bulletsHtml + '</ul></div>';
+          container.appendChild(div);
+        });
+      })();
+
+      // Testimonials
+      (function() {
+        var testimonials = [
+          { text: "Cruzei a linha dos 21km sem sentir dor. Faltavam 5 semanas pra prova e o treinador já tinha me tirado.", name: "Márcia", detail: "Meias-maratonas", tag: "Completou os 21km", result: "5 semanas" },
+          { text: "Duas semanas depois, voltei a correr leve. Antes, toda vez que aumentava o treino, aparecia uma dor diferente.", name: "Cláudio", detail: "Corredor de rua", tag: "Resultado em 2 semanas", result: "2 semanas" },
+          { text: "6 meses de dor crônica no joelho. Tinha feito de tudo. Até aplicar o protocolo.", name: "Carolina", detail: "Dor crônica no joelho", tag: "6 meses resolvidos", result: "6 meses" },
+          { text: "Só o ritual pré-treino já zerou a dor no pé. Antes mesmo de qualquer outra coisa do protocolo.", name: "Juliano", detail: "Dor no pé", tag: "Dor zerada", result: "1ª semana" }
+        ];
+        var container = document.getElementById("testimonials-grid");
+        testimonials.forEach(function(t) {
+          var div = document.createElement("div");
+          div.className = "bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow";
+          div.innerHTML = '<div class="flex items-center gap-2 mb-4"><span class="bg-[#FF5C00] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">' + t.result + '</span></div><p class="text-gray-700 text-sm leading-relaxed mb-5 font-medium">"' + t.text + '"</p><div class="flex items-center justify-between border-t border-gray-100 pt-4"><div><p class="text-sm font-bold text-gray-900">' + t.name + '</p><p class="text-xs text-gray-400">' + t.detail + '</p></div><span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full"> ✓ ' + t.tag + '</span></div>';
+          container.appendChild(div);
+        });
+      })();
+
+      // Inside App Steps
+      (function() {
+        var appSteps = [
+          { n: "1", title: "Check-up Corporal", tag: "7 testes de movimento", desc: "Faz o teste, responde como foi. O app revela seus pontos de compensação." },
+          { n: "2", title: "Protocolo personalizado", tag: "Exercícios do seu corpo", desc: "Vídeo, séries e tempo. Nada genérico — cada exercício é para o que o seu corpo mostrou." },
+          { n: "3", title: "Abre. Segue. Fecha.", tag: "20 min · 3x por semana", desc: "Sem pesquisar, sem adivinhar. O programa diz exatamente o que fazer e por quê." }
+        ];
+        var container = document.getElementById("app-steps");
+        appSteps.forEach(function(s, i) {
+          var div = document.createElement("div");
+          var border = i < appSteps.length - 1 ? " border-b border-gray-800" : "";
+          div.className = "flex gap-4 px-6 py-5 items-start" + border;
+          div.innerHTML = '<div class="w-8 h-8 rounded-lg bg-[#FF5C00] text-white text-sm font-black flex items-center justify-center flex-shrink-0">' + s.n + '</div><div><div class="flex items-center gap-2 mb-1 flex-wrap"><p class="text-sm font-bold text-white">' + s.title + '</p><span class="text-[10px] font-semibold bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">' + s.tag + '</span></div><p class="text-xs text-gray-400 leading-relaxed">' + s.desc + '</p></div>';
+          container.appendChild(div);
+        });
+      })();
+
+      // Offer Items
+      (function() {
+        var offerItems = [
+          { label: "App Corredor Sem Dor", desc: "Acesso vitalício + todas as atualizações" },
+          { label: "Check-up Corporal", desc: "7 testes que revelam onde você está compensando" },
+          { label: "Protocolo personalizado", desc: "Exercícios específicos para os seus pontos, com vídeo" },
+          { label: "Bônus: Ritual de Corrida", desc: "Ativação pré-treino para ligar os músculos certos" },
+          { label: "Bônus: Recuperação Funcional", desc: "Protocolo pós-treino com rolo e auto-liberação" },
+          { label: "Bônus: Evolução Segura", desc: "Como aumentar volume sem se machucar" }
+        ];
+        var container = document.getElementById("offer-items");
+        offerItems.forEach(function(item, i) {
+          var div = document.createElement("div");
+          var border = i < offerItems.length - 1 ? " border-b border-gray-100" : "";
+          div.className = "flex gap-3 items-center py-3.5 text-sm" + border;
+          div.innerHTML = '<span class="text-emerald-500 font-black text-base flex-shrink-0">✓</span><div><span class="font-bold text-gray-900">' + item.label + '</span><span class="text-gray-400"> — ' + item.desc + '</span></div>';
+          container.appendChild(div);
+        });
+      })();
+
+      // CTAs
+      document.getElementById("offer-cta").appendChild(createCTA("GARANTIR ACESSO AGORA", true, "Você recebe o acesso por e-mail imediatamente após a compra"));
+      document.getElementById("final-cta").appendChild(createCTA("GARANTIR ACESSO AGORA", false, "14 dias de garantia · Sem risco"));
+      document.getElementById("sticky-cta").appendChild((function() {
+        var a = document.createElement("a");
+        a.href = CHECKOUT_URL;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.className = "block text-center bg-[#FF5C00] text-white font-bold text-sm py-3.5 rounded-full hover:bg-[#E04800] transition-colors";
+        a.textContent = "Quero correr sem dor →";
+        return a;
+      })());
+
+      // FAQ accordion
+      (function() {
+        var faqs = [
+          { q: "Minha dor é no joelho. Serve pra mim?", a: "Sim — é o caso mais comum. Em quase todos, o problema real está no quadril ou tornozelo. O programa foi feito para encontrar onde o corpo está falhando e corrigir a causa." },
+          { q: "Já fiz fisioterapia e a dor voltou. Por que seria diferente?", a: "Fisioterapia convencional foca onde dói — resolve temporariamente, mas não corrige o padrão de movimento. O CSD corrige a causa: estabilidade, controle e absorção de impacto." },
+          { q: "Preciso de academia ou equipamentos?", a: "Não. 20 minutos, 3 vezes por semana, em qualquer espaço. Sem nada especial." },
+          { q: "Posso fazer junto com meu treino atual?", a: "Sim. O programa prepara o corpo para absorver melhor o impacto — faz sentido rodar os dois em paralelo." },
+          { q: "Em quanto tempo vejo resultado?", a: "O Cláudio sentiu em 2 semanas. A Márcia cruzou os 21km em 5 semanas. A Carolina resolveu 6 meses de dor crônica. Há 14 dias de garantia para você testar sem risco." },
+          { q: "Como funciona o acesso?", a: "Assim que a compra é confirmada, você recebe o link por e-mail. Entra no app, começa pelo Check-up Corporal. Simples." }
+        ];
+        var container = document.getElementById("faq-list");
+        faqs.forEach(function(faq, i) {
+          var div = document.createElement("div");
+          div.className = "bg-white border border-gray-200 rounded-xl overflow-hidden";
+          div.innerHTML = '<button onclick="toggleFAQ(' + i + ')" class="w-full flex justify-between items-center px-5 py-4 text-left gap-3 hover:bg-gray-50 transition-colors"><span class="text-sm font-bold text-gray-900">' + faq.q + '</span><svg class="w-4 h-4 text-[#FF5C00] flex-shrink-0 transition-transform duration-200" id="faq-chevron-' + i + '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button><div class="hidden border-t border-gray-100 px-5 pb-4" id="faq-answer-' + i + '"><p class="text-sm text-gray-600 leading-relaxed pt-3">' + faq.a + '</p></div>';
+          container.appendChild(div);
+        });
+      })();
+
+      function toggleFAQ(index) {
+        var answer = document.getElementById("faq-answer-" + index);
+        var chevron = document.getElementById("faq-chevron-" + index);
+        var isHidden = answer.classList.contains("hidden");
+        // Close all others
+        var allAnswers = document.querySelectorAll("[id^='faq-answer-']");
+        var allChevrons = document.querySelectorAll("[id^='faq-chevron-']");
+        allAnswers.forEach(function(el) { el.classList.add("hidden"); });
+        allChevrons.forEach(function(el) { el.classList.remove("rotate-180"); });
+        if (isHidden) {
+          answer.classList.remove("hidden");
+          chevron.classList.add("rotate-180");
+        }
+      }
+
+      // VSL + Unlock em 15:19 (919s) — 4 estratégias paralelas
+      (function() {
+        var REVEAL_SECONDS = 919;
+        var LOCKED = true;
+        var lockedContent = document.getElementById("locked-content");
+
+        function doReveal() {
+          if (!LOCKED) return;
+          LOCKED = false;
+          lockedContent.classList.add("unlocked");
+          if (retryInterval) clearInterval(retryInterval);
+          if (pollInterval) clearInterval(pollInterval);
+        }
+
+        // Carrega o player no DOM
+        var smartPlayer = document.createElement("vturb-smartplayer");
+        smartPlayer.setAttribute("id", "vid-69bca36b596c6131b739c02b");
+        smartPlayer.style.display = "block";
+        smartPlayer.style.margin = "0 auto";
+        smartPlayer.style.width = "100%";
+        smartPlayer.style.maxWidth = "460px";
+        document.getElementById("vsl-container").appendChild(smartPlayer);
+
+        var script = document.createElement("script");
+        script.src = "https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/69bca36b596c6131b739c02b/v4/player.js";
+        script.async = true;
+        document.head.appendChild(script);
+
+        // ── ESTRATÉGIA 1: Eventos nativos do VTurb ──
+        function attachVTurbEvents() {
+          if (!LOCKED) return;
+          var el = document.getElementById("vid-69bca36b596c6131b739c02b");
+          if (!el) return false;
+
+          // Método A: CustomEvent "timeupdate" com e.detail.currentTime
+          if (typeof el.addEventListener === "function") {
+            el.addEventListener("timeupdate", function(e) {
+              var t = (e.detail && e.detail.currentTime) || e.currentTime || 0;
+              if (t >= REVEAL_SECONDS) doReveal();
+            });
+          }
+
+          // Método B: API .on("timeupdate", cb) do smartplayer
+          var sp = el.smartplayer || el;
+          if (typeof sp.on === "function") {
+            sp.on("timeupdate", function(t) {
+              if (t >= REVEAL_SECONDS) doReveal();
+            });
+          }
+          return true;
+        }
+
+        attachVTurbEvents();
+        var retryInterval = setInterval(function() {
+          if (LOCKED) attachVTurbEvents();
+        }, 2000);
+
+        // ── ESTRATÉGIA 2: postMessage do iframe ──
+        function handleMessage(event) {
+          if (!LOCKED) return;
+          try {
+            var raw = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+            if (!raw || typeof raw !== "object") return;
+            var ct = raw.currentTime || (raw.data && raw.data.currentTime) || raw.time || raw.t;
+            if (ct !== undefined && Number(ct) >= REVEAL_SECONDS) doReveal();
+          } catch (_) {}
+        }
+        window.addEventListener("message", handleMessage);
+
+        // ── ESTRATÉGIA 3: Polling de <video> no DOM ──
+        var pollInterval = setInterval(function() {
+          if (!LOCKED) return;
+          var videos = document.querySelectorAll("video");
+          for (var i = 0; i < videos.length; i++) {
+            var v = videos[i];
+            if (!isNaN(v.currentTime) && v.currentTime >= REVEAL_SECONDS) {
+              doReveal();
+              return;
+            }
+          }
+          var sp = document.getElementById("vid-69bca36b596c6131b739c02b");
+          if (sp) {
+            var ct = sp.currentTime || (typeof sp.getCurrentTime === "function" ? sp.getCurrentTime() : undefined);
+            if (ct !== undefined && ct >= REVEAL_SECONDS) doReveal();
+          }
+        }, 1000);
+
+        // ── ESTRATÉGIA 4: Timer de fallback (rede de segurança) ──
+        var elapsed = performance.now() / 1000;
+        var remaining = Math.max(0, REVEAL_SECONDS - elapsed);
+        var fallbackTimer = setTimeout(doReveal, remaining * 1000);
+
+        // Cleanup no unload (opcional, para evitar leaks)
+        window.addEventListener("beforeunload", function() {
+          window.removeEventListener("message", handleMessage);
+          clearInterval(pollInterval);
+          clearInterval(retryInterval);
+          clearTimeout(fallbackTimer);
+        });
+      })();
+
+      // Sticky CTA: aparece só depois de passar da seção de depoimentos
+      (function() {
+        var testimonials = document.getElementById("testimonials-section");
+        var sticky = document.getElementById("sticky-cta");
+        if (!testimonials || !sticky) return;
+
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+              sticky.classList.remove("sticky-hidden");
+            } else {
+              sticky.classList.add("sticky-hidden");
+            }
+          });
+        }, { threshold: 0 });
+
+        observer.observe(testimonials);
+      })();
+    </script>
+  </body>
+</html>
