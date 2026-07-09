@@ -86,6 +86,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .test-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2}
 
 .video-placeholder{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:border-color .2s}
+.video-placeholder:has(iframe){height:auto;aspect-ratio:16/9;cursor:default}
 .video-placeholder:hover{border-color:var(--border2)}
 .play-btn{width:48px;height:48px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .video-placeholder:hover .play-btn{transform:scale(1.05);box-shadow:0 0 20px var(--orange-glow)}
@@ -560,8 +561,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 // ══ TESTES ══
 const TESTS = [
   {id:'agachamento', eyebrow:'Teste 1 — Mobilidade', title:'Agachamento completo (cócora)',
-    desc:'Fique em pé com os pés na largura dos ombros. Agache lentamente até que os glúteos fiquem próximos dos calcanhares. Vá o mais fundo que conseguir.',
-    video:'agachamento completo — cócora',
+    video:'agachamento completo — cócora', videoUrl:'https://www.youtube.com/embed/mfnGsv3eV8s',
     hint:'Marque tudo que aconteceu durante o movimento',
     options:[
       {id:'calc', label:'Calcanhares saíram do chão', sub:'Não consegui manter os pés planos', signals:['tornozelo']},
@@ -1096,7 +1096,12 @@ function loadTest(idx) {
   document.getElementById('test-eyebrow').textContent = t.eyebrow
   document.getElementById('test-title').textContent = t.title
 
-  document.getElementById('video-label').textContent = t.video
+  const vp = document.querySelector('.video-placeholder')
+  if (t.videoUrl) {
+    vp.innerHTML = `<iframe src="${t.videoUrl}" style="width:100%;height:100%;border:none;border-radius:12px" allowfullscreen></iframe>`
+  } else {
+    vp.innerHTML = `<div class="play-btn">▶</div><div class="video-label">${t.video}</div>`
+  }
   document.getElementById('cb-hint').textContent = t.hint
   document.getElementById('progress-fill').style.width = ((idx+1)/TESTS.length*100)+'%'
 
