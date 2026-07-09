@@ -244,6 +244,90 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .db-empty-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
 .db-consequence{font-size:12px;color:var(--orange);line-height:1.5;margin-top:4px;font-weight:500}
 
+/* ONBOARDING CHAT */
+.chat-area{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.chat-msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn .25s ease both}
+.chat-msg.system{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.chat-msg.user{align-self:flex-end;background:var(--orange);color:#fff;border-bottom-right-radius:4px}
+.chat-typing{align-self:flex-start;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;border-bottom-left-radius:4px;display:flex;gap:4px}
+.chat-typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:typingDot .8s ease infinite alternate}
+.chat-typing span:nth-child(2){animation-delay:.2s}
+.chat-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{to{opacity:.2;transform:scale(.8)}}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.chat-bottom{padding:12px 20px 20px;border-top:1px solid var(--border)}
+.chat-opts{display:flex;flex-wrap:wrap;gap:6px}
+.chat-opt{padding:9px 16px;background:var(--surface);border:1px solid var(--border2);border-radius:20px;font-size:13px;color:var(--text);cursor:pointer;font-family:inherit;transition:all .15s;user-select:none}
+.chat-opt:hover{background:var(--surface2);border-color:var(--orange)}
+.chat-opt.selected{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
+.chat-opt.sel{background:var(--orange);border-color:var(--orange);color:#fff}
+.chat-slider-wrap{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.chat-slider-wrap input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--border2);border-radius:2px;outline:none}
+.chat-slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--orange);border:2px solid var(--bg);cursor:pointer;box-shadow:0 0 8px var(--orange-glow)}
+.chat-slider-val{text-align:center;font-size:28px;font-weight:800;color:var(--orange);font-family:'Syne',sans-serif}
+.chat-msg .highlight{color:var(--orange);font-weight:600}
+
+/* RELATÓRIO */
+.report{padding:20px 24px 32px;display:flex;flex-direction:column;gap:20px}
+.report-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
+.report-block-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.report-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.report-row-label{font-size:13px;color:var(--muted)}
+.report-row-val{font-size:13px;color:var(--text);font-weight:500}
+.report-conclusion{background:rgba(232,80,10,.08);border:1px solid rgba(232,80,10,.2);border-radius:var(--radius-lg);padding:18px}
+.report-conclusion-title{font-size:12px;font-weight:600;color:var(--orange);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.report-conclusion p{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* WHY PLAN */
+.why-wrap{padding:20px 24px 40px;display:flex;flex-direction:column;gap:14px}
+.why-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2;margin-bottom:4px}
+.why-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+.why-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0}
+.why-check{width:20px;height:20px;border-radius:50%;background:var(--glut);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.why-text{font-size:13px;color:var(--text);line-height:1.5}
+
+/* PLANO MENSAL */
+.plan-top{padding:12px 20px 0}
+.plan-months{display:flex;gap:6px}
+.plan-month-btn{flex:1;padding:8px 4px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);font-family:inherit;transition:all .15s}
+.plan-month-btn.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.plan-month-btn.locked{opacity:.5;cursor:default}
+.plan-month-btn.locked.active{opacity:1}
+.plan-view{padding:16px 20px 40px;display:flex;flex-direction:column;gap:14px}
+.plan-month-desc{font-size:12px;color:var(--muted);line-height:1.6;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.plan-goal{color:var(--orange);font-weight:600}
+.plan-weeks{display:flex;flex-direction:column;gap:8px}
+.plan-week-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.plan-week-header{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.plan-week-name{font-size:13px;font-weight:600;color:var(--text)}
+.plan-week-toggle{color:var(--muted);font-size:12px;transition:transform .2s}
+.plan-week-body{display:none;padding:0 14px 14px;flex-direction:column;gap:6px}
+.plan-week-body.open{display:flex}
+.plan-session-btn{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text);font-family:inherit;text-align:left;transition:border-color .15s}
+.plan-session-btn:hover{border-color:var(--border2)}
+.plan-session-btn .sess-day{color:var(--orange);font-weight:600}
+.plan-locked{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px 20px;text-align:center;overflow:hidden}
+.plan-locked-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px;color:var(--text);opacity:.04;font-weight:800;pointer-events:none;user-select:none}
+.plan-locked-icon{font-size:32px;margin-bottom:8px}
+.plan-locked-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.plan-locked-sub{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* REAVALIAÇÃO */
+.reav-hero{padding:40px 24px 24px;background:linear-gradient(180deg,rgba(56,189,248,.1) 0%,transparent 100%);border-bottom:1px solid var(--border)}
+.reav-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1.15;margin-bottom:8px}
+.reav-sub{font-size:13px;color:var(--muted);line-height:1.6}
+.reav-content{padding:20px 24px 40px;display:flex;flex-direction:column;gap:16px}
+.reav-compare{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.reav-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.reav-box-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.reav-box-score{font-family:'Syne',sans-serif;font-size:28px;font-weight:800}
+.reav-box-score.antes{color:var(--muted)}
+.reav-box-score.depois{color:var(--orange)}
+.reav-diff{text-align:center;font-size:13px;padding:8px;border-radius:var(--radius)}
+.reav-diff.up{background:rgba(74,222,128,.1);color:var(--glut)}
+.reav-diff.same{background:rgba(255,255,255,.05);color:var(--muted)}
+.reav-diff.down{background:rgba(239,68,68,.1);color:var(--torn)}
+
 /* ANIMAÇÕES */
 .fade-in{animation:fadeIn .4s ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -289,27 +373,35 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- WELCOME -->
 <div id="s-welcome" class="screen">
-  <div class="welcome-hero">
-    <div class="welcome-eyebrow">check-up corporal</div>
-    <div class="welcome-title">Descubra onde seu corpo <span>está falhando</span></div>
-    <div class="welcome-sub">7 testes de movimento que identificam a causa real da sua dor — não onde dói, mas onde falha.</div>
+  <div class="welcome-hero" style="padding:56px 24px 32px">
+    <div class="welcome-eyebrow" style="margin-bottom:14px">centro de performance</div>
+    <div class="welcome-title" style="font-size:26px">Bem-vindo ao<br><span>Centro de Performance</span></div>
+    <div class="welcome-sub" style="margin-top:12px">Hoje vamos descobrir por que seu corpo está gerando dor durante a corrida.</div>
   </div>
-  <div class="welcome-content">
-    <div class="stats-grid">
-      <div class="stat-box"><div class="stat-num">77</div><div class="stat-label">corredores avaliados</div></div>
-      <div class="stat-box"><div class="stat-num">88%</div><div class="stat-label">chegaram com dor</div></div>
-      <div class="stat-box"><div class="stat-num">7</div><div class="stat-label">testes no check-up</div></div>
-      <div class="stat-box"><div class="stat-num">20min</div><div class="stat-label">3× por semana</div></div>
+  <div class="welcome-content" style="gap:20px">
+    <div class="info-card" style="border-color:var(--orange-dim)">
+      <div class="info-title" style="color:var(--orange)">O processo tem três etapas</div>
+      <div class="info-row"><div class="info-icon" style="background:rgba(56,189,248,.12);color:#38BDF8">✓</div><div><div class="info-text">Entender sua corrida</div><div class="info-muted">Conhecer seu histórico e sua dor</div></div></div>
+      <div class="info-row"><div class="info-icon" style="background:rgba(74,222,128,.12);color:#4ADE80">✓</div><div><div class="info-text">Avaliar seu corpo</div><div class="info-muted">7 testes funcionais de movimento</div></div></div>
+      <div class="info-row"><div class="info-icon" style="background:rgba(232,80,10,.12);color:var(--orange)">✓</div><div><div class="info-text">Criar seu plano personalizado</div><div class="info-muted">Protocolo progressivo de 4 semanas</div></div></div>
     </div>
-    <div class="info-card">
-      <div class="info-title">Como funciona</div>
-      <div class="info-row"><div class="info-icon">①</div><div><div class="info-text">Faça os 7 testes de movimento</div><div class="info-muted">Marque tudo que aconteceu em cada um</div></div></div>
-      <div class="info-row"><div class="info-icon">②</div><div><div class="info-text">Veja seu resultado por região</div><div class="info-muted">O app identifica onde está o problema real</div></div></div>
-      <div class="info-row"><div class="info-icon">③</div><div><div class="info-text">Receba seu protocolo personalizado</div><div class="info-muted">Dividido em 3 sessões semanais</div></div></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 0;font-size:13px;color:var(--muted)">
+      <span style="font-size:16px">⏱</span> Tempo estimado: <strong style="color:var(--text)">20 minutos</strong>
     </div>
   </div>
-  <div class="welcome-cta"><button class="btn-primary" onclick="startCheckup()">Iniciar check-up →</button>
+  <div class="welcome-cta"><button class="btn-primary" id="btn-welcome-cta" onclick="startOnboarding()">Começar Avaliação →</button>
     <button class="btn-outline" onclick="goToDashboard()" style="font-size:12px">← Voltar ao painel</button></div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="s-onboarding" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goBackOnboarding()">←</button>
+    <div class="top-label">Avaliação</div>
+    <div class="top-badge" id="onb-progress">1/11</div>
+  </div>
+  <div class="chat-area" id="chat-area"></div>
+  <div class="chat-bottom" id="chat-bottom"></div>
 </div>
 
 <!-- TESTES -->
@@ -333,6 +425,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="play-btn">▶</div>
       <div class="video-label" id="video-label"></div>
     </div>
+    <div id="test-context" style="display:none;padding:10px 12px;background:var(--orange-dim);border:1px solid rgba(232,80,10,.2);border-radius:var(--radius);font-size:12px;color:var(--text);line-height:1.5"></div>
     <div class="checkbox-section">
       <div class="checkbox-hint" id="cb-hint"></div>
       <div id="checkbox-list"></div>
@@ -343,54 +436,50 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 </div>
 
-<!-- RESULTADO -->
+<!-- RELATÓRIO -->
 <div id="s-result" class="screen">
   <div class="top-bar">
     <button class="back-btn" onclick="goToDashboard()">←</button>
-    <div class="top-label">Resultado</div>
+    <div class="top-label">Relatório</div>
     <div class="top-badge">check-up</div>
   </div>
-  <div class="result-hero">
-    <div class="result-score-wrap">
-      <div class="result-score" id="result-score">0</div>
-      <div class="result-score-label" id="result-score-label">alterações encontradas</div>
-    </div>
-    <div class="result-title" id="result-title"></div>
-    <div class="result-sub" id="result-sub"></div>
-  </div>
-  <div class="result-content">
-    <div>
-      <div class="section-label">achados por região</div>
-      <div class="finding-list" id="findings-list"></div>
-    </div>
-  </div>
-  <div class="result-cta">
-    <button class="btn-primary" onclick="buildAndShowProtocol()">Ver meu protocolo personalizado →</button>
+  <div class="report" id="report-content"></div>
+  <div style="padding:0 24px 40px">
+    <button class="btn-primary" id="btn-why-plan" onclick="showWhyPlan()">Entender meu plano →</button>
   </div>
 </div>
 
-<!-- PROTOCOLO -->
-<div id="s-protocol" class="screen">
+<!-- POR QUE SEU PLANO É DIFERENTE -->
+<div id="s-why-plan" class="screen">
   <div class="top-bar">
     <button class="back-btn" onclick="showScreen('s-result')">←</button>
-    <div class="top-label">Protocolo</div>
+    <div class="top-label">Seu Plano</div>
     <div class="top-badge">personalizado</div>
   </div>
-  <div class="protocol-hero">
-    <div class="protocol-title">Seu protocolo<br>da semana</div>
-    <div class="protocol-sub" id="proto-sub"></div>
-    <div id="nivel-pill-wrap"></div>
-  </div>
-  <div class="protocol-content">
-    <div class="session-tabs">
-      <button class="session-tab active" onclick="switchSession(0,this)">Segunda</button>
-      <button class="session-tab" onclick="switchSession(1,this)">Quarta</button>
-      <button class="session-tab" onclick="switchSession(2,this)">Sexta</button>
+  <div class="why-wrap">
+    <div class="why-title">Por que seu plano<br>é <span style="color:var(--orange)">diferente</span>?</div>
+    <div class="why-sub">Seu plano não foi escolhido por um exercício específico. Ele foi gerado considerando:</div>
+    <div id="why-list"></div>
+    <div style="margin-top:8px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)">
+      <div style="font-size:12px;color:var(--muted);line-height:1.6" id="why-conclusion"></div>
     </div>
-    <div id="session-panels"></div>
-    <button class="btn-outline" onclick="showBonuses()" style="margin-bottom:8px">Ver bônus →</button>
-    <button class="btn-outline" onclick="goToDashboard()">← Voltar ao início</button>
   </div>
+  <div style="padding:0 24px 40px;margin-top:auto">
+    <button class="btn-primary" onclick="showPlan()">Ver meu plano →</button>
+  </div>
+</div>
+
+<!-- PLANO DE RECUPERAÇÃO -->
+<div id="s-protocol" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('s-why-plan')">←</button>
+    <div class="top-label">Plano de Recuperação</div>
+    <div class="top-badge" id="plan-badge">mês 1</div>
+  </div>
+  <div class="plan-top">
+    <div class="plan-months" id="plan-months"></div>
+  </div>
+  <div class="plan-view" id="plan-view"></div>
 </div>
 
 <!-- BÔNUS -->
@@ -411,6 +500,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="top-badge">extra</div>
   </div>
   <div class="bonus-detail" id="bonus-detail-content"></div>
+</div>
+
+<!-- REAVALIAÇÃO -->
+<div id="s-reavaliacao" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goToDashboard()">←</button>
+    <div class="top-label">Reavaliação</div>
+    <div class="top-badge">evolução</div>
+  </div>
+  <div class="reav-hero">
+    <div class="reav-title">Seu corpo mudou<br>desde a última <span style="color:var(--orange)">avaliação</span></div>
+    <div class="reav-sub">Para continuar evoluindo, precisamos verificar quais compensações já foram corrigidas.</div>
+  </div>
+  <div class="reav-content" id="reav-content">
+    <div class="reav-compare" id="reav-compare"></div>
+    <button class="btn-primary" onclick="startReavaliacao()">Refazer Check-up Corporal</button>
+  </div>
 </div>
 
 </div>
@@ -622,12 +728,30 @@ const BONUSES = [
     items:['Regra dos 10% — nunca aumentar volume semanal > 10%','Semana de descompressão a cada 4 semanas (reduz 40% do volume)','Sinal verde: só aumentar se o protocolo A/B/C foi completo por 2 semanas','Sinal amarelo: dor leve durante corrida = volta 1 semana no volume','Sinal vermelho: dor moderada/forte = para 3 dias, volta com protocolo A','Auto-check-up a cada 30 dias para monitorar evolução']}
 ]
 
+// ══ ONBOARDING ══
+const ONBOARDING = [
+  {id:'painToday',q:'Hoje você sente alguma <span class="highlight">dor</span> durante a corrida?',type:'single',opts:['Sim','Não']},
+  {id:'painLocation',q:'Onde você sente essa dor?',type:'multi',opts:['Joelho','Quadril','Panturrilha','Tornozelo','Pé','Canela','Lombar'],show:d=>d.painToday==='Sim'},
+  {id:'painIntensity',q:'Qual a <span class="highlight">intensidade</span> da dor? (0 = nenhuma, 10 = insuportável)',type:'slider',min:0,max:10},
+  {id:'painMoment',q:'Quando ela <span class="highlight">aparece</span>?',type:'single',opts:['Logo no início','Durante a corrida','No final','Após correr','No dia seguinte'],show:d=>d.painToday==='Sim'},
+  {id:'painDuration',q:'Há <span class="highlight">quanto tempo</span> você convive com isso?',type:'single',opts:['Menos de 1 semana','1–4 semanas','1–3 meses','Mais de 3 meses']},
+  {id:'stoppedRunning',q:'Você já precisou <span class="highlight">parar de correr</span> por causa da dor?',type:'single',opts:['Sim','Não']},
+  {id:'weeklyRuns',q:'Quantas vezes você <span class="highlight">corre por semana</span>?',type:'single',opts:['1','2','3','4','5+']},
+  {id:'weeklyMileage',q:'Quantos <span class="highlight">quilômetros por semana</span>?',type:'single',opts:['Até 10 km','10–20','20–40','40–60','Mais de 60']},
+  {id:'goal',q:'Qual seu <span class="highlight">principal objetivo</span> agora?',type:'single',opts:['Correr sem dor','Melhorar performance','Voltar a correr','Primeira prova','Meia Maratona','Maratona']},
+  {id:'strengthTraining',q:'Você faz <span class="highlight">fortalecimento</span>?',type:'single',opts:['Nunca','1x por semana','2x por semana','3x+ por semana']},
+  {id:'previousTreatments',q:'Já tentou <span class="highlight">tratar</span> essa dor?',type:'multi',opts:['Nunca','Fisioterapia','Quiropraxia','Fortalecimento','Palmilhas','Medicamentos','Alongamentos','Outro']}
+]
+
 // ══ ESTADO ══
 let currentTest = 0
 let answers = {}
 let nivel = 'mid'
 let criticalSignal = null
 let signalCounts = {}
+let onboardingData = {}
+let onboardingStep = 0
+let onboardingLocked = false
 
 // ══ ÍNDICE CORPORAL ══
 function calculateIndex() {
@@ -684,6 +808,11 @@ function renderDashboard() {
   const prioritario = criticalSignal
   const conseq = CONSEQUENCES[prioritario]
 
+  // Onboarding data
+  const odRaw = localStorage.getItem('csd_onboarding')
+  let odData = {}
+  if (odRaw) { try { odData = JSON.parse(odRaw) } catch(e){} }
+
   // Body map status
   const bodyStatus = getBodyStatus(signalCounts)
 
@@ -719,13 +848,26 @@ function renderDashboard() {
   })
 
   const lastCheckup = localStorage.getItem('csd_lastCheckup')
-  let countdownHtml = ''
+  let countdownHtml = '', reavHtml = ''
   if (lastCheckup) {
     const days = Math.max(1, 21 - Math.floor((Date.now() - parseInt(lastCheckup)) / 86400000))
-    countdownHtml = `<div class="db-countdown fade-in"><span class="db-countdown-icon">🔄</span> Próximo check-up em <strong>${days} dias</strong> — refaça para acompanhar sua evolução</div>`
+    if (days <= 0) {
+      reavHtml = `<div class="db-countdown fade-in" style="background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.2)"><span style="font-size:16px">📊</span> Seu corpo mudou — <strong style="cursor:pointer;color:#38BDF8" onclick="showReavaliacao()">refaça o check-up</strong> para ver sua evolução</div>`
+    } else {
+      countdownHtml = `<div class="db-countdown fade-in"><span>🔄</span> Reavaliação em <strong>${days} dias</strong></div>`
+    }
   }
 
+  const lastEval = lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'
+
   content.innerHTML = `
+    <div class="fade-in" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
+      <div class="db-stat"><div class="db-stat-val">${overall}</div><div class="db-stat-label">Índice Corporal</div></div>
+      <div class="db-stat"><div class="db-stat-val" style="font-size:14px">${lastEval}</div><div class="db-stat-label">Última avaliação</div></div>
+    </div>
+
+    ${reavHtml}
+
     <div class="score-ring-wrap fade-in">
       <div class="score-ring">
         <svg viewBox="0 0 96 96">
@@ -737,6 +879,8 @@ function renderDashboard() {
       <div class="score-label">Índice Corporal — de 0 a 100</div>
       <div class="subscores">${subHtml}</div>
     </div>
+
+    ${odData.goal ? `<div class="fade-in" style="padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--muted)">🎯 Objetivo: <strong style="color:var(--orange)">${odData.goal}</strong></div>` : ''}
 
     ${prioritiesHtml ? `<div class="priority-section fade-in fade-in-d3"><div class="section-label">Prioridades do plano</div><div class="priority-list">${prioritiesHtml}</div></div>` : ''}
 
@@ -754,7 +898,7 @@ function renderDashboard() {
     ${countdownHtml}
 
     <div class="fade-in fade-in-d4" style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn-primary" onclick="showScreen('s-welcome')">Refazer check-up</button>
+      <button class="btn-primary" onclick="showPlan()">Continuar Plano →</button>
       <button class="btn-outline" onclick="showBonuses()">Ver bônus →</button>
     </div>`
 }
@@ -807,10 +951,9 @@ function showScreen(id) {
   window.scrollTo(0,0)
 }
 function goToSession(idx) {
-  if (!document.getElementById('session-0')) buildAndShowProtocol()
+  if (!document.getElementById('session-plan')) showPlan()
   showScreen('s-protocol')
-  document.querySelectorAll('.session-tab').forEach((t,i) => t.classList.toggle('active',i===idx))
-  document.querySelectorAll('.session-panel').forEach((p,i) => p.classList.toggle('active',i===idx))
+  setTimeout(() => showSessionFromPlan(idx), 100)
 }
 
 function getDetail(ex) {
@@ -882,6 +1025,16 @@ document.getElementById('login-senha')?.addEventListener('keydown', ev => { if (
 // ══ CHECK-UP ══
 function startCheckup() {
   currentTest = 0; answers = {}; nivel = 'mid'; criticalSignal = null; signalCounts = {}
+  // Check if reavaliação
+  const reav = checkReavaliacao()
+  if (reav && !localStorage.getItem('csd_reav_confirm')) {
+    // Save old scores
+    if (Object.keys(signalCounts).length > 0) {
+      const idx = calculateIndex()
+      localStorage.setItem('csd_lastScores',JSON.stringify({overall:idx.overall,scores:idx.scores,date:Date.now()}))
+    }
+    localStorage.setItem('csd_reav_confirm','1')
+  }
   loadTest(0)
   showScreen('s-test')
 }
@@ -894,6 +1047,20 @@ function goBack() {
 function loadTest(idx) {
   const t = TESTS[idx]
   document.getElementById('test-top-label').textContent = `Teste ${idx+1} de ${TESTS.length}`
+  // Show onboarding context for first test
+  const ctx = document.getElementById('test-context')
+  if (idx === 0) {
+    const od = localStorage.getItem('csd_onboarding')
+    if (od) {
+      try {
+        const d = JSON.parse(od)
+        if (d.painToday === 'Sim' && d.painLocation && d.painLocation.length > 0) {
+          ctx.textContent = `Sua principal queixa é ${d.painLocation.length > 1 ? 'dor em ' : 'dor no '}${d.painLocation.join(' e ')}. Agora vamos verificar se essa realmente é a origem do problema.`
+          ctx.style.display = 'block'
+        } else { ctx.style.display = 'none' }
+      } catch(e) { ctx.style.display = 'none' }
+    } else { ctx.style.display = 'none' }
+  } else { ctx.style.display = 'none' }
   document.getElementById('test-eyebrow').textContent = t.eyebrow
   document.getElementById('test-title').textContent = t.title
   document.getElementById('test-desc').textContent = t.desc
@@ -957,7 +1124,7 @@ function nextTest() {
     else nivel = 'adv'
   }
   if (currentTest < TESTS.length-1) { currentTest++; loadTest(currentTest); window.scrollTo(0,0) }
-  else showResult()
+  else showReport()
 }
 
 // ══ RESULTADO (com severidade + fontes + crítico) ══
@@ -985,68 +1152,196 @@ function getActiveSignals() {
   return { sigCounts, sigSources }
 }
 
-function showResult() {
+function showReport() {
   const { sigCounts, sigSources } = getActiveSignals()
   const sigs = Object.keys(sigCounts)
   const count = sigs.length
-  document.getElementById('result-score').textContent = count
-  document.getElementById('result-score-label').textContent = count===1?'alteração encontrada':'alterações encontradas'
+  const { overall } = calculateIndex()
+  const od = localStorage.getItem('csd_onboarding')
+  let odData = {}
+  if (od) { try { odData = JSON.parse(od) } catch(e){} }
 
-  let title, sub
-  if (count===0) { title='Ótimo resultado'; sub='Nenhuma compensação detectada. Seu protocolo é de manutenção e prevenção.' }
-  else if (count<=2) { title='Poucos pontos de atenção'; sub='Compensações identificadas em regiões específicas. Protocolo focado nas áreas afetadas.' }
-  else if (count<=4) { title='Padrão de compensação ativo'; sub='Múltiplas regiões sinalizadas. O problema real provavelmente não está onde dói.' }
-  else { title='Compensações em cadeia'; sub='Várias regiões afetadas. Seu corpo está redistribuindo carga de forma significativa.' }
+  // Queixa principal
+  const painText = odData.painToday === 'Sim'
+    ? (odData.painLocation||[]).join(', ') || 'Dor durante a corrida'
+    : 'Sem dor no momento'
+  const goalText = odData.goal || 'Não informado'
 
-  document.getElementById('result-title').textContent = title
-  document.getElementById('result-sub').textContent = sub
-
-  const list = document.getElementById('findings-list')
-  list.innerHTML = ''
-  if (count === 0) {
-    list.innerHTML = `<div class="finding-row finding-ok fade-in">
-      <div class="finding-dot" style="background:var(--glut)"></div>
-      <div><div class="finding-label">Nenhuma compensação detectada</div>
-      <div class="finding-region">Protocolo de manutenção preventiva</div></div></div>`
+  // Hipótese inicial
+  let hipotese = ''
+  if (odData.painToday === 'Sim' && odData.painLocation) {
+    hipotese = `Você relatou ${odData.painLocation.length > 1 ? 'dores em ' : 'dor no '}${odData.painLocation.join(' e ')} durante a corrida. Agora vamos comparar essa informação com os resultados dos testes funcionais.`
   } else {
-    sigs.forEach((sig, i) => {
-      const info = SIGNAL_MAP[sig]; if (!info) return
-      const isCritical = sig === criticalSignal
-      const qtd = sigCounts[sig]
-      const countClass = isCritical ? 'critical' : qtd >= 2 ? 'warning' : 'ok'
-      const countLabel = isCritical ? '★ CRÍTICO' : qtd === 1 ? 'Leve' : 'Moderado'
-      const sources = (sigSources[sig]||[]).map(s => `<strong>${s.test}:</strong> ${s.opt}`).join('<br>')
-      const c = CONSEQUENCES[sig]
-      const conseqHtml = c ? `<div class="finding-source" style="margin-top:6px;color:var(--orange);font-style:normal">${c.cause}<br>→ ${c.effect}</div>` : ''
-      list.innerHTML += `<div class="finding-row fade-in${i>0?' fade-in-d'+i:''}">
-        <div class="finding-dot" style="background:${info.color}"></div>
-        <div style="flex:1"><div class="finding-label">${info.label}</div>
-        <div class="finding-region">${c ? c.priority : 'exercícios incluídos no protocolo'}</div>
-        <div class="finding-source">${sources}</div>
-        ${conseqHtml}</div>
-        <div class="finding-count ${countClass}">${countLabel}</div></div>`
-    })
+    hipotese = 'Você está realizando o check-up preventivo. Os testes vão identificar se existem compensações que precisam ser trabalhadas antes que virem dor.'
   }
+
+  // Conclusão
+  let conclusao = ''
+  const principal = criticalSignal ? SIGNAL_MAP[criticalSignal] : null
+  if (count === 0) {
+    conclusao = 'Nenhuma compensação significativa detectada. Seu plano será focado em manutenção e otimização da sua função como corredor.'
+  } else if (principal) {
+    const c = CONSEQUENCES[criticalSignal]
+    conclusao = `Os testes indicam que sua dor <strong>provavelmente não se origina</strong> no local da queixa. Seu corpo apresenta uma limitação importante de <strong>${principal.label.toLowerCase()}</strong>.${c ? ' ' + c.cause + ' ' + c.effect : ''} Seu plano será priorizado para corrigir primeiro essa compensação.`
+  }
+
+  const sigHtml = sigs.length > 0 ? `<div class="report-block fade-in fade-in-d2">
+    <div class="report-block-title">resultado do check-up</div>
+    <div style="display:flex;flex-direction:column;gap:10px">${sigs.map(sig => {
+      const info = SIGNAL_MAP[sig]; if (!info) return ''
+      const qtd = sigCounts[sig]
+      const isC = sig === criticalSignal
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div style="width:8px;height:8px;border-radius:50%;background:${info.color};flex-shrink:0"></div>
+        <div style="flex:1"><span style="font-size:13px;font-weight:600;color:var(--text)">${info.label}</span>
+        ${qtd >= 2 ? `<span style="font-size:10px;margin-left:6px;padding:1px 6px;border-radius:10px;background:rgba(251,146,60,.12);color:#FB923C">${isC ? '★ crítico' : qtd === 1 ? 'leve' : 'moderado'}</span>` : ''}</div>
+        ${isC ? '<span style="font-size:16px">!</span>' : ''}</div>`
+    }).join('')}</div></div>` : ''
+
+  const odReport = odData.painToday === 'Sim' ? `
+    <div class="report-block fade-in"><div class="report-block-title">queixa principal</div>
+      <div class="report-row"><span class="report-row-label">Local</span><span class="report-row-val">${painText}</span></div>
+      ${odData.painIntensity !== undefined ? `<div class="report-row"><span class="report-row-label">Intensidade</span><span class="report-row-val">${odData.painIntensity}/10</span></div>` : ''}
+      ${odData.painMoment ? `<div class="report-row"><span class="report-row-label">Quando aparece</span><span class="report-row-val">${odData.painMoment}</span></div>` : ''}
+      ${odData.painDuration ? `<div class="report-row"><span class="report-row-label">Há quanto tempo</span><span class="report-row-val">${odData.painDuration}</span></div>` : ''}
+    </div>` : ''
+  const goalReport = odData.goal ? `<div class="report-block fade-in fade-in-d1">
+    <div class="report-block-title">objetivo</div>
+    <div style="font-size:14px;font-weight:600;color:var(--orange)">${goalText}</div>
+  </div>` : ''
+
+  document.getElementById('report-content').innerHTML = `
+    ${odReport}
+    ${goalReport}
+    <div class="report-block fade-in fade-in-d1">
+      <div class="report-block-title">hipótese inicial</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.7">${hipotese}</p>
+    </div>
+    ${sigHtml}
+    <div class="report-conclusion fade-in${sigs.length?' fade-in-d3':''}">
+      <div class="report-conclusion-title">📋 conclusão</div>
+      <p>${conclusao}</p>
+    </div>`
+
   localStorage.setItem('csd_checkup','1')
   localStorage.setItem('csd_lastCheckup',Date.now().toString())
   localStorage.setItem('csd_answers',JSON.stringify(answers))
   localStorage.setItem('csd_nivel',nivel)
+  localStorage.removeItem('csd_reav_confirm')
+
+  // Show reavaliação comparison if applicable
+  const lastScores = localStorage.getItem('csd_lastScores')
+  if (lastScores) {
+    try {
+      const old = JSON.parse(lastScores)
+      const delta = overall - old.overall
+      let diffHtml = ''
+      if (delta > 0) diffHtml = `<div class="reav-diff up" style="margin-top:12px">↑ +${delta} pontos — evolução detectada</div>`
+      else if (delta === 0) diffHtml = `<div class="reav-diff same" style="margin-top:12px">→ Índice mantido</div>`
+      else diffHtml = `<div class="reav-diff down" style="margin-top:12px">↓ ${delta} pontos</div>`
+      document.getElementById('report-content').insertAdjacentHTML('afterbegin',
+        `<div class="report-block fade-in" style="border-color:rgba(56,189,248,.3)">
+          <div class="report-block-title">evolução</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="text-align:center"><div style="font-size:10px;color:var(--muted)">Antes</div><div style="font-size:24px;font-weight:800;color:var(--muted)">${old.overall}</div></div>
+            <div style="text-align:center"><div style="font-size:10px;color:var(--muted)">Depois</div><div style="font-size:24px;font-weight:800;color:var(--orange)">${overall}</div></div>
+          </div>${diffHtml}</div>`)
+      localStorage.removeItem('csd_lastScores')
+    } catch(e) {}
+  }
+
   showScreen('s-result')
 }
 
-// ══ PROTOCOLO (com crítico repetido nas 3 sessões) ══
-function buildAndShowProtocol() {
+// ══ POR QUE SEU PLANO É DIFERENTE ══
+function showWhyPlan() {
+  const od = localStorage.getItem('csd_onboarding')
+  let odData = {}
+  if (od) { try { odData = JSON.parse(od) } catch(e){} }
+  const { sigCounts, sigSources } = getActiveSignals()
+  const sigs = Object.keys(sigCounts)
+
+  const items = []
+  if (odData.painToday === 'Sim' && odData.painLocation) {
+    odData.painLocation.forEach(l => items.push(`Você sente ${l.includes('dor')?'':'dor no '}${l.toLowerCase()}`))
+  }
+  if (odData.painMoment) items.push(`Sua dor aparece ${odData.painMoment.toLowerCase()}`)
+  if (odData.weeklyRuns) items.push(`Você corre ${odData.weeklyRuns}${parseInt(odData.weeklyRuns)<=1?' vez':' vezes'} por semana`)
+  if (odData.goal) items.push(`Seu objetivo é ${odData.goal.toLowerCase()}`)
+  sigs.forEach(sig => {
+    const info = SIGNAL_MAP[sig]
+    if (info) items.push(`O check-up identificou <strong>${info.label.toLowerCase()}</strong>`)
+  })
+
+  let conclusao = ''
+  const p = criticalSignal ? CONSEQUENCES[criticalSignal] : null
+  if (p) {
+    const info = SIGNAL_MAP[criticalSignal]
+    conclusao = `Por isso seu tratamento <strong>começa restaurando a ${info ? info.label.toLowerCase() : 'função da região afetada'}</strong> antes de avançar para as próximas etapas.`
+  } else {
+    conclusao = 'Seu plano foi ajustado para manutenção e prevenção, sem compensações críticas no momento.'
+  }
+
+  document.getElementById('why-list').innerHTML = items.map(t =>
+    `<div class="why-item fade-in"><div class="why-check">✓</div><div class="why-text">${t}</div></div>`
+  ).join('')
+  document.getElementById('why-conclusion').innerHTML = conclusao
+  showScreen('s-why-plan')
+}
+
+// ══ PLANO DE RECUPERAÇÃO ══
+const PLAN_MONTHS = [
+  {id:0,label:'MÊS 1',title:'Eliminar as compensações principais',
+   desc:'Nas próximas quatro semanas seu corpo irá recuperar mobilidade, estabilidade e controle nas regiões identificadas durante o check-up.',
+   goal:'Recuperar a função da principal compensação'},
+  {id:1,label:'MÊS 2',title:'Transformar movimento em força',locked:true,
+   desc:'Quando sua principal compensação estiver controlada, o foco passará para fortalecimento específico da corrida.',
+   goal:'Fortalecimento específico'},
+  {id:2,label:'MÊS 3',title:'Consolidar o novo padrão',locked:true,
+   desc:'Seu corpo será preparado para suportar maiores volumes de corrida sem voltar ao padrão anterior de compensação.',
+   goal:'Consolidar novo padrão'}
+]
+
+let currentPlanMonth = 0
+let currentPlanWeek = 0
+
+function showPlan() {
+  currentPlanMonth = 0; currentPlanWeek = 0
+  renderPlanMonths()
+  renderPlanView()
+  showScreen('s-protocol')
+}
+
+function renderPlanMonths() {
+  const c = document.getElementById('plan-months')
+  c.innerHTML = PLAN_MONTHS.map((m,i) =>
+    `<div class="plan-month-btn${m.locked?' locked':''}${i===currentPlanMonth?' active':''}" onclick="switchPlanMonth(${i})">${m.label}</div>`
+  ).join('')
+}
+
+function switchPlanMonth(idx) {
+  const m = PLAN_MONTHS[idx]
+  if (m.locked) return
+  currentPlanMonth = idx; currentPlanWeek = 0
+  document.getElementById('plan-badge').textContent = m.label.toLowerCase()
+  document.querySelectorAll('.plan-month-btn').forEach((b,i) => b.classList.toggle('active',i===idx))
+  renderPlanView()
+}
+
+function renderPlanView() {
+  const m = PLAN_MONTHS[currentPlanMonth]
+  const view = document.getElementById('plan-view')
+  if (m.locked) {
+    view.innerHTML = `<div class="plan-locked fade-in">
+      <div class="plan-locked-bg">${m.label}</div>
+      <div class="plan-locked-icon">🔒</div>
+      <div class="plan-locked-title">${m.title}</div>
+      <div class="plan-locked-sub">${m.desc}</div>
+    </div>`
+    return
+  }
+  // Build protocol data for week 1 (same protocol repeated for all 4 weeks)
   const sigs = Object.keys(signalCounts)
-  const nLabels = {init:['🟢 Iniciante','nivel-init'],mid:['🟠 Intermediário','nivel-mid'],adv:['🔵 Avançado','nivel-adv']}
-  const [nl, nc] = nLabels[nivel] || nLabels.mid
-  document.getElementById('nivel-pill-wrap').innerHTML =
-    `<span class="nivel-pill ${nc}">${nl} · definido pelo teste de equilíbrio</span>`
-
-  document.getElementById('proto-sub').textContent = sigs.length===0
-    ? 'Protocolo de manutenção · sem compensações detectadas'
-    : `${sigs.length} região${sigs.length>1?'ões':''} trabalhada${sigs.length>1?'s':''} · personalizado pelo check-up`
-
-  // Monta as 3 sessões de exercícios específicos
   const sessKeys = ['a','b','c']
   const sessoes = sessKeys.map(k => {
     const ids = []
@@ -1054,65 +1349,254 @@ function buildAndShowProtocol() {
       const info = SIGNAL_MAP[sig]; if (!info) return
       ;(info[k]||[]).forEach(id => { if (!ids.includes(id)) ids.push(id) })
     })
-    // Déficit crítico: repete seus exercícios em TODAS as sessões
     if (criticalSignal) {
       const critInfo = SIGNAL_MAP[criticalSignal]
-      if (critInfo && critInfo[k]) {
-        critInfo[k].forEach(id => { if (!ids.includes(id)) ids.push(id) })
-      }
+      if (critInfo && critInfo[k]) critInfo[k].forEach(id => { if (!ids.includes(id)) ids.push(id) })
     }
     if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
     return ids
   })
+  localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
 
-  const container = document.getElementById('session-panels')
-  container.innerHTML = ''
-
-  sessoes.forEach((exIds, si) => {
-    const panel = document.createElement('div')
-    panel.className = 'session-panel'+(si===0?' active':'')
-    panel.id = `session-${si}`
-
-    let html = `<div class="session-header">
-      <div class="session-header-title">${SESSION_INFO[si].day}</div>
-      <div class="session-header-sub">${SESSION_INFO[si].focus}</div>
-    </div>`
-
-    // Bloco geral
-    html += `<div class="block-label">⚡ Bloco geral — fazer antes de correr</div>`
-    let gn = 1
-    GERAL_ORDEM.forEach(bloco => {
-      bloco.ids.forEach(id => {
-        html += renderExCard(id, gn++, false, false)
-      })
-    })
-
-    // Bloco específico
-    if (exIds.length > 0) {
-      html += `<div class="block-label" style="margin-top:4px">🎯 Bloco específico — seu protocolo personalizado</div>`
-      let en = 1
-      exIds.forEach(id => {
-        // Check if this exercise belongs to the critical signal
-        const isCrit = criticalSignal && (SIGNAL_MAP[criticalSignal]?.[sessKeys[si]]||[]).includes(id)
-        const rendered = renderExCard(id, en, true, isCrit)
-        if (rendered) en++
-        html += rendered
-      })
-    }
-
-    panel.innerHTML = html
-    container.appendChild(panel)
-  })
-
-  showScreen('s-protocol')
+  const weeks = ['Semana 1','Semana 2','Semana 3','Semana 4']
+  view.innerHTML = `
+    <div class="plan-month-desc fade-in">
+      <div class="plan-goal">🎯 ${m.goal}</div>
+      <div style="margin-top:6px">${m.desc}</div>
+    </div>
+    <div class="plan-weeks fade-in fade-in-d1">${weeks.map((w,i) => renderPlanWeek(i,w)).join('')}</div>`
 }
 
-function switchSession(idx, btn) {
-  document.querySelectorAll('.session-tab').forEach(t => t.classList.remove('active'))
-  document.querySelectorAll('.session-panel').forEach(p => p.classList.remove('active'))
-  btn.classList.add('active')
-  document.getElementById(`session-${idx}`).classList.add('active')
-  window.scrollTo(0,160)
+function renderPlanWeek(idx, label) {
+  const isOpen = idx === currentPlanWeek
+  return `<div class="plan-week-card">
+    <div class="plan-week-header" onclick="togglePlanWeek(${idx})">
+      <div class="plan-week-name">${label}</div>
+      <div class="plan-week-toggle" style="transform:rotate(${isOpen?180:0}deg)">▾</div>
+    </div>
+    <div class="plan-week-body${isOpen?' open':''}">
+      <button class="plan-session-btn" onclick="showSessionFromPlan(0)"><span class="sess-day">Sessão A</span> — Segunda-feira · ${SESSION_INFO[0].focus}</button>
+      <button class="plan-session-btn" onclick="showSessionFromPlan(1)"><span class="sess-day">Sessão B</span> — Quarta-feira · ${SESSION_INFO[1].focus}</button>
+      <button class="plan-session-btn" onclick="showSessionFromPlan(2)"><span class="sess-day">Sessão C</span> — Sexta-feira · ${SESSION_INFO[2].focus}</button>
+    </div>
+  </div>`
+}
+
+function togglePlanWeek(idx) {
+  if (currentPlanWeek === idx) { currentPlanWeek = -1 } else { currentPlanWeek = idx }
+  renderPlanWeeks()
+}
+
+function renderPlanWeeks() {
+  const weeks = document.querySelectorAll('.plan-week-card')
+  weeks.forEach((w,i) => {
+    const body = w.querySelector('.plan-week-body')
+    const toggle = w.querySelector('.plan-week-toggle')
+    const isOpen = i === currentPlanWeek
+    body.classList.toggle('open',isOpen)
+    if (toggle) toggle.style.transform = `rotate(${isOpen?180:0}deg)`
+  })
+}
+
+function showSessionFromPlan(sessIdx) {
+  const saved = localStorage.getItem('csd_sessoes')
+  if (!saved) return
+  const sessoes = JSON.parse(saved)
+  const g = document.getElementById('session-panels')
+  g.innerHTML = ''
+  const si = sessIdx
+  const exIds = sessoes[si] || []
+  const panel = document.createElement('div'); panel.className='session-panel active'; panel.id='session-plan'
+  let html = `<div class="session-header"><div class="session-header-title">${SESSION_INFO[si].day}</div><div class="session-header-sub">${SESSION_INFO[si].focus}</div></div>`
+  html += `<div class="block-label">⚡ Bloco geral — fazer antes de correr</div>`
+  let gn = 1
+  GERAL_ORDEM.forEach(bloco => { bloco.ids.forEach(id => { html += renderExCard(id, gn++, false, false) }) })
+  if (exIds.length > 0) {
+    html += `<div class="block-label" style="margin-top:4px">🎯 Bloco específico</div>`
+    let en = 1
+    exIds.forEach(id => {
+      const isCrit = criticalSignal && (SIGNAL_MAP[criticalSignal]?.[['a','b','c'][si]]||[]).includes(id)
+      const rendered = renderExCard(id, en, true, isCrit)
+      if (rendered) en++; html += rendered
+    })
+  }
+  panel.innerHTML = html; g.appendChild(panel)
+  document.getElementById('plan-sessions-wrap')?.remove()
+  // Add a wrapper with the exercises
+  const cont = document.createElement('div'); cont.id = 'plan-sessions-wrap'
+  cont.innerHTML = `<div class="session-tabs">${['Segunda','Quarta','Sexta'].map((d,i) => `<button class="session-tab${i===sessIdx?' active':''}" onclick="showSessionFromPlan(${i})">${d}</button>`).join('')}</div>`
+  cont.appendChild(g)
+  cont.appendChild(document.createElement('br'))
+  const backBtn = document.createElement('button'); backBtn.className='btn-outline'; backBtn.textContent='← Voltar ao plano'; backBtn.onclick=()=>{showPlan()}
+  cont.appendChild(backBtn)
+
+  // Replace plan-view content temporarily
+  const planView = document.getElementById('plan-view')
+  planView.innerHTML = ''
+  planView.appendChild(cont)
+  planView.scrollIntoView({behavior:'smooth',block:'start'})
+}
+
+// ══ ONBOARDING ══
+function startOnboarding() {
+  onboardingData = {}; onboardingStep = 0; onboardingLocked = false
+  document.getElementById('chat-area').innerHTML = ''
+  document.getElementById('chat-bottom').innerHTML = ''
+  showScreen('s-onboarding')
+  renderOnboardingStep()
+}
+
+function goBackOnboarding() {
+  if (onboardingLocked) return
+  showScreen('s-welcome')
+}
+
+function renderOnboardingStep() {
+  if (onboardingStep >= ONBOARDING.length) {
+    // Final message
+    document.getElementById('onb-progress').textContent = '✓'
+    addChatMsg('system','')
+    const el = document.querySelector('#chat-area .chat-msg:last-child')
+    typeText(el, 'Perfeito. Já tenho uma hipótese inicial. Agora preciso confirmar como seu corpo está funcionando. Em muitos corredores, a dor aparece em um local, mas a verdadeira causa está em outro. Vamos descobrir isso através do Check-up Corporal.', 12, () => {
+      const b = document.getElementById('chat-bottom')
+      b.innerHTML = `<button class="btn-primary" onclick="finishOnboarding()">Iniciar Check-up →</button>`
+    })
+    return
+  }
+  const q = ONBOARDING[onboardingStep]
+  if (q.show && !q.show(onboardingData)) { onboardingStep++; renderOnboardingStep(); return }
+  document.getElementById('onb-progress').textContent = `${onboardingStep+1}/${ONBOARDING.length}`
+  addChatMsg('system','')
+  const el = document.querySelector('#chat-area .chat-msg:last-child')
+  const t = document.getElementById('chat-bottom'); t.innerHTML = ''
+  // typing indicator
+  const ty = document.createElement('div'); ty.className='chat-typing'
+  ty.innerHTML = '<span></span><span></span><span></span>'
+  document.getElementById('chat-area').appendChild(ty)
+  document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight
+
+  typeText(el, q.q, 14, () => {
+    ty.remove()
+    renderOptions(q)
+  })
+}
+
+function renderOptions(q) {
+  const b = document.getElementById('chat-bottom')
+  if (q.type === 'slider') {
+    const v = onboardingData[q.id] !== undefined ? onboardingData[q.id] : Math.floor((q.min+q.max)/2)
+    b.innerHTML = `<div class="chat-slider-wrap"><div class="chat-slider-val" id="slider-val">${v}</div>
+      <input type="range" min="${q.min}" max="${q.max}" value="${v}" id="slider-input" oninput="document.getElementById('slider-val').textContent=this.value">
+      <button class="btn-primary" style="margin-top:6px" onclick="selectOnbOpt('${q.id}',parseInt(document.getElementById('slider-input').value))">Confirmar →</button></div>`
+  } else if (q.type === 'single') {
+    b.innerHTML = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt" onclick="selectOnbOpt('${q.id}','${o}')">${o}</div>`).join('')}</div>`
+  } else if (q.type === 'multi') {
+    const saved = onboardingData[q.id] || []
+    b.innerHTML = `<div class="chat-opts" id="multi-opts">${q.opts.map(o => `<div class="chat-opt${saved.includes(o)?' selected':''}" data-val="${o}" onclick="toggleMultiOpt('${q.id}','${o}')">${o}</div>`).join('')}</div>
+      <button class="btn-primary" style="margin-top:8px" onclick="confirmMultiOpt('${q.id}')">Confirmar →</button>`
+  }
+}
+
+function toggleMultiOpt(id, val) {
+  if (!onboardingData[id]) onboardingData[id] = []
+  const arr = onboardingData[id]
+  const i = arr.indexOf(val)
+  if (i > -1) arr.splice(i,1); else arr.push(val)
+  document.querySelectorAll('#multi-opts .chat-opt').forEach(el => {
+    el.classList.toggle('selected',arr.includes(el.dataset.val))
+  })
+}
+
+function confirmMultiOpt(id) {
+  selectOnbOpt(id, onboardingData[id] || [])
+}
+
+function selectOnbOpt(id, val) {
+  if (onboardingLocked) return
+  onboardingData[id] = val
+  onboardingLocked = true
+  addChatMsg('user', typeof val === 'number' ? val+'/10' : Array.isArray(val) ? val.join(', ') : val)
+  onboardingStep++
+  setTimeout(() => { onboardingLocked = false; renderOnboardingStep() }, 300)
+}
+
+function addChatMsg(type, text) {
+  const a = document.getElementById('chat-area')
+  const d = document.createElement('div'); d.className = `chat-msg ${type}`
+  d.textContent = text; a.appendChild(d)
+  a.scrollTop = a.scrollHeight
+}
+
+function typeText(el, text, speed = 14, cb) {
+  let i = 0; el.innerHTML = ''
+  const t = setInterval(() => {
+    el.innerHTML += text[i]; i++
+    const a = document.getElementById('chat-area')
+    a.scrollTop = a.scrollHeight
+    if (i >= text.length) { clearInterval(t); if (cb) cb() }
+  }, speed)
+}
+
+function finishOnboarding() {
+  localStorage.setItem('csd_onboarding',JSON.stringify(onboardingData))
+  startCheckup()
+}
+
+// ══ REAVALIAÇÃO ══
+function checkReavaliacao() {
+  const last = localStorage.getItem('csd_lastCheckup')
+  if (!last) return false
+  const days = Math.floor((Date.now() - parseInt(last)) / 86400000)
+  return days >= 21
+}
+
+function showReavaliacao() {
+  const last = localStorage.getItem('csd_lastCheckup')
+  const savedScores = localStorage.getItem('csd_lastScores')
+  const comp = document.getElementById('reav-compare')
+  let html = '<div class="reav-box"><div class="reav-box-label">Índice anterior</div><div class="reav-box-score antes">?/100</div></div>'
+  html += '<div class="reav-box"><div class="reav-box-label">Novo índice</div><div class="reav-box-score depois">?</div></div>'
+  if (savedScores) {
+    try {
+      const old = JSON.parse(savedScores)
+      html = `<div class="reav-box"><div class="reav-box-label">${new Date(parseInt(last)).toLocaleDateString()}</div><div class="reav-box-score antes">${old.overall}/100</div></div>
+      <div class="reav-box"><div class="reav-box-label">Hoje</div><div class="reav-box-score depois">?</div></div>`
+    } catch(e) {}
+  }
+  comp.innerHTML = html
+  showScreen('s-reavaliacao')
+}
+
+function startReavaliacao() {
+  // Save current scores for comparison
+  if (Object.keys(signalCounts).length > 0) {
+    const { overall } = calculateIndex()
+    localStorage.setItem('csd_lastScores',JSON.stringify({overall,scores:calculateIndex().scores,date:Date.now()}))
+  }
+  showScreen('s-welcome')
+}
+
+function showReavResult() {
+  // After re-checkup, show comparison
+  const { overall, scores } = calculateIndex()
+  const lastScores = localStorage.getItem('csd_lastScores')
+  const comp = document.getElementById('reav-compare')
+  let oldOverall = '?', diff = ''
+  if (lastScores) {
+    try {
+      const old = JSON.parse(lastScores)
+      oldOverall = old.overall
+      const delta = overall - old.overall
+      if (delta > 0) diff = `<div class="reav-diff up">↑ +${delta} pontos — evolução detectada</div>`
+      else if (delta === 0) diff = `<div class="reav-diff same">→ Índice mantido</div>`
+      else diff = `<div class="reav-diff down">↓ ${delta} pontos — redução detectada</div>`
+    } catch(e) {}
+  }
+  comp.innerHTML = `
+    <div class="reav-box"><div class="reav-box-label">Antes</div><div class="reav-box-score antes">${oldOverall}/100</div></div>
+    <div class="reav-box"><div class="reav-box-label">Depois</div><div class="reav-box-score depois">${overall}/100</div></div>
+    ${diff}`
+  showReport()
 }
 </script>
 </body>
