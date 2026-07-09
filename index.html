@@ -266,6 +266,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .chat-slider-val{text-align:center;font-size:36px;font-weight:800;color:var(--orange);font-family:'Syne',sans-serif}
 .chat-msg .highlight{color:var(--orange);font-weight:600}
 
+/* ONBOARDING LAYOUT — UM CARD POR VEZ */
+#s-onboarding{background:#10181F;overflow:hidden}
+.onb-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 24px 0;overflow:hidden;position:relative}
+.onb-mascot{font-size:72px;line-height:1;margin-bottom:2px;z-index:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
+.onb-slide-wrap{width:100%;max-width:420px;flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:center}
+.onb-step{width:100%;transition:transform .3s ease-out,opacity .3s ease-out}
+.onb-step.exit{transform:translateY(-50px);opacity:0;position:absolute}
+.onb-step.enter-init{transform:translateY(50px);opacity:0}
+.onb-step.enter{transform:translateY(0);opacity:1}
+.onb-bubble{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 18px;margin-bottom:16px;text-align:center;min-height:56px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--text);line-height:1.5;font-family:'Inter',sans-serif}
+.onb-bubble .chat-typing{margin:0 auto;background:transparent;border:none;padding:0;justify-content:center}
+.onb-q{font-size:18px;font-weight:600;color:var(--text);line-height:1.5;font-family:'Inter',sans-serif}
+.onb-q .highlight{color:var(--orange);font-weight:600}
+.onb-bubble .highlight{color:var(--orange);font-weight:600}
+.onb-options{min-height:80px;display:flex;flex-direction:column;align-items:center}
+.onb-options .chat-slider-wrap{width:100%}
+.onb-footer{padding:12px 16px 20px;flex-shrink:0}
+
 /* RELATÓRIO */
 .report{padding:20px 24px 32px;display:flex;flex-direction:column;gap:20px}
 .report-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px}
@@ -413,7 +431,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="top-label">Avaliação</div>
     <div class="top-badge" id="onb-progress">1/${ONBOARDING.length}</div>
   </div>
-  <div class="chat-area" id="chat-area"></div>
+  <div class="onb-body">
+    <div class="onb-mascot" id="onb-mascot">🤔</div>
+    <div class="onb-slide-wrap" id="onb-slide-wrap">
+      <div class="onb-step" id="onb-step">
+        <div class="onb-bubble" id="onb-bubble"></div>
+        <div class="onb-options" id="onb-options"></div>
+      </div>
+    </div>
+  </div>
+  <div class="onb-footer">
+    <button class="btn-primary" id="onb-cta" onclick="onbCtaClick()" disabled>CONTINUAR</button>
+  </div>
 </div>
 
 <!-- TESTES -->
@@ -1489,12 +1518,21 @@ function showExerciseDetail(id) {
 }
 function closeExDetail() { document.getElementById('ex-detail').classList.remove('open') }
 
-// ══ ONBOARDING ══
+// ══ ONBOARDING — UM CARD POR VEZ ══
+const ONB_MASCOTS = {
+  painToday:'🤔', painLocation:'😣', painIntensity:'😰', painMoment:'⏰',
+  painDuration:'📅', weeklyRuns:'📆', goal:'🎯'
+}
+
+let onbSelectedVal = undefined
+
 function startOnboarding() {
   onboardingData = {}; onboardingStep = 0; onboardingLocked = false
-  document.getElementById('chat-area').innerHTML = ''
+  onbSelectedVal = undefined
+  const wrap = document.getElementById('onb-slide-wrap')
+  wrap.innerHTML = `<div class="onb-step" id="onb-step"><div class="onb-bubble"></div><div class="onb-options"></div></div>`
   showScreen('s-onboarding')
-  renderOnboardingStep()
+  fillOnbStep()
 }
 
 function goBackOnboarding() {
@@ -1502,108 +1540,131 @@ function goBackOnboarding() {
   showScreen('s-welcome')
 }
 
-function scrollChat() {
-  const a = document.getElementById('chat-area')
-  a.scrollTop = a.scrollHeight
-}
+function fillOnbStep() {
+  const step = document.getElementById('onb-step')
+  const bubble = step.querySelector('.onb-bubble')
+  const opts = step.querySelector('.onb-options')
 
-function renderOnboardingStep() {
   if (onboardingStep >= ONBOARDING.length) {
     document.getElementById('onb-progress').textContent = '✓'
-    addChatMsg('system','')
-    const el = document.querySelector('#chat-area .chat-msg:last-child')
-    typeText(el, 'Perfeito. Já tenho uma hipótese inicial. Agora preciso confirmar como seu corpo está funcionando. Em muitos corredores, a dor aparece em um local, mas a verdadeira causa está em outro. Vamos descobrir isso através do Check-up Corporal.', 12, () => {
-      appendChatHtml(`<button class="btn-primary" onclick="finishOnboarding()">Iniciar Check-up →</button>`)
-    })
+    document.getElementById('onb-mascot').textContent = '🏃'
+    bubble.innerHTML = '<div class="onb-q">Perfeito! Agora vamos confirmar com o <span class="highlight">Check-up Corporal</span>.</div>'
+    opts.innerHTML = ''
+    const cta = document.getElementById('onb-cta')
+    cta.textContent = 'INICIAR CHECK-UP'
+    cta.disabled = false
+    cta.onclick = finishOnboarding
     return
   }
-  const q = ONBOARDING[onboardingStep]
-  if (q.show && !q.show(onboardingData)) { onboardingStep++; renderOnboardingStep(); return }
-  document.getElementById('onb-progress').textContent = `${onboardingStep+1}/${ONBOARDING.length}`
-  addChatMsg('system','')
-  const el = document.querySelector('#chat-area .chat-msg:last-child')
-  // typing indicator
-  const ty = document.createElement('div'); ty.className='chat-typing'
-  ty.innerHTML = '<span></span><span></span><span></span>'
-  document.getElementById('chat-area').appendChild(ty)
-  scrollChat()
 
-  typeText(el, q.q, 14, () => {
-    ty.remove()
-    renderOptions(q)
+  const q = ONBOARDING[onboardingStep]
+  if (q.show && !q.show(onboardingData)) { onboardingStep++; fillOnbStep(); return }
+
+  document.getElementById('onb-progress').textContent = `${onboardingStep+1}/${ONBOARDING.length}`
+  document.getElementById('onb-mascot').textContent = ONB_MASCOTS[q.id] || '🏃'
+
+  const cta = document.getElementById('onb-cta')
+  cta.textContent = onboardingStep === ONBOARDING.length - 1 ? 'CONCLUIR' : 'CONTINUAR'
+  cta.disabled = true
+  cta.onclick = onbCtaClick
+  onbSelectedVal = undefined
+  opts.innerHTML = ''
+
+  typeText(bubble, q.q, 14, () => {
+    renderOnbOpts(opts, q)
   })
 }
 
-function appendChatHtml(html) {
-  const a = document.getElementById('chat-area')
-  const d = document.createElement('div'); d.innerHTML = html
-  while (d.firstChild) a.appendChild(d.firstChild)
-  scrollChat()
-}
-
-function renderOptions(q) {
+function renderOnbOpts(opts, q) {
   if (q.type === 'slider') {
     const v = onboardingData[q.id] !== undefined ? onboardingData[q.id] : Math.floor((q.min+q.max)/2)
-    const html = `<div class="chat-slider-wrap"><div class="chat-slider-val" id="slider-val">${v}</div>
-      <input type="range" min="${q.min}" max="${q.max}" value="${v}" id="slider-input" oninput="document.getElementById('slider-val').textContent=this.value">
-      <button class="btn-primary" style="margin-top:16px" onclick="selectOnbOpt('${q.id}',parseInt(document.getElementById('slider-input').value))">Confirmar →</button></div>`
-    appendChatHtml(html)
+    onbSelectedVal = v
+    const cta = document.getElementById('onb-cta')
+    cta.disabled = false
+    opts.innerHTML = `<div class="chat-slider-wrap"><div class="chat-slider-val" id="slider-val">${v}</div>
+      <input type="range" min="${q.min}" max="${q.max}" value="${v}" id="slider-input" oninput="document.getElementById('slider-val').textContent=this.value"></div>`
   } else if (q.type === 'single') {
-    const html = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt" onclick="selectOnbOpt('${q.id}','${o}')">${o}</div>`).join('')}</div>`
-    appendChatHtml(html)
+    opts.innerHTML = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt" onclick="onbPickOption(this,'${q.id}','${o}')">${o}</div>`).join('')}</div>`
   } else if (q.type === 'multi') {
     const saved = onboardingData[q.id] || []
-    const html = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt${saved.includes(o)?' selected':''}" data-val="${o}" onclick="toggleMultiOpt('${q.id}','${o}',this)">${o}</div>`).join('')}</div>
-      <button class="btn-primary" style="margin-top:16px" onclick="confirmMultiOpt('${q.id}')">Confirmar →</button>`
-    appendChatHtml(html)
+    opts.innerHTML = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt${saved.includes(o)?' selected':''}" data-val="${o}" onclick="onbToggleMulti('${q.id}','${o}',this)">${o}</div>`).join('')}</div>`
+    if (saved.length > 0) document.getElementById('onb-cta').disabled = false
   }
 }
 
-function toggleMultiOpt(id, val, el) {
+function onbPickOption(el, id, val) {
+  document.querySelectorAll('.onb-options .chat-opt').forEach(c => c.classList.remove('sel'))
+  el.classList.add('sel')
+  onbSelectedVal = val
+  document.getElementById('onb-cta').disabled = false
+}
+
+function onbToggleMulti(id, val, el) {
   if (!onboardingData[id]) onboardingData[id] = []
   const arr = onboardingData[id]
   const i = arr.indexOf(val)
   if (i > -1) arr.splice(i,1); else arr.push(val)
-  const opts = el.closest('.chat-opts')
-  opts.querySelectorAll('.chat-opt').forEach(o => {
-    o.classList.toggle('selected',arr.includes(o.dataset.val))
+  el.closest('.chat-opts').querySelectorAll('.chat-opt').forEach(o => {
+    o.classList.toggle('selected', arr.includes(o.dataset.val))
   })
+  document.getElementById('onb-cta').disabled = arr.length === 0
 }
 
-function confirmMultiOpt(id) {
-  selectOnbOpt(id, onboardingData[id] || [])
-}
-
-function selectOnbOpt(id, val) {
+function onbCtaClick() {
   if (onboardingLocked) return
-  onboardingData[id] = val
+  const q = ONBOARDING[onboardingStep]
+  if (!q) return
+  const selected = document.querySelector('.onb-options .chat-opt.sel')
+  let val = onbSelectedVal
+  if (q.type === 'single' && selected) val = selected.textContent
+  if (q.type === 'multi') val = onboardingData[q.id] || []
+  if (val === undefined) return
+  if (q.type === 'slider') {
+    val = parseInt(document.getElementById('slider-input')?.value)
+    if (isNaN(val)) return
+  }
+  onboardingData[q.id] = val
   onboardingLocked = true
-  addChatMsg('user', typeof val === 'number' ? val+'/10' : Array.isArray(val) ? val.join(', ') : val)
+
+  const wrap = document.getElementById('onb-slide-wrap')
+  const oldStep = document.getElementById('onb-step')
+  oldStep.classList.add('exit')
+  oldStep.removeAttribute('id')
+
+  // Build next step off-screen
   onboardingStep++
-  setTimeout(() => { onboardingLocked = false; renderOnboardingStep() }, 300)
-}
+  const newStep = document.createElement('div')
+  newStep.className = 'onb-step enter-init'
+  newStep.id = 'onb-step'
+  newStep.innerHTML = '<div class="onb-bubble"></div><div class="onb-options"></div>'
+  wrap.appendChild(newStep)
+  fillOnbStep()
 
-function addChatMsg(type, text) {
-  const a = document.getElementById('chat-area')
-  const d = document.createElement('div'); d.className = `chat-msg ${type}`
-  d.textContent = text; a.appendChild(d)
-  scrollChat()
-}
+  // Animate: old out, new in
+  requestAnimationFrame(() => {
+    newStep.classList.remove('enter-init')
+    newStep.classList.add('enter')
+  })
 
-function typeText(el, html, speed = 14, cb) {
-  const plain = html.replace(/<[^>]*>/g,'')
-  let i = 0; el.innerHTML = ''
-  const t = setInterval(() => {
-    i++
-    el.textContent = plain.substring(0,i)
-    scrollChat()
-    if (i >= plain.length) { clearInterval(t); el.innerHTML = html; if (cb) cb() }
-  }, speed)
+  setTimeout(() => {
+    if (oldStep.parentNode) oldStep.remove()
+    onboardingLocked = false
+  }, 300)
 }
 
 function finishOnboarding() {
   localStorage.setItem('csd_onboarding',JSON.stringify(onboardingData))
   startCheckup()
+}
+
+function typeText(el, html, speed, cb) {
+  const plain = html.replace(/<[^>]*>/g,'')
+  let i = 0; el.innerHTML = ''
+  const t = setInterval(() => {
+    i++
+    el.textContent = plain.substring(0,i)
+    if (i >= plain.length) { clearInterval(t); el.innerHTML = html; if (cb) cb() }
+  }, speed)
 }
 
 // ══ REAVALIAÇÃO ══
