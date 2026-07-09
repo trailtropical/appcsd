@@ -951,27 +951,27 @@ function renderDashboard() {
       <div class="db-progress-sub">Mês ${currentPlanMonth+1}</div>
     </div>
 
-    <div class="score-ring-wrap fade-in">
+    <div class="db-next fade-in fade-in-d1" onclick="goToSession(${next.idx})">
+      <div class="db-next-top"><span class="db-next-badge">${next.label}</span><span class="db-next-day">${next.day}</span></div>
+      <div class="db-next-title">Sessão ${['A','B','C'][next.idx]}</div>
+      <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
+      <button class="btn-primary" style="width:100%">▶ Começar</button>
+    </div>
+
+    <div class="score-ring-wrap fade-in fade-in-d2">
       <div class="score-ring">
         <svg viewBox="0 0 96 96"><circle class="score-ring-bg" cx="48" cy="48" r="40"/><circle class="score-ring-fill" cx="48" cy="48" r="40" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg>
         <div class="score-value">${overall}</div>
       </div>
       <div class="score-label">Índice Corporal — de 0 a 100</div>
-      ${msg ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">Seu maior ganho virá<br><strong style="color:var(--orange)">${msg.toLowerCase()}</strong></div>` : ''}
+      ${msg ? `<div style="margin-top:8px;line-height:1.4"><div style="font-size:11px;color:var(--muted)">Seu maior ganho virá de</div><div style="font-size:16px;font-weight:700;color:var(--orange)">${msg.toLowerCase()}</div></div>` : ''}
       <div class="subscores" style="margin-top:14px">${subHtml}</div>
     </div>
 
-    <div class="db-meta fade-in fade-in-d1">
+    <div class="db-meta fade-in fade-in-d3">
       <div class="db-meta-side"><div class="db-meta-label">Índice Atual</div><div class="db-meta-val">${overall}</div></div>
       <div class="db-meta-arrow">↓</div>
       <div class="db-meta-side"><div class="db-meta-label">Meta do Mês</div><div class="db-meta-val" style="color:var(--glut)">${target}</div></div>
-    </div>
-
-    <div class="db-next fade-in fade-in-d2" onclick="goToSession(${next.idx})">
-      <div class="db-next-top"><span class="db-next-badge">${next.label}</span><span class="db-next-day">${next.day}</span></div>
-      <div class="db-next-title">Sessão ${['A','B','C'][next.idx]}</div>
-      <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
-      <button class="btn-primary" style="width:100%">▶ Começar</button>
     </div>
 
     <div class="db-countdown fade-in fade-in-d3">
