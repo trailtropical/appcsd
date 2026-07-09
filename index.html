@@ -245,7 +245,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .db-consequence{font-size:12px;color:var(--orange);line-height:1.5;margin-top:4px;font-weight:500}
 
 /* ONBOARDING CHAT */
-.chat-area{flex:1;overflow-y:auto;padding:16px 20px 4px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.chat-area{flex:1;overflow:hidden;padding:16px 20px 4px;display:flex;flex-direction:column;gap:12px}
 .chat-msg{max-width:88%;padding:14px 18px;border-radius:16px;font-size:18px;line-height:1.5;animation:msgIn .25s ease both}
 .chat-msg.system{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:6px}
 .chat-msg.user{align-self:flex-end;background:var(--orange);color:#fff;border-bottom-right-radius:6px}
@@ -1508,27 +1508,44 @@ function scrollChat() {
 }
 
 function renderOnboardingStep() {
+  const area = document.getElementById('chat-area')
+  area.innerHTML = ''
+
   if (onboardingStep >= ONBOARDING.length) {
     document.getElementById('onb-progress').textContent = '✓'
-    addChatMsg('system','')
-    const el = document.querySelector('#chat-area .chat-msg:last-child')
-    typeText(el, 'Perfeito. Já tenho uma hipótese inicial. Agora preciso confirmar como seu corpo está funcionando. Em muitos corredores, a dor aparece em um local, mas a verdadeira causa está em outro. Vamos descobrir isso através do Check-up Corporal.', 12, () => {
-      appendChatHtml(`<button class="btn-primary" onclick="finishOnboarding()">Iniciar Check-up →</button>`)
+    const msg = document.createElement('div'); msg.className = 'chat-msg system'
+    msg.style.animation = 'none'
+    msg.style.transform = 'translateY(20px)'; msg.style.opacity = '0'
+    area.appendChild(msg)
+    ;(void msg.offsetHeight)
+    msg.style.transition = 'transform .3s ease-out, opacity .3s ease-out'
+    msg.style.transform = ''; msg.style.opacity = ''
+    const ty = document.createElement('div'); ty.className='chat-typing'
+    ty.innerHTML = '<span></span><span></span><span></span>'
+    area.appendChild(ty)
+    typeText(msg, 'Perfeito. Já tenho uma hipótese inicial. Agora preciso confirmar como seu corpo está funcionando. Em muitos corredores, a dor aparece em um local, mas a verdadeira causa está em outro. Vamos descobrir isso através do Check-up Corporal.', 12, () => {
+      ty.remove()
+      const btn = document.createElement('button'); btn.className = 'btn-primary'
+      btn.textContent = 'Iniciar Check-up →'; btn.onclick = finishOnboarding
+      area.appendChild(btn)
     })
     return
   }
   const q = ONBOARDING[onboardingStep]
   if (q.show && !q.show(onboardingData)) { onboardingStep++; renderOnboardingStep(); return }
   document.getElementById('onb-progress').textContent = `${onboardingStep+1}/${ONBOARDING.length}`
-  addChatMsg('system','')
-  const el = document.querySelector('#chat-area .chat-msg:last-child')
-  // typing indicator
+  const msg = document.createElement('div'); msg.className = 'chat-msg system'
+  msg.style.animation = 'none'
+  msg.style.transform = 'translateY(20px)'; msg.style.opacity = '0'
+  area.appendChild(msg)
+  ;(void msg.offsetHeight)
+  msg.style.transition = 'transform .3s ease-out, opacity .3s ease-out'
+  msg.style.transform = ''; msg.style.opacity = ''
   const ty = document.createElement('div'); ty.className='chat-typing'
   ty.innerHTML = '<span></span><span></span><span></span>'
-  document.getElementById('chat-area').appendChild(ty)
-  scrollChat()
+  area.appendChild(ty)
 
-  typeText(el, q.q, 14, () => {
+  typeText(msg, q.q, 14, () => {
     ty.remove()
     renderOptions(q)
   })
@@ -1578,9 +1595,17 @@ function selectOnbOpt(id, val) {
   if (onboardingLocked) return
   onboardingData[id] = val
   onboardingLocked = true
-  addChatMsg('user', typeof val === 'number' ? val+'/10' : Array.isArray(val) ? val.join(', ') : val)
-  onboardingStep++
-  setTimeout(() => { onboardingLocked = false; renderOnboardingStep() }, 300)
+  const area = document.getElementById('chat-area')
+  Array.from(area.children).forEach(el => {
+    el.style.transition = 'transform .2s ease-out, opacity .2s ease-out'
+    el.style.transform = 'translateY(-40px)'
+    el.style.opacity = '0'
+  })
+  setTimeout(() => {
+    onboardingStep++
+    onboardingLocked = false
+    renderOnboardingStep()
+  }, 200)
 }
 
 function addChatMsg(type, text) {
@@ -1596,7 +1621,6 @@ function typeText(el, html, speed = 14, cb) {
   const t = setInterval(() => {
     i++
     el.textContent = plain.substring(0,i)
-    scrollChat()
     if (i >= plain.length) { clearInterval(t); el.innerHTML = html; if (cb) cb() }
   }, speed)
 }
