@@ -147,7 +147,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .session-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:4px}
 .session-header-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
 .session-header-sub{font-size:12px;color:var(--muted)}
-.block-label{font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;padding:4px 0 2px}
 .ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;gap:12px;align-items:flex-start}
 .ex-card.especifico{border-color:rgba(232,80,10,.3);background:rgba(232,80,10,.05)}
 .ex-card.critico{border-color:var(--torn);background:rgba(239,68,68,.06)}
@@ -1456,31 +1455,54 @@ function showSessionFromPlan(sessIdx) {
   if (!saved) return
   const sessoes = JSON.parse(saved)
   const si = sessIdx
-  const exIds = sessoes[si] || []
+  const sessionKey = ['a','b','c'][si]
   const info = SESSION_INFO[si]
   document.getElementById('sess-label').textContent = info.day
   const badge = document.getElementById('sess-badge')
   badge.textContent = info.focus; badge.style.background = info.color
 
+  // 1. Specific exercises from decision engine
+  let specific = [...new Set(sessoes[si] || [])]
+
+  // 2. Prioritize: critical signal exercises first, then rest
+  let critIds = []
+  if (criticalSignal) {
+    const ci = SIGNAL_MAP[criticalSignal]
+    if (ci && ci[sessionKey]) critIds = ci[sessionKey]
+  }
+  let finalIds = []
+  critIds.forEach(id => { if (!finalIds.includes(id)) finalIds.push(id) })
+  specific.forEach(id => { if (!finalIds.includes(id)) finalIds.push(id) })
+
+  // 3. Cap at MAX (5), but keep critical ones
+  const MAX = 5, MIN = 4
+  const specificSet = new Set(specific)
+  if (finalIds.length > MAX) finalIds = finalIds.slice(0, MAX)
+
+  // 4. Fill with general exercises if under MIN
+  if (finalIds.length < MIN) {
+    const conflictNames = new Set(specific.map(id => EX[id]?.name).filter(Boolean))
+    const pool = GERAL_ORDEM.flatMap(b => b.ids).filter(id => {
+      if (finalIds.includes(id)) return false
+      const ex = EX[id]
+      return ex && !conflictNames.has(ex.name)
+    })
+    finalIds = finalIds.concat(pool.slice(0, MIN - finalIds.length))
+  }
+
+  // 5. Render as flat list
   let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
   html += ['Segunda','Quarta','Sexta'].map((d,i) =>
     `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
   ).join('')
   html += `</div>`
-  let gn = 1
-  html += `<div class="block-label">⚡ Bloco geral</div>`
-  GERAL_ORDEM.forEach(bloco => { bloco.ids.forEach(id => {
-    html += renderExCard(id, gn++, false, false)
-  }) })
-  if (exIds.length > 0) {
-    html += `<div class="block-label" style="margin-top:4px">🎯 Bloco específico</div>`
-    let en = 1
-    exIds.forEach(id => {
-      const isCrit = criticalSignal && (SIGNAL_MAP[criticalSignal]?.[['a','b','c'][si]]||[]).includes(id)
-      const rendered = renderExCard(id, en, true, isCrit)
-      if (rendered) en++; html += rendered
-    })
-  }
+  let n = 1
+  finalIds.forEach(id => {
+    const isCrit = criticalSignal && (SIGNAL_MAP[criticalSignal]?.[sessionKey]||[]).includes(id)
+    const isEsp = specificSet.has(id)
+    const rendered = renderExCard(id, n, isEsp, isCrit)
+    if (rendered) { html += rendered; n++ }
+  })
   const wrap = document.getElementById('sessao-exercises')
   wrap.innerHTML = html
   wrap.onclick = e => {
