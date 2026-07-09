@@ -410,10 +410,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- DASHBOARD -->
 <div id="s-dashboard" class="screen">
-  <div class="top-bar" style="border-bottom:none;padding-bottom:0">
-    <div class="top-label" style="margin-left:0">Centro de Performance</div>
-    <div class="top-badge" id="db-badge">logado</div>
-  </div>
   <div class="db-hero">
     <div class="db-hero-top">
       <div class="db-greeting"><span class="online"></span> Corredor Sem Dor</div>
@@ -887,7 +883,6 @@ function togglePlanMonth(idx) {
 function renderDashboard() {
   const done = localStorage.getItem('csd_checkup') === '1'
   const content = document.getElementById('db-content')
-  const badge = document.getElementById('db-badge')
   const phaseEl = document.getElementById('db-phase')
 
   if (done) {
@@ -899,7 +894,6 @@ function renderDashboard() {
   }
 
   if (!done) {
-    badge.textContent = 'check-up pendente'
     phaseEl.textContent = ''
     content.innerHTML = `<div class="db-empty fade-in">
       <div class="db-empty-icon">🏃</div>
@@ -910,7 +904,6 @@ function renderDashboard() {
     return
   }
 
-  badge.textContent = 'avaliado'
   const { overall, scores } = calculateIndex()
   const target = getTargetScore(overall)
   const sigs = Object.keys(signalCounts)
