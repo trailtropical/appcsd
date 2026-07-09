@@ -86,7 +86,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .test-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2}
 
 .video-placeholder{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:border-color .2s}
-.video-placeholder:has(iframe){height:auto;aspect-ratio:16/9;cursor:default}
+.video-placeholder:has(iframe, vturb-smartplayer){height:auto;aspect-ratio:16/9;cursor:default}
 .video-placeholder:hover{border-color:var(--border2)}
 .play-btn{width:48px;height:48px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .video-placeholder:hover .play-btn{transform:scale(1.05);box-shadow:0 0 20px var(--orange-glow)}
@@ -569,8 +569,10 @@ const TESTS = [
       {id:'ok', label:'Consegui sem dificuldade', sub:'Desci completamente com calcanhares no chão', signals:[], ok:true}
     ]},
   {id:'pelvica', eyebrow:'Teste 2 — Força de glúteo', title:'Elevação pélvica',
-    desc:'Deite de barriga para cima com os pés no chão e joelhos dobrados. Eleve os quadris até formar uma linha reta entre joelhos, quadris e ombros. Mantenha por 30 segundos.',
-    video:'elevação pélvica — ponte', hint:'O que aconteceu durante o movimento?',
+    video:'elevação pélvica — ponte',
+    videoEmbed:'<vturb-smartplayer id="vid-69b56e8ed04b0a3cfd82e8dc" style="display: block; margin: 0 auto; width: 100%; "><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 56.25% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer>',
+    videoScript:'https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/69b56e8ed04b0a3cfd82e8dc/v4/player.js',
+    hint:'O que aconteceu durante o movimento?',
     options:[
       {id:'nao_mant', label:'Não consegui manter a posição', sub:'Quadril caiu antes dos 30 segundos', signals:['gluteo']},
       {id:'caimbra', label:'Senti câimbra nos isquiotibiais', sub:'Dor ou câimbra na parte de trás da coxa', signals:['gluteo']},
@@ -1099,6 +1101,13 @@ function loadTest(idx) {
   const vp = document.querySelector('.video-placeholder')
   if (t.videoUrl) {
     vp.innerHTML = `<iframe width="100%" height="100%" src="${t.videoUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border-radius:12px"></iframe>`
+  } else if (t.videoEmbed) {
+    vp.innerHTML = t.videoEmbed
+    if (t.videoScript) {
+      const s = document.createElement('script')
+      s.src = t.videoScript; s.async = true
+      document.head.appendChild(s)
+    }
   } else {
     vp.innerHTML = `<div class="play-btn">▶</div><div class="video-label">${t.video}</div>`
   }
