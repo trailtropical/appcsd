@@ -270,7 +270,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .db-plan-month.active{border-color:rgba(232,80,10,.3)}
 .db-plan-header{display:flex;justify-content:space-between;align-items:center;padding:16px;cursor:pointer}
 .db-plan-header-left{display:flex;align-items:center;gap:10px}
-.db-plan-month-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--orange)}
+.db-plan-month-num{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .db-plan-month-title{font-size:13px;font-weight:600;color:var(--text)}
 .db-plan-month-sub{font-size:11px;color:var(--muted);margin-top:1px}
 .db-plan-lock{font-size:16px;color:var(--muted)}
@@ -980,10 +980,13 @@ function renderDashboard() {
         : `<span>⏳</span> Próxima reavaliação em <strong>${reavDays} dias</strong>`}
     </div>
 
+    <div class="fade-in fade-in-d3">
+      <div class="section-label" style="margin-bottom:8px">Seu Plano de Recuperação</div>
+    </div>
     <div class="db-plan-months fade-in fade-in-d3">
       <div class="db-plan-month active" style="border-color:rgba(232,80,10,.3)">
         <div class="db-plan-header" onclick="togglePlanMonth(0)">
-          <div class="db-plan-header-left"><span class="db-plan-month-num">01</span><div><div class="db-plan-month-title">${m.title}</div><div class="db-plan-month-sub">${m.goal}</div></div></div>
+          <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 01</span><div><div class="db-plan-month-title">${m.title}</div><div class="db-plan-month-sub">${m.goal}</div></div></div>
           <span style="font-size:12px;color:var(--orange)">▾</span>
         </div>
         <div class="db-plan-expand">
@@ -995,13 +998,13 @@ function renderDashboard() {
       </div>
       <div class="db-plan-month">
         <div class="db-plan-header">
-          <div class="db-plan-header-left"><span class="db-plan-month-num">02</span><div><div class="db-plan-month-title">${PLAN_MONTHS[1].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[1].goal}</div></div></div>
+          <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 02</span><div><div class="db-plan-month-title">${PLAN_MONTHS[1].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[1].goal}</div></div></div>
           <span class="db-plan-lock">🔒</span>
         </div>
       </div>
       <div class="db-plan-month">
         <div class="db-plan-header">
-          <div class="db-plan-header-left"><span class="db-plan-month-num">03</span><div><div class="db-plan-month-title">${PLAN_MONTHS[2].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[2].goal}</div></div></div>
+          <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 03</span><div><div class="db-plan-month-title">${PLAN_MONTHS[2].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[2].goal}</div></div></div>
           <span class="db-plan-lock">🔒</span>
         </div>
       </div>
