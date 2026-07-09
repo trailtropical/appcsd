@@ -918,7 +918,7 @@ function renderDashboard() {
   const msg = getPersonalizedMsg()
 
   const m = PLAN_MONTHS[currentPlanMonth]
-  phaseEl.innerHTML = `Seu plano está ativo<br><strong>Mês ${currentPlanMonth+1} de 3</strong> — ${m.title}`
+  phaseEl.innerHTML = `Seu plano está ativo<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
 
   const progressPct = Math.round(((currentPlanWeek+1)/12)*100)
 
@@ -948,7 +948,7 @@ function renderDashboard() {
     <div class="db-progress fade-in">
       <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct">${progressPct}%</span></div>
       <div class="db-progress-track"><div class="db-progress-fill" style="width:${progressPct}%"></div></div>
-      <div class="db-progress-sub">Mês ${currentPlanMonth+1} de 3</div>
+      <div class="db-progress-sub">Mês ${currentPlanMonth+1}</div>
     </div>
 
     <div class="score-ring-wrap fade-in">
