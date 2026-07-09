@@ -84,7 +84,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .test-content{padding:20px 24px 32px;flex:1;display:flex;flex-direction:column;gap:18px}
 .test-eyebrow{font-size:11px;font-weight:600;color:var(--orange);letter-spacing:.07em;text-transform:uppercase}
 .test-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2}
-.test-desc{font-size:13px;color:var(--muted);line-height:1.7}
+
 .video-placeholder{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:border-color .2s}
 .video-placeholder:hover{border-color:var(--border2)}
 .play-btn{width:48px;height:48px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s}
@@ -432,7 +432,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="test-eyebrow" id="test-eyebrow"></div>
       <div class="test-title" id="test-title"></div>
     </div>
-    <div class="test-desc" id="test-desc"></div>
+
     <div class="video-placeholder">
       <div class="play-btn">▶</div>
       <div class="video-label" id="video-label"></div>
@@ -1095,7 +1095,7 @@ function loadTest(idx) {
   } else { ctx.style.display = 'none' }
   document.getElementById('test-eyebrow').textContent = t.eyebrow
   document.getElementById('test-title').textContent = t.title
-  document.getElementById('test-desc').textContent = t.desc
+
   document.getElementById('video-label').textContent = t.video
   document.getElementById('cb-hint').textContent = t.hint
   document.getElementById('progress-fill').style.width = ((idx+1)/TESTS.length*100)+'%'
