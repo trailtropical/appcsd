@@ -328,6 +328,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .reav-diff.same{background:rgba(255,255,255,.05);color:var(--muted)}
 .reav-diff.down{background:rgba(239,68,68,.1);color:var(--torn)}
 
+/* SESSÃO DETALHE */
+.sessao-wrap{padding:16px 20px 40px;display:flex;flex-direction:column;gap:12px}
+.sessao-wrap .ex-card{cursor:pointer}
+
+/* EXERCÍCIO DETALHE */
+.ex-detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;overflow-y:auto}
+.ex-detail-overlay.open{display:flex}
+.ex-detail-video{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:16px 20px 0;cursor:pointer}
+.ex-detail-body{padding:16px 20px 40px}
+.ex-detail-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2;margin-bottom:4px}
+.ex-detail-detail{font-size:14px;color:var(--orange);font-weight:600;margin-bottom:12px}
+.ex-detail-why{font-size:13px;color:var(--muted);line-height:1.7;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px}
+.ex-detail-why::before{content:'💡 Por que esse exercício?';display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+
 /* ANIMAÇÕES */
 .fade-in{animation:fadeIn .4s ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -398,7 +412,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   <div class="top-bar">
     <button class="back-btn" onclick="goBackOnboarding()">←</button>
     <div class="top-label">Avaliação</div>
-    <div class="top-badge" id="onb-progress">1/11</div>
+    <div class="top-badge" id="onb-progress">1/${ONBOARDING.length}</div>
   </div>
   <div class="chat-area" id="chat-area"></div>
   <div class="chat-bottom" id="chat-bottom"></div>
@@ -517,6 +531,30 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="reav-compare" id="reav-compare"></div>
     <button class="btn-primary" onclick="startReavaliacao()">Refazer Check-up Corporal</button>
   </div>
+</div>
+
+<!-- SESSÃO DETALHE -->
+<div id="s-session-detail" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showPlan()">←</button>
+    <div class="top-label" id="sess-label">Sessão</div>
+    <div class="top-badge" id="sess-badge">plano</div>
+  </div>
+  <div class="sessao-wrap" id="sessao-exercises"></div>
+</div>
+
+<!-- EXERCÍCIO DETALHE (overlay) -->
+<div class="ex-detail-overlay" id="ex-detail">
+  <div class="top-bar" style="border-bottom:none">
+    <button class="back-btn" onclick="closeExDetail()">←</button>
+    <div class="top-label" id="ex-detail-label">Exercício</div>
+    <div class="top-badge" id="ex-detail-badge"></div>
+  </div>
+  <div class="ex-detail-video">
+    <div class="play-btn">▶</div>
+    <div class="video-label" id="ex-video-label">Vídeo em breve</div>
+  </div>
+  <div class="ex-detail-body" id="ex-detail-body"></div>
 </div>
 
 </div>
@@ -711,9 +749,9 @@ const GERAL_ORDEM = [
 ]
 
 const SESSION_INFO = [
-  {day:'Segunda-feira', focus:'Foco: mobilidade · tornozelo · quadril'},
-  {day:'Quarta-feira',  focus:'Foco: força · glúteo · controle motor'},
-  {day:'Sexta-feira',   focus:'Foco: propriocepção · revisão crítica'}
+  {day:'Segunda-feira', focus:'Foco: mobilidade · tornozelo · quadril', color:'var(--torn)'},
+  {day:'Quarta-feira',  focus:'Foco: força · glúteo · controle motor', color:'var(--glut)'},
+  {day:'Sexta-feira',   focus:'Foco: propriocepção · revisão crítica', color:'var(--prop)'}
 ]
 
 const BONUSES = [
@@ -735,12 +773,8 @@ const ONBOARDING = [
   {id:'painIntensity',q:'Qual a <span class="highlight">intensidade</span> da dor? (0 = nenhuma, 10 = insuportável)',type:'slider',min:0,max:10},
   {id:'painMoment',q:'Quando ela <span class="highlight">aparece</span>?',type:'single',opts:['Logo no início','Durante a corrida','No final','Após correr','No dia seguinte'],show:d=>d.painToday==='Sim'},
   {id:'painDuration',q:'Há <span class="highlight">quanto tempo</span> você convive com isso?',type:'single',opts:['Menos de 1 semana','1–4 semanas','1–3 meses','Mais de 3 meses']},
-  {id:'stoppedRunning',q:'Você já precisou <span class="highlight">parar de correr</span> por causa da dor?',type:'single',opts:['Sim','Não']},
   {id:'weeklyRuns',q:'Quantas vezes você <span class="highlight">corre por semana</span>?',type:'single',opts:['1','2','3','4','5+']},
-  {id:'weeklyMileage',q:'Quantos <span class="highlight">quilômetros por semana</span>?',type:'single',opts:['Até 10 km','10–20','20–40','40–60','Mais de 60']},
-  {id:'goal',q:'Qual seu <span class="highlight">principal objetivo</span> agora?',type:'single',opts:['Correr sem dor','Melhorar performance','Voltar a correr','Primeira prova','Meia Maratona','Maratona']},
-  {id:'strengthTraining',q:'Você faz <span class="highlight">fortalecimento</span>?',type:'single',opts:['Nunca','1x por semana','2x por semana','3x+ por semana']},
-  {id:'previousTreatments',q:'Já tentou <span class="highlight">tratar</span> essa dor?',type:'multi',opts:['Nunca','Fisioterapia','Quiropraxia','Fortalecimento','Palmilhas','Medicamentos','Alongamentos','Outro']}
+  {id:'goal',q:'Qual seu <span class="highlight">principal objetivo</span> agora?',type:'single',opts:['Correr sem dor','Melhorar performance','Voltar a correr','Primeira prova','Meia Maratona','Maratona']}
 ]
 
 // ══ ESTADO ══
@@ -980,7 +1014,7 @@ function renderExCard(exId, num, isEspecifico, isCritico) {
   const tagStyle = TAG_COLORS[ex.tc] || ''
   const cardClass = isCritico ? 'ex-card critico' : isEspecifico ? 'ex-card especifico' : 'ex-card geral'
   const tagCrit = isCritico ? '<span class="ex-tag critico">★ Crítico</span>' : ''
-  return `<div class="${cardClass} fade-in">
+  return `<div class="${cardClass} fade-in" data-exid="${exId}">
     <div class="ex-num">${num}</div>
     <div class="ex-body">
       <div class="ex-name">${ex.name}</div>
@@ -1402,15 +1436,23 @@ function showSessionFromPlan(sessIdx) {
   const saved = localStorage.getItem('csd_sessoes')
   if (!saved) return
   const sessoes = JSON.parse(saved)
-  const g = document.getElementById('session-panels')
-  g.innerHTML = ''
   const si = sessIdx
   const exIds = sessoes[si] || []
-  const panel = document.createElement('div'); panel.className='session-panel active'; panel.id='session-plan'
-  let html = `<div class="session-header"><div class="session-header-title">${SESSION_INFO[si].day}</div><div class="session-header-sub">${SESSION_INFO[si].focus}</div></div>`
-  html += `<div class="block-label">⚡ Bloco geral — fazer antes de correr</div>`
+  const info = SESSION_INFO[si]
+  document.getElementById('sess-label').textContent = info.day
+  const badge = document.getElementById('sess-badge')
+  badge.textContent = info.focus; badge.style.background = info.color
+
+  let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
+  html += ['Segunda','Quarta','Sexta'].map((d,i) =>
+    `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
+  ).join('')
+  html += `</div>`
   let gn = 1
-  GERAL_ORDEM.forEach(bloco => { bloco.ids.forEach(id => { html += renderExCard(id, gn++, false, false) }) })
+  html += `<div class="block-label">⚡ Bloco geral</div>`
+  GERAL_ORDEM.forEach(bloco => { bloco.ids.forEach(id => {
+    html += renderExCard(id, gn++, false, false)
+  }) })
   if (exIds.length > 0) {
     html += `<div class="block-label" style="margin-top:4px">🎯 Bloco específico</div>`
     let en = 1
@@ -1420,22 +1462,34 @@ function showSessionFromPlan(sessIdx) {
       if (rendered) en++; html += rendered
     })
   }
-  panel.innerHTML = html; g.appendChild(panel)
-  document.getElementById('plan-sessions-wrap')?.remove()
-  // Add a wrapper with the exercises
-  const cont = document.createElement('div'); cont.id = 'plan-sessions-wrap'
-  cont.innerHTML = `<div class="session-tabs">${['Segunda','Quarta','Sexta'].map((d,i) => `<button class="session-tab${i===sessIdx?' active':''}" onclick="showSessionFromPlan(${i})">${d}</button>`).join('')}</div>`
-  cont.appendChild(g)
-  cont.appendChild(document.createElement('br'))
-  const backBtn = document.createElement('button'); backBtn.className='btn-outline'; backBtn.textContent='← Voltar ao plano'; backBtn.onclick=()=>{showPlan()}
-  cont.appendChild(backBtn)
-
-  // Replace plan-view content temporarily
-  const planView = document.getElementById('plan-view')
-  planView.innerHTML = ''
-  planView.appendChild(cont)
-  planView.scrollIntoView({behavior:'smooth',block:'start'})
+  const wrap = document.getElementById('sessao-exercises')
+  wrap.innerHTML = html
+  wrap.onclick = e => {
+    const card = e.target.closest('[data-exid]')
+    if (card) showExerciseDetail(card.dataset.exid)
+  }
+  showScreen('s-session-detail')
 }
+
+function showExerciseDetail(id) {
+  const ex = EX[id]
+  if (!ex) return
+  document.getElementById('ex-detail-label').textContent = ex.name
+  const badge = document.getElementById('ex-detail-badge')
+  badge.textContent = ex.tag||''
+  const colorKey = ex.tc || 'torn'
+  badge.style.background = `var(--${colorKey})`
+  document.getElementById('ex-video-label').textContent = 'Vídeo: ' + ex.name
+
+  let detailHtml = `<div class="ex-detail-name">${ex.name}</div>`
+  const detailText = getDetail(ex)
+  if (detailText) detailHtml += `<div class="ex-detail-detail">${detailText}</div>`
+  if (ex.why) detailHtml += `<div class="ex-detail-why">${ex.why}</div>`
+  if (ex.adv_only) detailHtml += `<div style="margin-top:8px;font-size:11px;color:var(--orange);font-weight:600">🔒 Avançado — apenas após dominar nível intermediário</div>`
+  document.getElementById('ex-detail-body').innerHTML = detailHtml
+  document.getElementById('ex-detail').classList.add('open')
+}
+function closeExDetail() { document.getElementById('ex-detail').classList.remove('open') }
 
 // ══ ONBOARDING ══
 function startOnboarding() {
@@ -1527,13 +1581,15 @@ function addChatMsg(type, text) {
   a.scrollTop = a.scrollHeight
 }
 
-function typeText(el, text, speed = 14, cb) {
+function typeText(el, html, speed = 14, cb) {
+  const plain = html.replace(/<[^>]*>/g,'')
   let i = 0; el.innerHTML = ''
   const t = setInterval(() => {
-    el.innerHTML += text[i]; i++
+    i++
+    el.textContent = plain.substring(0,i)
     const a = document.getElementById('chat-area')
     a.scrollTop = a.scrollHeight
-    if (i >= text.length) { clearInterval(t); if (cb) cb() }
+    if (i >= plain.length) { clearInterval(t); el.innerHTML = html; if (cb) cb() }
   }, speed)
 }
 
