@@ -255,7 +255,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .chat-typing span:nth-child(3){animation-delay:.4s}
 @keyframes typingDot{to{opacity:.2;transform:scale(.8)}}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.chat-bottom{padding:6px 20px 16px}
 .chat-opts{display:flex;flex-wrap:wrap;gap:8px}
 .chat-opt{padding:14px 24px;background:var(--surface);border:1px solid var(--border2);border-radius:24px;font-size:18px;color:var(--text);cursor:pointer;font-family:inherit;transition:all .15s;user-select:none}
 .chat-opt:hover{background:var(--surface2);border-color:var(--orange)}
@@ -415,7 +414,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="top-badge" id="onb-progress">1/${ONBOARDING.length}</div>
   </div>
   <div class="chat-area" id="chat-area"></div>
-  <div class="chat-bottom" id="chat-bottom"></div>
 </div>
 
 <!-- TESTES -->
@@ -1495,7 +1493,6 @@ function closeExDetail() { document.getElementById('ex-detail').classList.remove
 function startOnboarding() {
   onboardingData = {}; onboardingStep = 0; onboardingLocked = false
   document.getElementById('chat-area').innerHTML = ''
-  document.getElementById('chat-bottom').innerHTML = ''
   showScreen('s-onboarding')
   renderOnboardingStep()
 }
@@ -1505,15 +1502,18 @@ function goBackOnboarding() {
   showScreen('s-welcome')
 }
 
+function scrollChat() {
+  const a = document.getElementById('chat-area')
+  a.scrollTop = a.scrollHeight
+}
+
 function renderOnboardingStep() {
   if (onboardingStep >= ONBOARDING.length) {
-    // Final message
     document.getElementById('onb-progress').textContent = '✓'
     addChatMsg('system','')
     const el = document.querySelector('#chat-area .chat-msg:last-child')
     typeText(el, 'Perfeito. Já tenho uma hipótese inicial. Agora preciso confirmar como seu corpo está funcionando. Em muitos corredores, a dor aparece em um local, mas a verdadeira causa está em outro. Vamos descobrir isso através do Check-up Corporal.', 12, () => {
-      const b = document.getElementById('chat-bottom')
-      b.innerHTML = `<button class="btn-primary" onclick="finishOnboarding()">Iniciar Check-up →</button>`
+      appendChatHtml(`<button class="btn-primary" onclick="finishOnboarding()">Iniciar Check-up →</button>`)
     })
     return
   }
@@ -1522,12 +1522,11 @@ function renderOnboardingStep() {
   document.getElementById('onb-progress').textContent = `${onboardingStep+1}/${ONBOARDING.length}`
   addChatMsg('system','')
   const el = document.querySelector('#chat-area .chat-msg:last-child')
-  const t = document.getElementById('chat-bottom'); t.innerHTML = ''
   // typing indicator
   const ty = document.createElement('div'); ty.className='chat-typing'
   ty.innerHTML = '<span></span><span></span><span></span>'
   document.getElementById('chat-area').appendChild(ty)
-  document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight
+  scrollChat()
 
   typeText(el, q.q, 14, () => {
     ty.remove()
@@ -1535,29 +1534,39 @@ function renderOnboardingStep() {
   })
 }
 
+function appendChatHtml(html) {
+  const a = document.getElementById('chat-area')
+  const d = document.createElement('div'); d.innerHTML = html
+  while (d.firstChild) a.appendChild(d.firstChild)
+  scrollChat()
+}
+
 function renderOptions(q) {
-  const b = document.getElementById('chat-bottom')
   if (q.type === 'slider') {
     const v = onboardingData[q.id] !== undefined ? onboardingData[q.id] : Math.floor((q.min+q.max)/2)
-    b.innerHTML = `<div class="chat-slider-wrap"><div class="chat-slider-val" id="slider-val">${v}</div>
+    const html = `<div class="chat-slider-wrap"><div class="chat-slider-val" id="slider-val">${v}</div>
       <input type="range" min="${q.min}" max="${q.max}" value="${v}" id="slider-input" oninput="document.getElementById('slider-val').textContent=this.value">
       <button class="btn-primary" style="margin-top:16px" onclick="selectOnbOpt('${q.id}',parseInt(document.getElementById('slider-input').value))">Confirmar →</button></div>`
+    appendChatHtml(html)
   } else if (q.type === 'single') {
-    b.innerHTML = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt" onclick="selectOnbOpt('${q.id}','${o}')">${o}</div>`).join('')}</div>`
+    const html = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt" onclick="selectOnbOpt('${q.id}','${o}')">${o}</div>`).join('')}</div>`
+    appendChatHtml(html)
   } else if (q.type === 'multi') {
     const saved = onboardingData[q.id] || []
-    b.innerHTML = `<div class="chat-opts" id="multi-opts">${q.opts.map(o => `<div class="chat-opt${saved.includes(o)?' selected':''}" data-val="${o}" onclick="toggleMultiOpt('${q.id}','${o}')">${o}</div>`).join('')}</div>
+    const html = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt${saved.includes(o)?' selected':''}" data-val="${o}" onclick="toggleMultiOpt('${q.id}','${o}',this)">${o}</div>`).join('')}</div>
       <button class="btn-primary" style="margin-top:16px" onclick="confirmMultiOpt('${q.id}')">Confirmar →</button>`
+    appendChatHtml(html)
   }
 }
 
-function toggleMultiOpt(id, val) {
+function toggleMultiOpt(id, val, el) {
   if (!onboardingData[id]) onboardingData[id] = []
   const arr = onboardingData[id]
   const i = arr.indexOf(val)
   if (i > -1) arr.splice(i,1); else arr.push(val)
-  document.querySelectorAll('#multi-opts .chat-opt').forEach(el => {
-    el.classList.toggle('selected',arr.includes(el.dataset.val))
+  const opts = el.closest('.chat-opts')
+  opts.querySelectorAll('.chat-opt').forEach(o => {
+    o.classList.toggle('selected',arr.includes(o.dataset.val))
   })
 }
 
@@ -1578,7 +1587,7 @@ function addChatMsg(type, text) {
   const a = document.getElementById('chat-area')
   const d = document.createElement('div'); d.className = `chat-msg ${type}`
   d.textContent = text; a.appendChild(d)
-  a.scrollTop = a.scrollHeight
+  scrollChat()
 }
 
 function typeText(el, html, speed = 14, cb) {
@@ -1587,8 +1596,7 @@ function typeText(el, html, speed = 14, cb) {
   const t = setInterval(() => {
     i++
     el.textContent = plain.substring(0,i)
-    const a = document.getElementById('chat-area')
-    a.scrollTop = a.scrollHeight
+    scrollChat()
     if (i >= plain.length) { clearInterval(t); el.innerHTML = html; if (cb) cb() }
   }, speed)
 }
