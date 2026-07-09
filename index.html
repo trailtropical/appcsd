@@ -581,8 +581,9 @@ const TESTS = [
       {id:'ok', label:'Consegui manter sem dificuldade', sub:'Quadril estável durante todo o tempo', signals:[], ok:true}
     ]},
   {id:'equilibrio', eyebrow:'Teste 3 — Propriocepção', title:'Equilíbrio unilateral',
-    desc:'Fique em pé em um pé só por 30 segundos. Se conseguiu sem dificuldade, repita com os olhos fechados. Observe a oscilação nos dois casos.',
-    video:'equilíbrio unilateral', hint:'Qual foi seu desempenho?',
+    video:'equilíbrio unilateral',
+    videoEmbed:'<div id="ifr_6a4fe81e7eb0449de2c3477b_wrapper" style="margin: 0 auto; width: 100%;"><div style="position: relative; padding: 56.25% 0 0 0;" id="ifr_6a4fe81e7eb0449de2c3477b_aspect"><iframe frameborder="0" allowfullscreen src="about:blank" id="ifr_6a4fe81e7eb0449de2c3477b" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" referrerpolicy="origin" onload="this.onload=null, this.src=\'https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/6a4fe81e7eb0449de2c3477b/v4/embed.html\'+(location.search||\'?\')+\'&vl=\'+encodeURIComponent(location.href)"></iframe></div></div>',
+    videoScript:'https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js', hint:'Qual foi seu desempenho?',
     options:[
       {id:'aberto_fail', label:'Não consegui manter com olhos abertos', sub:'Caí ou precisei apoiar antes dos 30s', signals:['propriocepcao']},
       {id:'fechado_fail', label:'Consegui abertos, mas oscilei com olhos fechados', sub:'Instabilidade aumentou ao fechar os olhos', signals:['propriocepcao']},
