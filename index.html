@@ -244,6 +244,45 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .db-empty-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
 .db-consequence{font-size:12px;color:var(--orange);line-height:1.5;margin-top:4px;font-weight:500}
 
+/* Dashboard v2 — jornada */
+.db-phase{font-size:12px;color:var(--muted);margin-top:4px}.db-phase strong{color:var(--text);font-weight:600}
+.db-progress{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.db-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.db-progress-title{font-size:13px;font-weight:700;color:var(--text)}
+.db-progress-pct{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--orange)}
+.db-progress-track{height:8px;background:var(--border2);border-radius:4px;overflow:hidden;margin-bottom:8px}
+.db-progress-fill{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--orange),#FF8C42);transition:width .8s ease}
+.db-progress-sub{font-size:11px;color:var(--muted);text-align:center}
+.db-meta{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.db-meta-side{display:flex;flex-direction:column;align-items:center}
+.db-meta-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800}
+.db-meta-arrow{font-size:18px;color:var(--muted)}
+.db-meta-label{font-size:10px;color:var(--muted);margin-bottom:2px}
+.db-next{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:border-color .15s}
+.db-next:hover{border-color:var(--orange)}
+.db-next-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.db-next-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--orange-dim);color:var(--orange);text-transform:uppercase;letter-spacing:.04em}
+.db-next-day{font-size:11px;color:var(--muted)}
+.db-next-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px}
+.db-next-focus{font-size:12px;color:var(--muted);margin-bottom:14px}
+.db-plan-months{display:flex;flex-direction:column;gap:10px}
+.db-plan-month{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .15s}
+.db-plan-month.active{border-color:rgba(232,80,10,.3)}
+.db-plan-header{display:flex;justify-content:space-between;align-items:center;padding:16px;cursor:pointer}
+.db-plan-header-left{display:flex;align-items:center;gap:10px}
+.db-plan-month-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--orange)}
+.db-plan-month-title{font-size:13px;font-weight:600;color:var(--text)}
+.db-plan-month-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.db-plan-lock{font-size:16px;color:var(--muted)}
+.db-plan-expand{padding:0 16px 16px;border-top:1px solid var(--border);display:none}
+.db-plan-month.active .db-plan-expand{display:block}
+.db-plan-list{list-style:none;padding:0;margin:8px 0 0}
+.db-plan-list li{font-size:12px;color:var(--text);padding:4px 0;padding-left:14px;position:relative;line-height:1.5}
+.db-plan-list li::before{content:'✓';position:absolute;left:0;color:var(--orange);font-weight:700;font-size:11px}
+.db-plan-why{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px;padding:10px;background:var(--surface2);border-radius:var(--radius)}
+.db-plan-btn{margin-top:12px}
+.db-last-eval{font-size:11px;color:var(--hint);text-align:center;padding:4px 0}
+
 /* ONBOARDING CHAT */
 .chat-area{flex:1;overflow:hidden;padding:16px 20px 4px;display:flex;flex-direction:column;gap:12px}
 .chat-msg{max-width:88%;padding:14px 18px;border-radius:16px;font-size:18px;line-height:1.5;animation:msgIn .25s ease both}
@@ -380,6 +419,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="db-greeting"><span class="online"></span> Corredor Sem Dor</div>
     </div>
     <div class="db-title" id="db-title">Bem-vindo de<br>volta<span>.</span></div>
+    <div class="db-phase" id="db-phase"></div>
   </div>
   <div class="db-content" id="db-content"></div>
 </div>
@@ -817,22 +857,50 @@ function calculateIndex() {
 }
 
 // ══ DASHBOARD ══
+function getTargetScore(overall) {
+  if (overall < 50) return 65
+  if (overall < 70) return 80
+  return 90
+}
+
+function getPersonalizedMsg() {
+  if (!criticalSignal) return ''
+  const c = CONSEQUENCES[criticalSignal]
+  return c ? c.priority : ''
+}
+
+function getNextSession() {
+  const d = new Date().getDay()
+  if (d === 1) return { idx: 0, label: 'Hoje', day: 'Segunda-feira' }
+  if (d === 3) return { idx: 1, label: 'Hoje', day: 'Quarta-feira' }
+  if (d === 5) return { idx: 2, label: 'Hoje', day: 'Sexta-feira' }
+  if (d < 1 || d > 5) return { idx: 0, label: 'Próxima', day: 'Segunda-feira' }
+  if (d < 3) return { idx: 1, label: 'Próxima', day: 'Quarta-feira' }
+  return { idx: 2, label: 'Próxima', day: 'Sexta-feira' }
+}
+
+function togglePlanMonth(idx) {
+  const el = document.querySelectorAll('.db-plan-month')[idx]
+  if (el) el.classList.toggle('active')
+}
+
 function renderDashboard() {
   const done = localStorage.getItem('csd_checkup') === '1'
   const content = document.getElementById('db-content')
   const badge = document.getElementById('db-badge')
+  const phaseEl = document.getElementById('db-phase')
 
-  // Restore state from previous checkup
   if (done) {
     const savedAnswers = localStorage.getItem('csd_answers')
     if (savedAnswers) { try { answers = JSON.parse(savedAnswers) } catch(e){} }
     const savedNivel = localStorage.getItem('csd_nivel')
     if (savedNivel) nivel = savedNivel
-    getActiveSignals()  // populates signalCounts + criticalSignal
+    getActiveSignals()
   }
 
   if (!done) {
     badge.textContent = 'check-up pendente'
+    phaseEl.textContent = ''
     content.innerHTML = `<div class="db-empty fade-in">
       <div class="db-empty-icon">🏃</div>
       <div class="db-empty-title">Nenhuma avaliação ainda</div>
@@ -844,101 +912,104 @@ function renderDashboard() {
 
   badge.textContent = 'avaliado'
   const { overall, scores } = calculateIndex()
+  const target = getTargetScore(overall)
   const sigs = Object.keys(signalCounts)
-  const prioritario = criticalSignal
-  const conseq = CONSEQUENCES[prioritario]
+  const next = getNextSession()
+  const msg = getPersonalizedMsg()
 
-  // Onboarding data
-  const odRaw = localStorage.getItem('csd_onboarding')
-  let odData = {}
-  if (odRaw) { try { odData = JSON.parse(odRaw) } catch(e){} }
+  const m = PLAN_MONTHS[currentPlanMonth]
+  phaseEl.innerHTML = `Seu plano está ativo<br><strong>Mês ${currentPlanMonth+1} de 3</strong> — ${m.title}`
 
-  // Body map status
-  const bodyStatus = getBodyStatus(signalCounts)
+  const progressPct = Math.round(((currentPlanWeek+1)/12)*100)
 
-  // Ring circumference
   const circ = 2 * Math.PI * 40
   const offset = circ - (overall / 100) * circ
-
   const catColors = {mobilidade:'#38BDF8',estabilidade:'#4ADE80',controle_motor:'#A78BFA',propulsao:'#FB923C',equilibrio:'#F472B6'}
-
   let subHtml = CATEGORY_ORDER.map(c => {
-    const pct = scores[c]
-    const col = catColors[c]
-    return `<div class="subscore-item">
-      <div class="subscore-header"><span class="subscore-name">${CATEGORY_INFO[c].label}</span><span class="subscore-val">${pct}</span></div>
-      <div class="subscore-track"><div class="subscore-fill" style="width:${pct}%;background:${col}"></div></div>
-    </div>`
+    const pct = scores[c]; const col = catColors[c]
+    return `<div class="subscore-item"><div class="subscore-header"><span class="subscore-name">${CATEGORY_INFO[c].label}</span><span class="subscore-val">${pct}</span></div><div class="subscore-track"><div class="subscore-fill" style="width:${pct}%;background:${col}"></div></div></div>`
   }).join('')
 
-  let prioritiesHtml = ''
   const sorted = sigs.slice().sort((a,b) => (signalCounts[b]||0) - (signalCounts[a]||0))
-  sorted.forEach((sig,i) => {
-    const info = SIGNAL_MAP[sig]
-    const c = CONSEQUENCES[sig]
-    if (!info) return
-    prioritiesHtml += `<div class="priority-card fade-in${i>0?' fade-in-d'+i:''}">
-      <div class="priority-num">${i+1}</div>
-      <div class="priority-info">
-        <div class="priority-title">${c?c.priority:info.label}</div>
-        <div class="priority-why">${c?c.cause:''}</div>
-        <div class="db-consequence">${c?'→ '+c.effect:''}</div>
-      </div>
-    </div>`
-  })
+  let whyItems = sorted.map(sig => {
+    const c = CONSEQUENCES[sig]; const info = SIGNAL_MAP[sig]
+    return c ? `<li>${c.priority}</li>` : info ? `<li>${info.label}</li>` : ''
+  }).join('')
+  let whyText = ''
+  if (criticalSignal) { const cc = CONSEQUENCES[criticalSignal]; if (cc) whyText = cc.effect }
 
   const lastCheckup = localStorage.getItem('csd_lastCheckup')
-  let countdownHtml = '', reavHtml = ''
-  if (lastCheckup) {
-    const days = Math.max(1, 21 - Math.floor((Date.now() - parseInt(lastCheckup)) / 86400000))
-    if (days <= 0) {
-      reavHtml = `<div class="db-countdown fade-in" style="background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.2)"><span style="font-size:16px">📊</span> Seu corpo mudou — <strong style="cursor:pointer;color:#38BDF8" onclick="showReavaliacao()">refaça o check-up</strong> para ver sua evolução</div>`
-    } else {
-      countdownHtml = `<div class="db-countdown fade-in"><span>🔄</span> Reavaliação em <strong>${days} dias</strong></div>`
-    }
-  }
-
+  let reavDays = 21
+  if (lastCheckup) reavDays = Math.max(0, 21 - Math.floor((Date.now() - parseInt(lastCheckup)) / 86400000))
+  const reavReady = reavDays <= 0
   const lastEval = lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'
 
   content.innerHTML = `
-    <div class="fade-in" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
-      <div class="db-stat"><div class="db-stat-val">${overall}</div><div class="db-stat-label">Índice Corporal</div></div>
-      <div class="db-stat"><div class="db-stat-val" style="font-size:14px">${lastEval}</div><div class="db-stat-label">Última avaliação</div></div>
+    <div class="db-progress fade-in">
+      <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct">${progressPct}%</span></div>
+      <div class="db-progress-track"><div class="db-progress-fill" style="width:${progressPct}%"></div></div>
+      <div class="db-progress-sub">Mês ${currentPlanMonth+1} de 3</div>
     </div>
-
-    ${reavHtml}
 
     <div class="score-ring-wrap fade-in">
       <div class="score-ring">
-        <svg viewBox="0 0 96 96">
-          <circle class="score-ring-bg" cx="48" cy="48" r="40"/>
-          <circle class="score-ring-fill" cx="48" cy="48" r="40" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
-        </svg>
+        <svg viewBox="0 0 96 96"><circle class="score-ring-bg" cx="48" cy="48" r="40"/><circle class="score-ring-fill" cx="48" cy="48" r="40" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg>
         <div class="score-value">${overall}</div>
       </div>
       <div class="score-label">Índice Corporal — de 0 a 100</div>
-      <div class="subscores">${subHtml}</div>
+      ${msg ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">Seu maior ganho virá<br><strong style="color:var(--orange)">${msg.toLowerCase()}</strong></div>` : ''}
+      <div class="subscores" style="margin-top:14px">${subHtml}</div>
     </div>
 
-    ${odData.goal ? `<div class="fade-in" style="padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--muted)">🎯 Objetivo: <strong style="color:var(--orange)">${odData.goal}</strong></div>` : ''}
+    <div class="db-meta fade-in fade-in-d1">
+      <div class="db-meta-side"><div class="db-meta-label">Índice Atual</div><div class="db-meta-val">${overall}</div></div>
+      <div class="db-meta-arrow">↓</div>
+      <div class="db-meta-side"><div class="db-meta-label">Meta do Mês</div><div class="db-meta-val" style="color:var(--glut)">${target}</div></div>
+    </div>
 
-    ${prioritiesHtml ? `<div class="priority-section fade-in fade-in-d3"><div class="section-label">Prioridades do plano</div><div class="priority-list">${prioritiesHtml}</div></div>` : ''}
+    <div class="db-next fade-in fade-in-d2" onclick="goToSession(${next.idx})">
+      <div class="db-next-top"><span class="db-next-badge">${next.label}</span><span class="db-next-day">${next.day}</span></div>
+      <div class="db-next-title">Sessão ${['A','B','C'][next.idx]}</div>
+      <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
+      <button class="btn-primary" style="width:100%">▶ Começar</button>
+    </div>
 
-    <div class="body-map-wrap fade-in fade-in-d4">${renderBodyMap(signalCounts)}</div>
+    <div class="db-countdown fade-in fade-in-d3">
+      ${reavReady
+        ? `<span style="font-size:16px">📊</span> Seu corpo mudou — <strong style="cursor:pointer;color:#38BDF8" onclick="showReavaliacao()">refaça o check-up</strong> para ver sua evolução`
+        : `<span>⏳</span> Próxima reavaliação em <strong>${reavDays} dias</strong>`}
+    </div>
 
-    <div class="fade-in fade-in-d4">
-      <div class="section-label" style="margin-bottom:8px">Plano da semana</div>
-      <div class="db-sessions">
-        <button class="db-session-btn" onclick="goToSession(0)">Seg</button>
-        <button class="db-session-btn" onclick="goToSession(1)">Qua</button>
-        <button class="db-session-btn" onclick="goToSession(2)">Sex</button>
+    <div class="db-plan-months fade-in fade-in-d3">
+      <div class="db-plan-month active" style="border-color:rgba(232,80,10,.3)">
+        <div class="db-plan-header" onclick="togglePlanMonth(0)">
+          <div class="db-plan-header-left"><span class="db-plan-month-num">01</span><div><div class="db-plan-month-title">${m.title}</div><div class="db-plan-month-sub">${m.goal}</div></div></div>
+          <span style="font-size:12px;color:var(--orange)">▾</span>
+        </div>
+        <div class="db-plan-expand">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Foco deste mês:</div>
+          <ul class="db-plan-list">${whyItems}</ul>
+          ${whyText ? `<div class="db-plan-why">${whyText}</div>` : ''}
+          <div class="db-plan-btn"><button class="btn-primary" style="width:100%" onclick="showPlan()">▶ Continuar Treinos</button></div>
+        </div>
+      </div>
+      <div class="db-plan-month">
+        <div class="db-plan-header">
+          <div class="db-plan-header-left"><span class="db-plan-month-num">02</span><div><div class="db-plan-month-title">${PLAN_MONTHS[1].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[1].goal}</div></div></div>
+          <span class="db-plan-lock">🔒</span>
+        </div>
+      </div>
+      <div class="db-plan-month">
+        <div class="db-plan-header">
+          <div class="db-plan-header-left"><span class="db-plan-month-num">03</span><div><div class="db-plan-month-title">${PLAN_MONTHS[2].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[2].goal}</div></div></div>
+          <span class="db-plan-lock">🔒</span>
+        </div>
       </div>
     </div>
 
-    ${countdownHtml}
+    <div class="db-last-eval fade-in fade-in-d4">Última avaliação: ${lastEval}</div>
 
     <div class="fade-in fade-in-d4" style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn-primary" onclick="showPlan()">Continuar Plano →</button>
       <button class="btn-outline" onclick="showBonuses()">Ver bônus →</button>
     </div>`
 }
