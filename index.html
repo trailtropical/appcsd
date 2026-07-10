@@ -209,7 +209,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .subscore-name{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .subscore-val{font-size:12px;font-weight:700;color:var(--text)}
 .subscore-track{height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
-.subscore-fill{height:3px;border-radius:2px;transition:width 1.2s ease}
+.subscore-fill{height:3px;border-radius:2px;transition:width 1.8s ease}
 
 /* Priority cards */
 .priority-section .section-label{margin-bottom:8px}
@@ -1118,7 +1118,7 @@ function animateDashboard() {
     const target = parseInt(el.dataset.count)
     const isPct = el.classList.contains('db-progress-pct')
     const isScore = el.classList.contains('score-value')
-    animateCount(el, 0, target, isScore ? 2400 : 1600, isPct ? '%' : '')
+    animateCount(el, 0, target, isScore ? 2400 : 1800, isPct ? '%' : '')
   })
 }
 
