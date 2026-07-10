@@ -971,7 +971,7 @@ function renderDashboard() {
     <div class="db-progress sr" data-delay="0">
       <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct" data-count="${progressPct}">0%</span></div>
       <div class="db-progress-track"><div class="db-progress-fill" style="width:0" data-target="${progressPct}"></div></div>
-      <div class="db-progress-sub">Mês ${currentPlanMonth+1}</div>
+      <div class="db-progress-sub">Mês ${currentPlanMonth+1} — Semana atual</div>
     </div>
 
     <div class="score-ring-wrap sr" data-delay="100">
@@ -1897,11 +1897,13 @@ function getCompletionPct() {
   const sessoes = JSON.parse(saved)
   const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
   let total = 0, done = 0
-  sessoes.forEach((sess, i) => {
+  for (let i = 0; i < 3; i++) {
+    const sess = sessoes[i]
+    if (!sess) continue
     const sChecks = checks[`sess_${i}`] || {}
     total += sess.length
     sess.forEach(id => { if (sChecks[id]) done++ })
-  })
+  }
   return total > 0 ? Math.round((done / total) * 100) : 0
 }
 
