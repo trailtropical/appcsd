@@ -401,6 +401,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .fade-in-d2{animation-delay:0.1s}
 .fade-in-d3{animation-delay:0.15s}
 .fade-in-d4{animation-delay:0.2s}
+
+/* Scroll Reveal */
+.sr{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
+.sr.visible{opacity:1;transform:translateY(0)}
+
+/* Animacoes de contagem */
+@keyframes barGrow{from{width:0}to{width:var(--target-w)}}
+@keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes ringDraw{from{stroke-dashoffset:251.3}to{stroke-dashoffset:var(--ring-offset)}}
 </style>
 </head>
 <body>
@@ -934,7 +943,7 @@ function renderDashboard() {
   const catColors = {mobilidade:'#38BDF8',estabilidade:'#4ADE80',controle_motor:'#A78BFA',propulsao:'#FB923C',equilibrio:'#F472B6'}
   let subHtml = CATEGORY_ORDER.map(c => {
     const pct = scores[c]; const col = catColors[c]
-    return `<div class="subscore-item"><div class="subscore-header"><span class="subscore-name">${CATEGORY_INFO[c].label}</span><span class="subscore-val">${pct}</span></div><div class="subscore-track"><div class="subscore-fill" style="width:${pct}%;background:${col}"></div></div></div>`
+    return `<div class="subscore-item"><div class="subscore-header"><span class="subscore-name">${CATEGORY_INFO[c].label}</span><span class="subscore-val" data-count="${pct}">0</span></div><div class="subscore-track"><div class="subscore-fill" style="width:0;background:${col}" data-target="${pct}"></div></div></div>`
   }).join('')
 
   const sorted = sigs.slice().sort((a,b) => (signalCounts[b]||0) - (signalCounts[a]||0))
@@ -952,47 +961,47 @@ function renderDashboard() {
   const lastEval = lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'
 
   content.innerHTML = `
-    <div class="db-next fade-in" onclick="goToSession(${next.idx})">
+    <div class="db-next sr" onclick="goToSession(${next.idx})" data-delay="0">
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Seu próximo treino</div>
       <div class="db-next-title">Treino ${['A','B','C'][next.idx]}</div>
       <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
       <button class="btn-primary" style="width:100%">▶ Começar</button>
     </div>
 
-    <div class="db-progress fade-in fade-in-d1">
-      <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct">${progressPct}%</span></div>
-      <div class="db-progress-track"><div class="db-progress-fill" style="width:${progressPct}%"></div></div>
+    <div class="db-progress sr" data-delay="0">
+      <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct" data-count="${progressPct}">0%</span></div>
+      <div class="db-progress-track"><div class="db-progress-fill" style="width:0" data-target="${progressPct}"></div></div>
       <div class="db-progress-sub">Mês ${currentPlanMonth+1}</div>
     </div>
 
-    <div class="score-ring-wrap fade-in fade-in-d2">
+    <div class="score-ring-wrap sr" data-delay="100">
       <div class="score-ring">
-        <svg viewBox="0 0 96 96"><circle class="score-ring-bg" cx="48" cy="48" r="40"/><circle class="score-ring-fill" cx="48" cy="48" r="40" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg>
-        <div class="score-value">${overall}</div>
+        <svg viewBox="0 0 96 96"><circle class="score-ring-bg" cx="48" cy="48" r="40"/><circle class="score-ring-fill" cx="48" cy="48" r="40" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" data-target="${offset}"/></svg>
+        <div class="score-value" data-count="${overall}">0</div>
       </div>
       <div class="score-label">Índice Corporal — de 0 a 100</div>
       ${msg ? `<div style="margin-top:8px;line-height:1.4"><div style="font-size:11px;color:var(--muted)">Seu maior ganho virá de</div><div style="font-size:16px;font-weight:700;color:var(--orange)">${msg.toLowerCase()}</div></div>` : ''}
       <div class="subscores" style="margin-top:14px">${subHtml}</div>
     </div>
 
-    <div class="db-meta fade-in fade-in-d3">
+    <div class="db-meta sr" data-delay="200">
       <div class="db-meta-side"><div class="db-meta-label">Índice Atual</div><div class="db-meta-val">${overall}</div></div>
       <div class="db-meta-arrow">↓</div>
       <div class="db-meta-side"><div class="db-meta-label">Meta do Mês</div><div class="db-meta-val" style="color:var(--glut)">${target}</div></div>
     </div>
 
-    <div class="db-countdown fade-in fade-in-d3">
+    <div class="db-countdown sr" data-delay="250">
       ${reavReady
         ? `<span style="font-size:16px">📊</span> Seu corpo mudou — <strong style="cursor:pointer;color:#38BDF8" onclick="showReavaliacao()">refaça o check-up</strong> para ver sua evolução`
         : `<span>⏳</span> Próxima reavaliação em <strong>${reavDays} dias</strong>`}
     </div>
 
-    <div class="body-map-wrap fade-in fade-in-d3">${renderBodyMap(signalCounts)}</div>
+    <div class="body-map-wrap sr" data-delay="300">${renderBodyMap(signalCounts)}</div>
 
-    <div class="fade-in fade-in-d3">
+    <div class="sr" data-delay="350">
       <div class="section-label" style="margin-bottom:8px">Seu Plano de Recuperação</div>
     </div>
-    <div class="db-plan-months fade-in fade-in-d3">
+    <div class="db-plan-months sr" data-delay="400">
       <div class="db-plan-month active" style="border-color:rgba(232,80,10,.3)">
         <div class="db-plan-header" onclick="togglePlanMonth(0)">
           <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 01</span><div><div class="db-plan-month-title">${m.title}</div><div class="db-plan-month-sub">${m.goal}</div></div></div>
@@ -1019,11 +1028,13 @@ function renderDashboard() {
       </div>
     </div>
 
-    <div class="db-last-eval fade-in fade-in-d4">Última avaliação: ${lastEval}</div>
+    <div class="db-last-eval sr" data-delay="450">Última avaliação: ${lastEval}</div>
 
-    <div class="fade-in fade-in-d4" style="display:flex;flex-direction:column;gap:8px">
+    <div class="sr" data-delay="500" style="display:flex;flex-direction:column;gap:8px">
       <button class="btn-outline" onclick="showBonuses()">Ver bônus →</button>
     </div>`
+
+  setTimeout(animateDashboard, 150)
 }
 
 function getBodyStatus(sigCounts) {
@@ -1072,7 +1083,65 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
   document.getElementById(id).classList.add('active')
   window.scrollTo(0,0)
+  if (id === 's-dashboard') setTimeout(animateDashboard, 200)
 }
+
+function animateDashboard() {
+  const content = document.getElementById('db-content')
+  if (!content) return
+
+  const srEls = content.querySelectorAll('.sr')
+  srEls.forEach(el => {
+    const rect = el.getBoundingClientRect()
+    const delay = parseInt(el.dataset.delay || '0')
+    if (rect.top < window.innerHeight) {
+      setTimeout(() => el.classList.add('visible'), delay)
+    } else {
+      srObserver.observe(el)
+    }
+  })
+
+  document.querySelectorAll('#db-content [data-target]').forEach(el => {
+    const target = parseFloat(el.dataset.target)
+    const isPct = el.classList.contains('db-progress-fill') || el.classList.contains('subscore-fill')
+    const isRing = el.tagName === 'circle'
+
+    if (isRing) {
+      el.style.transition = 'stroke-dashoffset 1.2s ease'
+      el.style.strokeDashoffset = target
+    } else if (isPct) {
+      setTimeout(() => { el.style.width = target + '%' }, 300)
+    }
+  })
+
+  document.querySelectorAll('#db-content [data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count)
+    const isPct = el.classList.contains('db-progress-pct')
+    animateCount(el, 0, target, 800, isPct ? '%' : '')
+  })
+}
+
+function animateCount(el, from, to, duration, suffix) {
+  const start = performance.now()
+  function tick(now) {
+    const elapsed = now - start
+    const progress = Math.min(elapsed / duration, 1)
+    const eased = 1 - Math.pow(1 - progress, 3)
+    const current = Math.round(from + (to - from) * eased)
+    el.textContent = current + (suffix || '')
+    if (progress < 1) requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+}
+
+const srObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible')
+      srObserver.unobserve(e.target)
+    }
+  })
+}, { threshold: 0.15 })
 function goToSession(idx) {
   if (!document.getElementById('session-plan')) showPlan()
   showScreen('s-protocol')
