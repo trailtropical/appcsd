@@ -571,7 +571,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="s-session-detail" class="screen">
   <div class="top-bar">
     <button class="back-btn" onclick="goToDashboard()">⌂</button>
-    <div class="top-label" id="sess-label">Sessão</div>
+    <div class="top-label" id="sess-label">Treino</div>
     <div class="top-badge" id="sess-badge">plano</div>
   </div>
   <div class="sessao-wrap" id="sessao-exercises"></div>
@@ -1496,9 +1496,9 @@ function renderPlanWeek(idx, label) {
       <div class="plan-week-toggle" style="transform:rotate(${isOpen?180:0}deg)">▾</div>
     </div>
     <div class="plan-week-body${isOpen?' open':''}">
-      <button class="plan-session-btn" onclick="showSessionFromPlan(0)"><span class="sess-day">Sessão A</span> — Segunda-feira · ${SESSION_INFO[0].focus}</button>
-      <button class="plan-session-btn" onclick="showSessionFromPlan(1)"><span class="sess-day">Sessão B</span> — Quarta-feira · ${SESSION_INFO[1].focus}</button>
-      <button class="plan-session-btn" onclick="showSessionFromPlan(2)"><span class="sess-day">Sessão C</span> — Sexta-feira · ${SESSION_INFO[2].focus}</button>
+      <button class="plan-session-btn" onclick="showSessionFromPlan(0)"><span class="sess-day">Treino A</span> — Segunda-feira · ${SESSION_INFO[0].focus}</button>
+      <button class="plan-session-btn" onclick="showSessionFromPlan(1)"><span class="sess-day">Treino B</span> — Quarta-feira · ${SESSION_INFO[1].focus}</button>
+      <button class="plan-session-btn" onclick="showSessionFromPlan(2)"><span class="sess-day">Treino C</span> — Sexta-feira · ${SESSION_INFO[2].focus}</button>
     </div>
   </div>`
 }
@@ -1526,7 +1526,7 @@ function showSessionFromPlan(sessIdx) {
   const si = sessIdx
   const sessionKey = ['a','b','c'][si]
   const info = SESSION_INFO[si]
-  document.getElementById('sess-label').textContent = info.day
+  document.getElementById('sess-label').textContent = `Treino ${['A','B','C'][si]}`
   const badge = document.getElementById('sess-badge')
   badge.textContent = info.focus; badge.style.background = info.color
 
@@ -1561,7 +1561,7 @@ function showSessionFromPlan(sessIdx) {
 
   // 5. Render as flat list
   let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
-  html += ['Segunda','Quarta','Sexta'].map((d,i) =>
+  html += ['Treino A','Treino B','Treino C'].map((d,i) =>
     `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
   ).join('')
   html += `</div>`
