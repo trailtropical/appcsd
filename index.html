@@ -927,7 +927,7 @@ function renderDashboard() {
   const m = PLAN_MONTHS[currentPlanMonth]
   phaseEl.innerHTML = `Seu plano está ativo<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
 
-  const progressPct = Math.round(((currentPlanWeek+1)/12)*100)
+  const progressPct = getCompletionPct()
 
   const circ = 2 * Math.PI * 40
   const offset = circ - (overall / 100) * circ
@@ -1555,6 +1555,12 @@ function toggleExCheck(exId, el) {
     const allDone = Array.from(allCards).every(c => allChecks[c.dataset.exid])
     if (allDone) setTimeout(showDoneAnimation, 400)
   }
+
+  const pct = getCompletionPct()
+  const fill = document.querySelector('.db-progress-fill')
+  const pctEl = document.querySelector('.db-progress-pct')
+  if (fill) fill.style.width = pct + '%'
+  if (pctEl) pctEl.textContent = pct + '%'
 }
 
 function showDoneAnimation() {
@@ -1812,6 +1818,21 @@ function typeText(el, html, speed = 14, cb) {
 function finishOnboarding() {
   localStorage.setItem('csd_onboarding',JSON.stringify(onboardingData))
   startCheckup()
+}
+
+// ══ PROGRESSO ══
+function getCompletionPct() {
+  const saved = localStorage.getItem('csd_sessoes')
+  if (!saved) return 0
+  const sessoes = JSON.parse(saved)
+  const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
+  let total = 0, done = 0
+  sessoes.forEach((sess, i) => {
+    const sChecks = checks[`sess_${i}`] || {}
+    total += sess.length
+    sess.forEach(id => { if (sChecks[id]) done++ })
+  })
+  return total > 0 ? Math.round((done / total) * 100) : 0
 }
 
 // ══ REAVALIAÇÃO ══
