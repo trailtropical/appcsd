@@ -167,7 +167,7 @@ overall = média das 5 categorias
 - Score Ring animado (impacto visual)
 - Body Map SVG (representação visual intuitiva)
 - "Por quê" em cada exercício (aumenta adesão)
-- Contador de reavaliação 21 dias (gamificação)
+- Contador de reavaliação 30 dias (gamificação)
 - Mensagem "Já tenho uma hipótese" antes do check-up (expectativa)
 
 ### Animações
@@ -199,7 +199,7 @@ overall = média das 5 categorias
 - Mix geral + específico (sem duplicatas)
 - Bônus (3 itens + detalhe)
 - Reavaliação (comparativo antes/depois)
-- Countdown 21 dias no dashboard
+- Countdown 30 dias no dashboard
 - Persistência completa via localStorage
 - Body Map SVG com 4 regiões
 - Vídeos dos testes (ConverteAI embed)

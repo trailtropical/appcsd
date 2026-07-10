@@ -946,8 +946,8 @@ function renderDashboard() {
   if (criticalSignal) { const cc = CONSEQUENCES[criticalSignal]; if (cc) whyText = cc.effect }
 
   const lastCheckup = localStorage.getItem('csd_lastCheckup')
-  let reavDays = 21
-  if (lastCheckup) reavDays = Math.max(0, 21 - Math.floor((Date.now() - parseInt(lastCheckup)) / 86400000))
+  let reavDays = 30
+  if (lastCheckup) reavDays = Math.max(0, 30 - Math.floor((Date.now() - parseInt(lastCheckup)) / 86400000))
   const reavReady = reavDays <= 0
   const lastEval = lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'
 
@@ -1005,16 +1005,16 @@ function renderDashboard() {
           <div class="db-plan-btn"><button class="btn-primary" style="width:100%" onclick="showPlan()">▶ Continuar Treinos</button></div>
         </div>
       </div>
-      <div class="db-plan-month">
+      <div class="db-plan-month${currentPlanMonth < 1 ? '' : ' unlocked'}">
         <div class="db-plan-header">
           <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 02</span><div><div class="db-plan-month-title">${PLAN_MONTHS[1].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[1].goal}</div></div></div>
-          <span class="db-plan-lock">🔒</span>
+          ${currentPlanMonth < 1 ? '<span class="db-plan-lock">🔒</span>' : '<span class="db-plan-lock" style="color:var(--green)">✓</span>'}
         </div>
       </div>
-      <div class="db-plan-month">
+      <div class="db-plan-month${currentPlanMonth < 2 ? '' : ' unlocked'}">
         <div class="db-plan-header">
           <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 03</span><div><div class="db-plan-month-title">${PLAN_MONTHS[2].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[2].goal}</div></div></div>
-          <span class="db-plan-lock">🔒</span>
+          ${currentPlanMonth < 2 ? '<span class="db-plan-lock">🔒</span>' : '<span class="db-plan-lock" style="color:var(--green)">✓</span>'}
         </div>
       </div>
     </div>
@@ -1362,6 +1362,11 @@ function showReport() {
   localStorage.setItem('csd_lastCheckup',Date.now().toString())
   localStorage.setItem('csd_answers',JSON.stringify(answers))
   localStorage.setItem('csd_nivel',nivel)
+  // Advance plan month after reavaliação
+  if (localStorage.getItem('csd_reav_confirm')) {
+    currentPlanMonth = Math.min(2, currentPlanMonth + 1)
+    localStorage.setItem('csd_planMonth', currentPlanMonth.toString())
+  }
   localStorage.removeItem('csd_reav_confirm')
 
   // Show reavaliação comparison if applicable
@@ -1437,11 +1442,11 @@ const PLAN_MONTHS = [
    goal:'Consolidar novo padrão'}
 ]
 
-let currentPlanMonth = 0
+let currentPlanMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
 let currentPlanWeek = 0
 
 function showPlan() {
-  currentPlanMonth = 0; currentPlanWeek = 0
+  currentPlanWeek = 0
   renderPlanMonths()
   renderPlanView()
   showScreen('s-protocol')
@@ -1449,15 +1454,16 @@ function showPlan() {
 
 function renderPlanMonths() {
   const c = document.getElementById('plan-months')
-  c.innerHTML = PLAN_MONTHS.map((m,i) =>
-    `<div class="plan-month-btn${m.locked?' locked':''}${i===currentPlanMonth?' active':''}" onclick="switchPlanMonth(${i})">${m.label}</div>`
-  ).join('')
+  c.innerHTML = PLAN_MONTHS.map((m,i) => {
+    const locked = i > currentPlanMonth
+    return `<div class="plan-month-btn${locked?' locked':''}${i===currentPlanMonth?' active':''}" onclick="switchPlanMonth(${i})">${m.label}</div>`
+  }).join('')
 }
 
 function switchPlanMonth(idx) {
-  const m = PLAN_MONTHS[idx]
-  if (m.locked) return
+  if (idx > currentPlanMonth) return
   currentPlanMonth = idx; currentPlanWeek = 0
+  const m = PLAN_MONTHS[currentPlanMonth]
   document.getElementById('plan-badge').textContent = m.label.toLowerCase()
   document.querySelectorAll('.plan-month-btn').forEach((b,i) => b.classList.toggle('active',i===idx))
   renderPlanView()
@@ -1466,15 +1472,6 @@ function switchPlanMonth(idx) {
 function renderPlanView() {
   const m = PLAN_MONTHS[currentPlanMonth]
   const view = document.getElementById('plan-view')
-  if (m.locked) {
-    view.innerHTML = `<div class="plan-locked fade-in">
-      <div class="plan-locked-bg">${m.label}</div>
-      <div class="plan-locked-icon">🔒</div>
-      <div class="plan-locked-title">${m.title}</div>
-      <div class="plan-locked-sub">${m.desc}</div>
-    </div>`
-    return
-  }
   // Build protocol data for week 1 (same protocol repeated for all 4 weeks)
   const sigs = Object.keys(signalCounts)
   const sessKeys = ['a','b','c']
@@ -1822,7 +1819,7 @@ function checkReavaliacao() {
   const last = localStorage.getItem('csd_lastCheckup')
   if (!last) return false
   const days = Math.floor((Date.now() - parseInt(last)) / 86400000)
-  return days >= 21
+  return days >= 30
 }
 
 function showReavaliacao() {
