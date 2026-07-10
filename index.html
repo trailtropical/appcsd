@@ -199,7 +199,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .score-ring{width:96px;height:96px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
 .score-ring svg{transform:rotate(-90deg);width:96px;height:96px}
 .score-ring-bg{fill:none;stroke:var(--border2);stroke-width:5}
-.score-ring-fill{fill:none;stroke:var(--orange);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.score-ring-fill{fill:none;stroke:var(--orange);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1.6s ease}
 .score-value{position:absolute;font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--text);line-height:1}
 .score-over{font-size:11px;color:var(--hint);position:absolute;bottom:26px;right:-10px}
 .score-label{font-size:11px;color:var(--muted);margin-bottom:14px}
@@ -209,7 +209,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .subscore-name{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .subscore-val{font-size:12px;font-weight:700;color:var(--text)}
 .subscore-track{height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
-.subscore-fill{height:3px;border-radius:2px;transition:width .6s ease}
+.subscore-fill{height:3px;border-radius:2px;transition:width 1.2s ease}
 
 /* Priority cards */
 .priority-section .section-label{margin-bottom:8px}
@@ -251,7 +251,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .db-progress-title{font-size:13px;font-weight:700;color:var(--text)}
 .db-progress-pct{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--orange)}
 .db-progress-track{height:8px;background:var(--border2);border-radius:4px;overflow:hidden;margin-bottom:8px}
-.db-progress-fill{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--orange),#FF8C42);transition:width .8s ease}
+.db-progress-fill{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--orange),#FF8C42);transition:width 1.6s ease}
 .db-progress-sub{font-size:11px;color:var(--muted);text-align:center}
 .db-meta{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .db-meta-side{display:flex;flex-direction:column;align-items:center}
@@ -1117,7 +1117,7 @@ function animateDashboard() {
   document.querySelectorAll('#db-content [data-count]').forEach(el => {
     const target = parseInt(el.dataset.count)
     const isPct = el.classList.contains('db-progress-pct')
-    animateCount(el, 0, target, 800, isPct ? '%' : '')
+    animateCount(el, 0, target, 1600, isPct ? '%' : '')
   })
 }
 
