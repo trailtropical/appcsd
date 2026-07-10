@@ -1712,6 +1712,11 @@ function showSessionFromPlan(sessIdx) {
   const wrap = document.getElementById('sessao-exercises')
   wrap.innerHTML = html
 
+  const sessionExerciseIds = Array.from(wrap.querySelectorAll('.ex-card')).map(c => c.dataset.exid)
+  const allSessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
+  allSessionExercises[`sess_${sessIdx}`] = sessionExerciseIds
+  localStorage.setItem('csd_sessionExercises', JSON.stringify(allSessionExercises))
+
   const checks = getSessionChecks()[`sess_${sessIdx}`] || {}
   wrap.querySelectorAll('.ex-card').forEach(card => {
     const id = card.dataset.exid
@@ -1893,16 +1898,14 @@ function finishOnboarding() {
 
 // ══ PROGRESSO ══
 function getCompletionPct() {
-  const saved = localStorage.getItem('csd_sessoes')
-  if (!saved) return 0
-  const sessoes = JSON.parse(saved)
   const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
+  const allEx = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
   let completedSessions = 0
   for (let i = 0; i < 3; i++) {
-    const sess = sessoes[i]
-    if (!sess || sess.length === 0) continue
     const sChecks = checks[`sess_${i}`] || {}
-    const allDone = sess.every(id => sChecks[id])
+    const exIds = allEx[`sess_${i}`]
+    if (!exIds || exIds.length === 0) continue
+    const allDone = exIds.every(id => sChecks[id])
     if (allDone) completedSessions++
   }
   return Math.round((completedSessions / 3) * 100)
