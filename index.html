@@ -938,17 +938,17 @@ function renderDashboard() {
   const lastEval = lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'
 
   content.innerHTML = `
-    <div class="db-progress fade-in">
+    <div class="db-next fade-in" onclick="goToSession(${next.idx})">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Seu próximo treino</div>
+      <div class="db-next-title">Treino ${['A','B','C'][next.idx]}</div>
+      <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
+      <button class="btn-primary" style="width:100%">▶ Começar</button>
+    </div>
+
+    <div class="db-progress fade-in fade-in-d1">
       <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct">${progressPct}%</span></div>
       <div class="db-progress-track"><div class="db-progress-fill" style="width:${progressPct}%"></div></div>
       <div class="db-progress-sub">Mês ${currentPlanMonth+1}</div>
-    </div>
-
-    <div class="db-next fade-in fade-in-d1" onclick="goToSession(${next.idx})">
-      <div class="db-next-top"><span class="db-next-badge">${next.label}</span><span class="db-next-day">${next.day}</span></div>
-      <div class="db-next-title">Sessão ${['A','B','C'][next.idx]}</div>
-      <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
-      <button class="btn-primary" style="width:100%">▶ Começar</button>
     </div>
 
     <div class="score-ring-wrap fade-in fade-in-d2">
