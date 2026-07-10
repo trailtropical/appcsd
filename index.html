@@ -971,7 +971,7 @@ function renderDashboard() {
     <div class="db-progress sr" data-delay="0">
       <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct" data-count="${progressPct}">0%</span></div>
       <div class="db-progress-track"><div class="db-progress-fill" style="width:0" data-target="${progressPct}"></div></div>
-      <div class="db-progress-sub">Mês ${currentPlanMonth+1} — Semana atual</div>
+      <div class="db-progress-sub">Semana ${getCurrentWeek()}</div>
     </div>
 
     <div class="score-ring-wrap sr" data-delay="100">
@@ -1430,6 +1430,7 @@ function showReport() {
 
   localStorage.setItem('csd_checkup','1')
   localStorage.setItem('csd_lastCheckup',Date.now().toString())
+  if (!localStorage.getItem('csd_firstCheckup')) localStorage.setItem('csd_firstCheckup', Date.now().toString())
   localStorage.setItem('csd_answers',JSON.stringify(answers))
   localStorage.setItem('csd_nivel',nivel)
   // Advance plan month after reavaliação
@@ -1896,15 +1897,22 @@ function getCompletionPct() {
   if (!saved) return 0
   const sessoes = JSON.parse(saved)
   const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
-  let total = 0, done = 0
+  let completedSessions = 0
   for (let i = 0; i < 3; i++) {
     const sess = sessoes[i]
-    if (!sess) continue
+    if (!sess || sess.length === 0) continue
     const sChecks = checks[`sess_${i}`] || {}
-    total += sess.length
-    sess.forEach(id => { if (sChecks[id]) done++ })
+    const allDone = sess.every(id => sChecks[id])
+    if (allDone) completedSessions++
   }
-  return total > 0 ? Math.round((done / total) * 100) : 0
+  return Math.round((completedSessions / 3) * 100)
+}
+
+function getCurrentWeek() {
+  const first = localStorage.getItem('csd_firstCheckup')
+  if (!first) return 1
+  const days = Math.floor((Date.now() - parseInt(first)) / 86400000)
+  return Math.min(4, Math.floor(days / 7) + 1)
 }
 
 // ══ REAVALIAÇÃO ══
