@@ -638,15 +638,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 window._sbClient = null
 const SUPABASE_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPhO6e5yWL_nkPWgfI_4zBfeziic'
-function initSupabase() {
+try {
   if (window.supabase && window.supabase.createClient) {
     window._sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
     console.log('[CSD] Supabase OK')
   } else {
     console.error('[CSD] Supabase SDK não carregou')
   }
+} catch(e) {
+  console.error('[CSD] Erro ao init Supabase:', e)
 }
-initSupabase()
 
 // ══ TESTES ══
 const TESTS = [
