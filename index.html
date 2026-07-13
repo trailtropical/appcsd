@@ -1559,13 +1559,14 @@ function renderPlanView() {
   const sessKeys = ['a','b','c']
   const sessoes = sessKeys.map(k => {
     const ids = []
+    const seen = new Set()
     sigs.forEach(sig => {
       const info = SIGNAL_MAP[sig]; if (!info) return
-      ;(info[k]||[]).forEach(id => { if (!ids.includes(id)) ids.push(id) })
+      ;(info[k]||[]).forEach(id => { if (!seen.has(id)) { seen.add(id); ids.push(id) } })
     })
     if (criticalSignal) {
       const critInfo = SIGNAL_MAP[criticalSignal]
-      if (critInfo && critInfo[k]) critInfo[k].forEach(id => { if (!ids.includes(id)) ids.push(id) })
+      if (critInfo && critInfo[k]) critInfo[k].forEach(id => { if (!seen.has(id)) { seen.add(id); ids.push(id) } })
     }
     if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
     return ids
@@ -1708,6 +1709,7 @@ function showSessionFromPlan(sessIdx) {
   }
 
   // 5. Render as flat list
+  const seen = new Set()
   let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
   html += ['Treino A','Treino B','Treino C'].map((d,i) =>
     `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
@@ -1715,6 +1717,8 @@ function showSessionFromPlan(sessIdx) {
   html += `</div>`
   let n = 1
   finalIds.forEach(id => {
+    if (seen.has(id)) return
+    seen.add(id)
     const isCrit = criticalSignal && (SIGNAL_MAP[criticalSignal]?.[sessionKey]||[]).includes(id)
     const isEsp = specificSet.has(id)
     const rendered = renderExCard(id, n, isEsp, isCrit)
