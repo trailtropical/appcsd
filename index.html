@@ -425,11 +425,27 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="logo-mark">CSD</div>
     </div>
     <div class="login-title">Corredor Sem Dor</div>
-    <div class="login-sub">Use o email e senha que você recebeu após a compra.</div>
+    <div class="login-sub">Use o email e senha que você criou após a compra.</div>
     <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
     <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="sua-senha"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar</button>
     <div class="login-footer">Problemas para acessar?<br>Responda o email que recebeu após a compra.</div>
+  </div>
+</div>
+
+<!-- CADASTRO PÓS-COMPRA -->
+<div id="s-signup" class="screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark">CSD</div>
+    </div>
+    <div class="login-title">Crie sua senha</div>
+    <div class="login-sub">Sua compra foi confirmada! Agora defina uma senha para acessar o programa.</div>
+    <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="seu@email.com" readonly style="opacity:0.7"></div>
+    <div class="field"><label>Senha</label><input type="password" id="signup-senha" placeholder="Mínimo 6 caracteres"></div>
+    <div class="field"><label>Confirmar senha</label><input type="password" id="signup-senha2" placeholder="Repita a senha"></div>
+    <button class="btn-primary" onclick="doSignupConfirm()">Criar conta e começar</button>
+    <div class="login-footer">Já tem conta? <a href="#" onclick="showScreen('s-login');return false" style="color:var(--orange);text-decoration:none">Entrar</a></div>
   </div>
 </div>
 
@@ -2177,6 +2193,64 @@ function showReavResult() {
     ${diff}`
   showReport()
 }
+
+// ══ CADASTRO PÓS-COMPRA (Hotmart) ══
+function checkHotmartRedirect() {
+  const params = new URLSearchParams(window.location.search)
+  const email = params.get('email')
+  if (email) {
+    document.getElementById('signup-email').value = email
+    showScreen('s-signup')
+    // Limpar URL
+    window.history.replaceState({}, '', window.location.pathname)
+  }
+}
+
+async function doSignupConfirm() {
+  const email = document.getElementById('signup-email').value.trim()
+  const senha = document.getElementById('signup-senha').value
+  const senha2 = document.getElementById('signup-senha2').value
+
+  if (!email || !senha) { alert('Preencha email e senha.'); return }
+  if (senha.length < 6) { alert('A senha deve ter no mínimo 6 caracteres.'); return }
+  if (senha !== senha2) { alert('As senhas não coincidem.'); return }
+
+  const btn = document.querySelector('#s-signup .btn-primary')
+  btn.textContent = 'Criando conta...'
+  btn.disabled = true
+
+  const { data, error } = await window._sbClient.auth.signUp({ email: email, password: senha })
+
+  btn.textContent = 'Criar conta e começar'
+  btn.disabled = false
+
+  if (error) {
+    if (error.message?.includes('already')) {
+      alert('Este email já tem conta. Faça login.')
+      showScreen('s-login')
+      document.getElementById('login-email').value = email
+    } else {
+      alert('Erro: ' + error.message)
+    }
+    return
+  }
+
+  // Criar profile
+  if (data.user) {
+    await window._sbClient.from('profiles').upsert({ id: data.user.id, email: email })
+  }
+
+  // Login automático
+  currentUser = data.user
+  localStorage.setItem('csd_logged', '1')
+  localStorage.setItem('csd_user_id', currentUser.id)
+
+  // Primeiro acesso → welcome
+  showScreen('s-welcome')
+}
+
+// Detectar redirect da Hotmart ao carregar
+checkHotmartRedirect()
 </script>
 </body>
 </html>
