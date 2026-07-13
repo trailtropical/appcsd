@@ -1297,6 +1297,7 @@ async function loadUserData() {
     localStorage.setItem('csd_lastCheckup', new Date(c.created_at).getTime().toString())
     if (c.scores) localStorage.setItem('csd_lastScores', JSON.stringify(c.scores))
     if (c.onboarding) localStorage.setItem('csd_onboarding', JSON.stringify(c.onboarding))
+    if (c.first_checkup_at) localStorage.setItem('csd_firstCheckup', new Date(c.first_checkup_at).getTime().toString())
   }
 
   // Carregar sessões
@@ -1311,6 +1312,7 @@ async function loadUserData() {
     localStorage.setItem('csd_sessoes', JSON.stringify(s.exercicios))
     localStorage.setItem('csd_sessionChecks', JSON.stringify(s.checks || {}))
     localStorage.setItem('csd_planMonth', s.plan_month.toString())
+    if (s.session_exercises) localStorage.setItem('csd_sessionExercises', JSON.stringify(s.session_exercises))
   }
 }
 
@@ -1354,12 +1356,14 @@ async function saveCheckupToSupabase(overall) {
   if (!window._sbClient || !currentUser) { console.log('[CSD] Skip save checkup:', {sb: !!window._sbClient, user: !!currentUser}); return }
   const onboarding = JSON.parse(localStorage.getItem('csd_onboarding') || '{}')
   const scores = calculateIndex()
+  const firstCheckup = localStorage.getItem('csd_firstCheckup') || Date.now().toString()
   const payload = {
     user_id: currentUser.id,
     answers: answers,
     nivel: nivel,
     scores: { overall: overall, scores: scores.scores },
-    onboarding: onboarding
+    onboarding: onboarding,
+    first_checkup_at: new Date(parseInt(firstCheckup)).toISOString()
   }
   console.log('[CSD] Salvando checkup:', payload)
   const { data, error } = await window._sbClient.from('checkups').insert(payload)
@@ -1371,18 +1375,20 @@ async function saveSessionsToSupabase() {
   if (!window._sbClient || !currentUser) return
   const sessoes = JSON.parse(localStorage.getItem('csd_sessoes') || '{}')
   const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
+  const sessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
   const planMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
   // Upsert: uma sessão por user_id
   const { data: existing } = await window._sbClient.from('sessions')
     .select('id').eq('user_id', currentUser.id).limit(1)
   if (existing && existing.length > 0) {
     await window._sbClient.from('sessions').update({
-      exercicios: sessoes, checks: checks, plan_month: planMonth
+      exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises
     }).eq('id', existing[0].id)
   } else {
     await window._sbClient.from('sessions').insert({
-      user_id: currentUser.id, exercicios: sessoes, checks: checks, plan_month: planMonth
+      user_id: currentUser.id, exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises
     })
+  }
   }
   console.log('[CSD] Sessões salvas no Supabase')
 }
