@@ -1257,6 +1257,8 @@ async function doLogin() {
   }
 
   currentUser = data.user
+  // Limpar dados antigos do localStorage (migração localStorage → Supabase)
+  localStorage.clear()
   localStorage.setItem('csd_logged', '1')
   localStorage.setItem('csd_user_id', currentUser.id)
   console.log('[CSD] Login OK, user:', currentUser.id)
@@ -1264,8 +1266,13 @@ async function doLogin() {
   // Carregar dados do Supabase
   await loadUserData()
 
-  renderDashboard()
-  showScreen('s-dashboard')
+  // Se não tem checkup, é primeiro acesso → onboarding
+  if (!localStorage.getItem('csd_checkup')) {
+    startOnboarding()
+  } else {
+    renderDashboard()
+    showScreen('s-dashboard')
+  }
 }
 
 async function loadUserData() {
