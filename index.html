@@ -1257,8 +1257,12 @@ async function doLogin() {
   }
 
   currentUser = data.user
-  // Limpar dados antigos do localStorage (migração localStorage → Supabase)
+  // Limpar dados antigos do CSD (manter sessão Supabase)
+  const sbKeys = Object.keys(localStorage).filter(k => k.startsWith('sb-') || k.startsWith('supabase'))
+  const sbData = {}
+  sbKeys.forEach(k => sbData[k] = localStorage.getItem(k))
   localStorage.clear()
+  Object.entries(sbData).forEach(([k,v]) => localStorage.setItem(k, v))
   localStorage.setItem('csd_logged', '1')
   localStorage.setItem('csd_user_id', currentUser.id)
   console.log('[CSD] Login OK, user:', currentUser.id)
@@ -1347,17 +1351,20 @@ async function doSignup() {
 
 // ══ SALVAR DADOS NO SUPABASE ══
 async function saveCheckupToSupabase(overall) {
-  if (!window._sbClient || !currentUser) return
+  if (!window._sbClient || !currentUser) { console.log('[CSD] Skip save checkup:', {sb: !!window._sbClient, user: !!currentUser}); return }
   const onboarding = JSON.parse(localStorage.getItem('csd_onboarding') || '{}')
-  const { error } = await window._sbClient.from('checkups').insert({
+  const scores = calculateIndex()
+  const payload = {
     user_id: currentUser.id,
     answers: answers,
     nivel: nivel,
-    scores: { overall: overall, scores: calculateIndex().scores },
+    scores: { overall: overall, scores: scores.scores },
     onboarding: onboarding
-  })
-  if (error) console.error('[CSD] Erro save checkup:', error.message)
-  else console.log('[CSD] Checkup salvo no Supabase')
+  }
+  console.log('[CSD] Salvando checkup:', payload)
+  const { data, error } = await window._sbClient.from('checkups').insert(payload)
+  if (error) console.error('[CSD] Erro save checkup:', error.message, error)
+  else console.log('[CSD] Checkup salvo OK:', data)
 }
 
 async function saveSessionsToSupabase() {
