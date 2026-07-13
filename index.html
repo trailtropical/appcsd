@@ -1773,7 +1773,12 @@ function showExerciseDetail(id) {
   document.getElementById('ex-detail-body').innerHTML = detailHtml
   document.getElementById('ex-detail').classList.add('open')
 }
-function closeExDetail() { document.getElementById('ex-detail').classList.remove('open') }
+function closeExDetail() {
+  document.getElementById('ex-detail').classList.remove('open')
+  const videoWrap = document.querySelector('.ex-detail-video')
+  videoWrap.innerHTML = '<div class="play-btn">▶</div><div class="video-label" id="ex-video-label">Vídeo em breve</div>'
+  videoWrap.classList.remove('has-video')
+}
 
 // ══ ONBOARDING ══
 function startOnboarding() {
