@@ -619,9 +619,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 </div>
 <script>
 // ══ SUPABASE ══
+var _sb = null
 const SUPABASE_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPhO6e5yWL_nkPWgfI_4zBfeziic'
-const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+function initSupabase() {
+  if (window.supabase && window.supabase.createClient) {
+    _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+    console.log('[CSD] Supabase OK')
+  } else {
+    console.error('[CSD] Supabase SDK não carregou')
+  }
+}
+initSupabase()
 
 // ══ TESTES ══
 const TESTS = [
@@ -1233,6 +1242,7 @@ async function doLogin() {
   btn.textContent = 'Entrando...'
   btn.disabled = true
 
+  if (!_sb) { alert('Sistema indisponível. Recarregue a página.'); return }
   console.log('[CSD] Tentando login:', e)
   const { data, error } = await _sb.auth.signInWithPassword({ email: e, password: s })
   console.log('[CSD] Resultado:', { data, error })
