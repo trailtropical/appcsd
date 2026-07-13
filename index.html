@@ -387,7 +387,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 /* EXERCÍCIO DETALHE */
 .ex-detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;overflow-y:auto}
 .ex-detail-overlay.open{display:flex}
-.ex-detail-video{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:16px 20px 0;cursor:pointer}
+.ex-detail-video{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:16px 20px 0;cursor:pointer;overflow:hidden}
+.ex-detail-video.has-video{height:auto;aspect-ratio:16/9}
+.ex-detail-video.has-video iframe{width:100%;height:100%;border:none}
 .ex-detail-body{padding:16px 20px 40px}
 .ex-detail-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2;margin-bottom:4px}
 .ex-detail-detail{font-size:14px;color:var(--orange);font-weight:600;margin-bottom:12px}
@@ -743,47 +745,56 @@ const CONSEQUENCES = {
 }
 
 // ══ EXERCÍCIOS ══
+const VTURB_BASE = 'https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/'
+function vturbEmbed(vid) {
+  return `<script type="text/javascript">var s=document.createElement("script");s.src="https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js",s.async=!0,document.head.appendChild(s);</script><div id="ifr_${vid}_wrapper" style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0" id="ifr_${vid}_aspect"><iframe frameborder="0" allowfullscreen src="about:blank" id="ifr_${vid}" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="origin" onload="this.onload=null,this.src='${VTURB_BASE}${vid}/v4/embed.html'+(location.search||'?')+'&vl='+encodeURIComponent(location.href)"></iframe></div></div>`
+}
 const EX = {
   // BLOCO GERAL
-  g_volta_mundo:{name:'Volta ao mundo',di:'2 séries · 30s cada lado · 4 apoios',dm:'2 séries · 30s cada lado · em pé',da:'2 séries · 30s cada lado · em pé',tag:'mobilidade',tc:'qmob',why:'Abre o quadril em todas as direções antes de sair para correr.'},
-  g_cocoras:{name:'Cócoras',di:'2 séries · 30 segundos',dm:'2 séries · 45 segundos',da:'2 séries · 60 segundos',tag:'mobilidade',tc:'qmob',why:'Mobiliza tornozelo e quadril simultaneamente.'},
-  g_prancha:{name:'Prancha Frontal',di:'3 séries · 20s',dm:'3 séries · 30s',da:'3 séries · 45s',tag:'core',tc:'flex',why:'Ativa o core — base de estabilidade para a corrida.'},
-  g_panturrilha:{name:'Elevação de Panturrilha Unilateral',di:'3 séries · 8 reps · mãos na parede',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'força',tc:'pant',why:'Prepara a panturrilha e o tornozelo para o impacto da corrida.'},
-  g_equilibrio:{name:'Equilíbrio Unilateral',di:'2 séries · 30s · olhos abertos',dm:'2 séries · 30s · olhos fechados',da:'2 séries · 45s · olhos fechados',tag:'propriocepção',tc:'prop',why:'Treina a comunicação entre sistema nervoso e músculos estabilizadores.'},
-  g_stepdown:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'controle',tc:'qfor',why:'Controle excêntrico — protege o joelho a cada passada.'},
-  g_terra:{name:'Levantamento Terra 1 perna',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'cadeia post.',tc:'glut',why:'Fortalece isquiotibiais, glúteo e lombar — a base que sustenta a corrida no cansaço.'},
+  g_volta_mundo:{name:'Volta ao mundo',di:'2 séries · 30s cada lado · 4 apoios',dm:'2 séries · 30s cada lado · em pé',da:'2 séries · 30s cada lado · em pé',tag:'mobilidade',tc:'qmob',why:'Abre o quadril em todas as direções antes de sair para correr.',vid:'6a54dec82c2f06556e0e0ef7'},
+  g_cocoras:{name:'Cócoras',di:'2 séries · 30 segundos',dm:'2 séries · 45 segundos',da:'2 séries · 60 segundos',tag:'mobilidade',tc:'qmob',why:'Mobiliza tornozelo e quadril simultaneamente.',vid:'6a54e6240a9f72b511fbefb4'},
+  g_prancha:{name:'Prancha Frontal',di:'3 séries · 20s',dm:'3 séries · 30s',da:'3 séries · 45s',tag:'core',tc:'flex',why:'Ativa o core — base de estabilidade para a corrida.',vid:'6a54de5f0a7249098836dd59'},
+  g_panturrilha:{name:'Elevação de Panturrilha Unilateral',di:'3 séries · 8 reps · mãos na parede',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'força',tc:'pant',why:'Prepara a panturrilha e o tornozelo para o impacto da corrida.',vid:'6a54deb92c2f06556e0e0e9c'},
+  g_equilibrio:{name:'Equilíbrio Unilateral',di:'2 séries · 30s · olhos abertos',dm:'2 séries · 30s · olhos fechados',da:'2 séries · 45s · olhos fechados',tag:'propriocepção',tc:'prop',why:'Treina a comunicação entre sistema nervoso e músculos estabilizadores.',vid:'6a54e61e6bda3ac633cd7f78'},
+  g_stepdown:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'controle',tc:'qfor',why:'Controle excêntrico — protege o joelho a cada passada.',vid:'6a54e6133c9d9bf04f45ed85'},
+  g_terra:{name:'Levantamento Terra 1 perna',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'cadeia post.',tc:'glut',why:'Fortalece isquiotibiais, glúteo e lombar — a base que sustenta a corrida no cansaço.',vid:'6a54deb40a7249098836deca'},
 
   // TORNOZELO
-  e_cocoras:{name:'Cócoras',di:'3 séries · 45s',dm:'3 séries · 60s',da:'3 séries · 60s com carga leve',tag:'tornozelo',tc:'torn',why:'Mobiliza o tornozelo progressivamente em posição de carga total.'},
-  e_meio_ajoel:{name:'Meio Ajoelhado',di:'3 séries · 12 reps cada lado',dm:'3 séries · 15 reps',da:'3 séries · 15 reps com elástico',tag:'tornozelo',tc:'torn',why:'Aumenta a dorsiflexão — movimento essencial a cada passada na corrida.'},
-  e_pe_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'tornozelo',tc:'torn',why:'Ativa os estabilizadores do tornozelo sem compensação visual.'},
+  e_cocoras:{name:'Cócoras',di:'3 séries · 45s',dm:'3 séries · 60s',da:'3 séries · 60s com carga leve',tag:'tornozelo',tc:'torn',why:'Mobiliza o tornozelo progressivamente em posição de carga total.',vid:'6a54e6240a9f72b511fbefb4'},
+  e_meio_ajoel:{name:'Meio Ajoelhado',di:'3 séries · 12 reps cada lado',dm:'3 séries · 15 reps',da:'3 séries · 15 reps com elástico',tag:'tornozelo',tc:'torn',why:'Aumenta a dorsiflexão — movimento essencial a cada passada na corrida.',vid:'6a54e6181e490ba6e5ff98c0'},
+  e_pe_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'tornozelo',tc:'torn',why:'Ativa os estabilizadores do tornozelo sem compensação visual.',vid:'6a54e61e6bda3ac633cd7f78'},
   e_agach_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 12 reps unilateral',tag:'tornozelo',tc:'torn',why:'Combina mobilidade de tornozelo com força de panturrilha.'},
-  e_saltos_quad:{name:'Saltos no quadrado',di:null,dm:null,da:'3 séries · 20 saltos',tag:'tornozelo',tc:'torn',why:'Treina a absorção de impacto rápido — exatamente o que acontece na corrida.',adv_only:true},
+  e_saltos_quad:{name:'Saltos no quadrado',di:null,dm:null,da:'3 séries · 20 saltos',tag:'tornozelo',tc:'torn',why:'Treina a absorção de impacto rápido — exatamente o que acontece na corrida.',adv_only:true,vid:'6a54e62a3c9d9bf04f45edbf'},
 
   // QUADRIL MOBILIDADE
-  e_volta_mundo:{name:'Volta ao mundo',di:'3 séries · 30s · 4 apoios',dm:'3 séries · 30s · em pé',da:'3 séries · 30s · em pé com carga',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.'},
-  e_noventa:{name:'90/90',di:'3 séries · 60s cada lado',dm:'3 séries · 60s + rotação ativa',da:'3 séries · 90s + pressão ativa',tag:'quadril mob.',tc:'qmob',why:'Trabalha rotação interna e externa do quadril simultaneamente.'},
-  e_iliopsoas:{name:'Alongamento do Iliopsoas',di:'3 séries · 45s cada lado',dm:'3 séries · 60s',da:'3 séries · 60s com elevação de braço',tag:'flexores',tc:'flex',why:'Alonga o flexor de quadril que encurta com horas sentado e limita a passada.'},
+  e_volta_mundo:{name:'Volta ao mundo',di:'3 séries · 30s · 4 apoios',dm:'3 séries · 30s · em pé',da:'3 séries · 30s · em pé com carga',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.',vid:'6a54dede0a9f72b511fbdb30'},
+  e_noventa:{name:'90/90',di:'3 séries · 60s cada lado',dm:'3 séries · 60s + rotação ativa',da:'3 séries · 90s + pressão ativa',tag:'quadril mob.',tc:'qmob',why:'Trabalha rotação interna e externa do quadril simultaneamente.',vid:'6a54dec2453615a5c5ae7b22'},
+  e_iliopsoas:{name:'Alongamento do Iliopsoas',di:'3 séries · 45s cada lado',dm:'3 séries · 60s',da:'3 séries · 60s com elevação de braço',tag:'flexores',tc:'flex',why:'Alonga o flexor de quadril que encurta com horas sentado e limita a passada.',vid:'6a54e6ce1e490ba6e5ff99d5'},
 
   // GLÚTEO
-  e_elev_pelv:{name:'Elevação Pélvica',di:'3 séries · 12 reps',dm:'3 séries · 15 reps',da:'3 séries · 12 reps unilateral',tag:'glúteo',tc:'glut',why:'Ativa glúteo máximo e isquiotibiais — essenciais para a propulsão na corrida.'},
-  e_coice:{name:'Coice 4 Apoios',di:'3 séries · 12 reps cada lado',dm:'3 séries · 15 reps com elástico',da:'3 séries · 15 reps elástico + pausa no topo',tag:'glúteo',tc:'glut',why:'Isola a ativação do glúteo máximo — corrige a inativação muscular.'},
-  e_bulg:{name:'Afundo Búlgaro',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 10 reps com carga',tag:'glúteo',tc:'glut',why:'Fortalece glúteo e quadríceps em padrão unilateral — como a corrida exige.'},
+  e_elev_pelv:{name:'Elevação Pélvica',di:'3 séries · 12 reps',dm:'3 séries · 15 reps',da:'3 séries · 12 reps unilateral',tag:'glúteo',tc:'glut',why:'Ativa glúteo máximo e isquiotibiais — essenciais para a propulsão na corrida.',vid:'6a54dea33d8ea0afcdcb062e'},
+  e_coice:{name:'Coice 4 Apoios',di:'3 séries · 12 reps cada lado',dm:'3 séries · 15 reps com elástico',da:'3 séries · 15 reps elástico + pausa no topo',tag:'glúteo',tc:'glut',why:'Isola a ativação do glúteo máximo — corrige a inativação muscular.',vid:'6a54de9d0a9f72b511fbd9fc'},
+  e_bulg:{name:'Afundo Búlgaro',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 10 reps com carga',tag:'glúteo',tc:'glut',why:'Fortalece glúteo e quadríceps em padrão unilateral — como a corrida exige.',vid:'6a54dea77e2e4092887dad2e'},
 
   // PROPRIOCEPÇÃO
-  e_prop_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'propriocepção',tc:'prop',why:'Treina o sistema proprioceptivo sem compensação visual.'},
+  e_prop_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'propriocepção',tc:'prop',why:'Treina o sistema proprioceptivo sem compensação visual.',vid:'6a54e61e6bda3ac633cd7f78'},
   e_prop_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 10 reps unilateral',tag:'propriocepção',tc:'prop',why:'Combina equilíbrio, propriocepção e força de tornozelo em um único movimento.'},
-  e_prop_step:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps',da:'3 séries · 10 reps com pausa',tag:'propriocepção',tc:'prop',why:'Propriocepção dinâmica — controle real em movimento de impacto.'},
+  e_prop_step:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps',da:'3 séries · 10 reps com pausa',tag:'propriocepção',tc:'prop',why:'Propriocepção dinâmica — controle real em movimento de impacto.',vid:'6a54e6133c9d9bf04f45ed85'},
 
   // PANTURRILHA
-  e_plant:{name:'Plantiflexão',di:'3 séries · 12 reps · mãos na parede',dm:'3 séries · 15 reps · sem apoio',da:'3 séries · 15 reps · superfície inclinada',tag:'panturrilha',tc:'pant',why:'Fortalece a panturrilha de forma progressiva e segura.'},
+  e_plant:{name:'Plantiflexão',di:'3 séries · 12 reps · mãos na parede',dm:'3 séries · 15 reps · sem apoio',da:'3 séries · 15 reps · superfície inclinada',tag:'panturrilha',tc:'pant',why:'Fortalece a panturrilha de forma progressiva e segura.',vid:'6a54debe8c9a9181a2105568'},
 
   // CONTROLE MOTOR QUADRIL
-  e_step_esp:{name:'Step-Down',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps com pausa no fundo',tag:'controle',tc:'qfor',why:'O exercício mais específico para controle motor do quadril e glúteo médio.'},
-  e_skatista:{name:'Agachamento Skatista',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps + pausa',tag:'controle',tc:'qfor',why:'Treina controle unilateral do joelho e quadril em padrão de impacto.'},
+  e_step_esp:{name:'Step-Down',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps com pausa no fundo',tag:'controle',tc:'qfor',why:'O exercício mais específico para controle motor do quadril e glúteo médio.',vid:'6a54e6133c9d9bf04f45ed85'},
+  e_skatista:{name:'Agachamento Skatista',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps + pausa',tag:'controle',tc:'qfor',why:'Treina controle unilateral do joelho e quadril em padrão de impacto.',vid:'6a54deac8c9a9181a210550b'},
 
   // FLEXORES
-  e_iliopsoas_esp:{name:'Alongamento do Iliopsoas',di:'3 séries · 45s cada lado',dm:'3 séries · 60s',da:'3 séries · 60s com elevação de braço',tag:'flexores',tc:'flex',why:'Alonga iliopsoas encurtado que impede a extensão completa do quadril na corrida.'}
+  e_iliopsoas_esp:{name:'Alongamento do Iliopsoas',di:'3 séries · 45s cada lado',dm:'3 séries · 60s',da:'3 séries · 60s com elevação de braço',tag:'flexores',tc:'flex',why:'Alonga iliopsoas encurtado que impede a extensão completa do quadril na corrida.',vid:'6a54e6ce1e490ba6e5ff99d5'},
+
+  // EXERCÍCIOS ADICIONAIS
+  e_agach_salto:{name:'Agachamento com Salto',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'quadríceps',tc:'qfor',why:'Ativa o quadríceps com explosividade — compensa fraqueza e inativação muscular.',vid:null},
+  e_prancha_lat:{name:'Prancha Lateral Dinâmica',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Fortalece core lateral — estabilidade do tronco essencial para corrida sustentada.',vid:null},
+  e_escalador:{name:'Escalador',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Combina core, flexores e coordenação — prepara o corpo para a dinâmica da corrida.',vid:null}
 }
 
 // ══ MAPA SINAL → SESSÕES ══
@@ -799,9 +810,9 @@ const SIGNAL_MAP = {
   panturrilha:{label:'Fraqueza de panturrilha',color:'var(--pant)',
     a:['e_plant'],b:['e_plant'],c:['e_plant']},
   quadril_forca:{label:'Déficit de controle motor de quadril',color:'var(--qfor)',
-    a:['e_step_esp'],b:['e_skatista','e_step_esp'],c:['e_skatista']},
+    a:['e_step_esp'],b:['e_skatista','e_step_esp','e_agach_salto'],c:['e_skatista','e_agach_salto']},
   flexores:{label:'Encurtamento de flexores de quadril',color:'var(--flex)',
-    a:['e_iliopsoas_esp'],b:['e_iliopsoas_esp'],c:['e_iliopsoas_esp']}
+    a:['e_iliopsoas_esp'],b:['e_iliopsoas_esp','e_prancha_lat','e_escalador'],c:['e_iliopsoas_esp','e_escalador']}
 }
 
 const SIGNAL_ORDER = ['tornozelo','quadril_mob','gluteo','propriocepcao','panturrilha','quadril_forca','flexores']
@@ -1743,6 +1754,15 @@ function showExerciseDetail(id) {
   const colorKey = ex.tc || 'torn'
   badge.style.background = `var(--${colorKey})`
   document.getElementById('ex-video-label').textContent = 'Vídeo: ' + ex.name
+
+  const videoWrap = document.querySelector('.ex-detail-video')
+  if (ex.vid) {
+    videoWrap.innerHTML = vturbEmbed(ex.vid)
+    videoWrap.classList.add('has-video')
+  } else {
+    videoWrap.innerHTML = '<div class="play-btn">▶</div><div class="video-label">Vídeo em breve</div>'
+    videoWrap.classList.remove('has-video')
+  }
 
   let detailHtml = `<div class="ex-detail-name">${ex.name}</div>`
   const detailText = getDetail(ex)
