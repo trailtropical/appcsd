@@ -2198,10 +2198,10 @@ function showReavResult() {
 function checkHotmartRedirect() {
   const params = new URLSearchParams(window.location.search)
   const email = params.get('email')
+  console.log('[CSD] checkHotmartRedirect, email:', email)
   if (email) {
     document.getElementById('signup-email').value = email
     showScreen('s-signup')
-    // Limpar URL
     window.history.replaceState({}, '', window.location.pathname)
   }
 }
