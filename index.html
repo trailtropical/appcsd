@@ -448,8 +448,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <!-- WELCOME -->
 <div id="s-welcome" class="screen">
   <div class="welcome-hero" style="padding:56px 24px 32px">
-    <div class="welcome-eyebrow" style="margin-bottom:14px">centro de performance</div>
-    <div class="welcome-title" style="font-size:26px">Bem-vindo ao<br><span>Centro de Performance</span></div>
+    <div class="welcome-eyebrow" style="margin-bottom:14px">corredor sem dor</div>
+    <div class="welcome-title" style="font-size:26px">Bem-vindo ao<br><span>Corredor Sem Dor</span></div>
     <div class="welcome-sub" style="margin-top:12px">Hoje vamos descobrir por que seu corpo está gerando dor durante a corrida.</div>
   </div>
   <div class="welcome-content" style="gap:20px">
@@ -1266,9 +1266,9 @@ async function doLogin() {
   // Carregar dados do Supabase
   await loadUserData()
 
-  // Se não tem checkup, é primeiro acesso → onboarding
+  // Se não tem checkup, é primeiro acesso → welcome
   if (!localStorage.getItem('csd_checkup')) {
-    startOnboarding()
+    showScreen('s-welcome')
   } else {
     renderDashboard()
     showScreen('s-dashboard')
