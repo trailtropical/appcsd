@@ -1345,6 +1345,41 @@ async function doSignup() {
   alert('Conta criada! Verifique seu email para confirmar o cadastro.')
 }
 
+// ══ SALVAR DADOS NO SUPABASE ══
+async function saveCheckupToSupabase(overall) {
+  if (!window._sbClient || !currentUser) return
+  const onboarding = JSON.parse(localStorage.getItem('csd_onboarding') || '{}')
+  const { error } = await window._sbClient.from('checkups').insert({
+    user_id: currentUser.id,
+    answers: answers,
+    nivel: nivel,
+    scores: { overall: overall, scores: calculateIndex().scores },
+    onboarding: onboarding
+  })
+  if (error) console.error('[CSD] Erro save checkup:', error.message)
+  else console.log('[CSD] Checkup salvo no Supabase')
+}
+
+async function saveSessionsToSupabase() {
+  if (!window._sbClient || !currentUser) return
+  const sessoes = JSON.parse(localStorage.getItem('csd_sessoes') || '{}')
+  const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
+  const planMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
+  // Upsert: uma sessão por user_id
+  const { data: existing } = await window._sbClient.from('sessions')
+    .select('id').eq('user_id', currentUser.id).limit(1)
+  if (existing && existing.length > 0) {
+    await window._sbClient.from('sessions').update({
+      exercicios: sessoes, checks: checks, plan_month: planMonth
+    }).eq('id', existing[0].id)
+  } else {
+    await window._sbClient.from('sessions').insert({
+      user_id: currentUser.id, exercicios: sessoes, checks: checks, plan_month: planMonth
+    })
+  }
+  console.log('[CSD] Sessões salvas no Supabase')
+}
+
 document.getElementById('login-senha')?.addEventListener('keydown', ev => { if (ev.key === 'Enter') doLogin() })
 
 // ══ CHECK-UP ══
@@ -1572,6 +1607,9 @@ function showReport() {
   }
   localStorage.removeItem('csd_reav_confirm')
 
+  // Salvar no Supabase
+  saveCheckupToSupabase(overall)
+
   // Show reavaliação comparison if applicable
   const lastScores = localStorage.getItem('csd_lastScores')
   if (lastScores) {
@@ -1693,6 +1731,7 @@ function renderPlanView() {
     return ids
   })
   localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
+  saveSessionsToSupabase()
 
   const weeks = ['Semana 1','Semana 2','Semana 3','Semana 4']
   view.innerHTML = `
@@ -1746,6 +1785,7 @@ function toggleExCheck(exId, el) {
   if (!checks[key]) checks[key] = {}
   checks[key][exId] = !checks[key][exId]
   localStorage.setItem('csd_sessionChecks', JSON.stringify(checks))
+  saveSessionsToSupabase()
 
   const check = el.querySelector('.ex-check')
   const done = checks[key][exId]
