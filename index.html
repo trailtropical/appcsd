@@ -619,12 +619,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 </div>
 <script>
 // ══ SUPABASE ══
-var _sb = null
+window._sbClient = null
 const SUPABASE_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPhO6e5yWL_nkPWgfI_4zBfeziic'
 function initSupabase() {
   if (window.supabase && window.supabase.createClient) {
-    _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+    window._sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
     console.log('[CSD] Supabase OK')
   } else {
     console.error('[CSD] Supabase SDK não carregou')
@@ -1242,9 +1242,9 @@ async function doLogin() {
   btn.textContent = 'Entrando...'
   btn.disabled = true
 
-  if (!_sb) { alert('Sistema indisponível. Recarregue a página.'); return }
+  if (!window._sbClient) { alert('Sistema indisponível. Recarregue a página.'); return }
   console.log('[CSD] Tentando login:', e)
-  const { data, error } = await _sb.auth.signInWithPassword({ email: e, password: s })
+  const { data, error } = await window._sbClient.auth.signInWithPassword({ email: e, password: s })
   console.log('[CSD] Resultado:', { data, error })
 
   btn.textContent = 'Entrar'
@@ -1272,7 +1272,7 @@ async function loadUserData() {
   if (!currentUser) return
 
   // Carregar último checkup
-  const { data: checkups } = await _sb.from('checkups')
+  const { data: checkups } = await window._sbClient.from('checkups')
     .select('*')
     .eq('user_id', currentUser.id)
     .order('created_at', { ascending: false })
@@ -1289,7 +1289,7 @@ async function loadUserData() {
   }
 
   // Carregar sessões
-  const { data: sessions } = await _sb.from('sessions')
+  const { data: sessions } = await window._sbClient.from('sessions')
     .select('*')
     .eq('user_id', currentUser.id)
     .order('created_at', { ascending: false })
@@ -1304,7 +1304,7 @@ async function loadUserData() {
 }
 
 async function doLogout() {
-  await _sb.auth.signOut()
+  await window._sbClient.auth.signOut()
   currentUser = null
   localStorage.clear()
   showScreen('s-login')
@@ -1320,7 +1320,7 @@ async function doSignup() {
   btn.textContent = 'Criando conta...'
   btn.disabled = true
 
-  const { data, error } = await _sb.auth.signUp({ email: e, password: s })
+  const { data, error } = await window._sbClient.auth.signUp({ email: e, password: s })
 
   btn.textContent = 'Entrar'
   btn.disabled = false
@@ -1332,7 +1332,7 @@ async function doSignup() {
 
   // Criar profile
   if (data.user) {
-    await _sb.from('profiles').upsert({ id: data.user.id, email: e })
+    await window._sbClient.from('profiles').upsert({ id: data.user.id, email: e })
   }
 
   alert('Conta criada! Verifique seu email para confirmar o cadastro.')
