@@ -413,6 +413,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 @keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 @keyframes ringDraw{from{stroke-dashoffset:251.3}to{stroke-dashoffset:var(--ring-offset)}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="app">
@@ -617,6 +618,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 </div>
 <script>
+// ══ SUPABASE ══
+const SUPABASE_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPhO6e5yWL_nkPWgfI_4zBfeziic'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+
 // ══ TESTES ══
 const TESTS = [
   {id:'agachamento', eyebrow:'Teste 1 — Mobilidade', title:'Agachamento completo (cócora)',
@@ -1216,14 +1222,108 @@ function showBonusDetail(idx) {
 }
 
 // ══ LOGIN ══
-function doLogin() {
+let currentUser = null
+
+async function doLogin() {
   const e = document.getElementById('login-email').value.trim()
   const s = document.getElementById('login-senha').value
   if (!e || !s) { alert('Preencha email e senha.'); return }
-  localStorage.setItem('csd_logged','1')
+
+  const btn = document.querySelector('#s-login .btn-primary')
+  btn.textContent = 'Entrando...'
+  btn.disabled = true
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email: e, password: s })
+
+  btn.textContent = 'Entrar'
+  btn.disabled = false
+
+  if (error) {
+    alert('Email ou senha inválidos.')
+    return
+  }
+
+  currentUser = data.user
+  localStorage.setItem('csd_logged', '1')
+  localStorage.setItem('csd_user_id', currentUser.id)
+
+  // Carregar dados do Supabase
+  await loadUserData()
+
   renderDashboard()
   showScreen('s-dashboard')
 }
+
+async function loadUserData() {
+  if (!currentUser) return
+
+  // Carregar último checkup
+  const { data: checkups } = await supabase.from('checkups')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (checkups && checkups.length > 0) {
+    const c = checkups[0]
+    localStorage.setItem('csd_checkup', '1')
+    localStorage.setItem('csd_answers', JSON.stringify(c.answers))
+    localStorage.setItem('csd_nivel', c.nivel)
+    localStorage.setItem('csd_lastCheckup', new Date(c.created_at).getTime().toString())
+    if (c.scores) localStorage.setItem('csd_lastScores', JSON.stringify(c.scores))
+    if (c.onboarding) localStorage.setItem('csd_onboarding', JSON.stringify(c.onboarding))
+  }
+
+  // Carregar sessões
+  const { data: sessions } = await supabase.from('sessions')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (sessions && sessions.length > 0) {
+    const s = sessions[0]
+    localStorage.setItem('csd_sessoes', JSON.stringify(s.exercicios))
+    localStorage.setItem('csd_sessionChecks', JSON.stringify(s.checks || {}))
+    localStorage.setItem('csd_planMonth', s.plan_month.toString())
+  }
+}
+
+async function doLogout() {
+  await supabase.auth.signOut()
+  currentUser = null
+  localStorage.clear()
+  showScreen('s-login')
+}
+
+async function doSignup() {
+  const e = document.getElementById('login-email').value.trim()
+  const s = document.getElementById('login-senha').value
+  if (!e || !s) { alert('Preencha email e senha para criar conta.'); return }
+  if (s.length < 6) { alert('A senha deve ter no mínimo 6 caracteres.'); return }
+
+  const btn = document.querySelector('#s-login .btn-primary')
+  btn.textContent = 'Criando conta...'
+  btn.disabled = true
+
+  const { data, error } = await supabase.auth.signUp({ email: e, password: s })
+
+  btn.textContent = 'Entrar'
+  btn.disabled = false
+
+  if (error) {
+    alert('Erro ao criar conta: ' + error.message)
+    return
+  }
+
+  // Criar profile
+  if (data.user) {
+    await supabase.from('profiles').upsert({ id: data.user.id, email: e })
+  }
+
+  alert('Conta criada! Verifique seu email para confirmar o cadastro.')
+}
+
 document.getElementById('login-senha')?.addEventListener('keydown', ev => { if (ev.key === 'Enter') doLogin() })
 
 // ══ CHECK-UP ══
