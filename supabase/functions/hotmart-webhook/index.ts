@@ -45,39 +45,6 @@ serve(async (req) => {
     // Create Supabase client with service role
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-    // Check if user already exists
-    const { data: existingUsers } = await supabase.auth.admin.listUsers()
-    const userExists = existingUsers?.users?.some(u => u.email === email)
-
-    if (!userExists) {
-      // Create user with a temp password (they'll set their own via the app)
-      const tempPassword = generatePassword()
-      const { data: userData, error: createError } = await supabase.auth.admin.createUser({
-        email: email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: { name: name }
-      })
-
-      if (createError) {
-        console.error("[hotmart] Error creating user:", createError.message)
-        return new Response("Error creating user", { status: 500 })
-      }
-
-      // Create profile
-      if (userData?.user) {
-        await supabase.from("profiles").upsert({
-          id: userData.user.id,
-          email: email,
-          nome: name
-        })
-      }
-
-      console.log("[hotmart] User created:", email, userData?.user?.id)
-    } else {
-      console.log("[hotmart] User already exists:", email)
-    }
-
     // Send email via Resend with signup link
     const signupUrl = `${APP_URL}?email=${encodeURIComponent(email)}`
     const firstName = name.split(" ")[0] || "atleta"
@@ -130,12 +97,3 @@ serve(async (req) => {
     return new Response("Internal error", { status: 500 })
   }
 })
-
-function generatePassword(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-  let password = ""
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return password
-}

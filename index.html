@@ -2299,6 +2299,27 @@ async function doSignupConfirm() {
 
 // Detectar redirect da Hotmart ao carregar
 checkHotmartRedirect()
+
+// Auto-login: se tem sessão válida, vai pro dashboard
+if (!window.location.search.includes('email=')) {
+  (async () => {
+    if (window._sbClient) {
+      const { data: { session } } = await window._sbClient.auth.getSession()
+      if (session?.user) {
+        console.log('[CSD] Sessão encontrada, auto-login:', session.user.email)
+        currentUser = session.user
+        localStorage.setItem('csd_logged', '1')
+        localStorage.setItem('csd_user_id', session.user.id)
+        await loadUserData()
+        if (localStorage.getItem('csd_checkup')) {
+          goToDashboard()
+        } else {
+          showScreen('s-welcome')
+        }
+      }
+    }
+  })()
+}
 </script>
 </body>
 </html>
