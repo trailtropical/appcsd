@@ -1075,9 +1075,36 @@ function renderDashboard() {
 
     <div class="sr" data-delay="500" style="display:flex;flex-direction:column;gap:8px">
       <button class="btn-outline" onclick="showBonuses()">Ver bônus →</button>
+      <button class="btn-outline" onclick="confirmRefazer()" style="font-size:12px;color:var(--muted)">Refazer avaliação →</button>
     </div>`
 
   setTimeout(animateDashboard, 150)
+}
+
+function confirmRefazer() {
+  const ov = document.createElement('div')
+  ov.className = 'ex-done-overlay'
+  ov.innerHTML = `
+    <div style="text-align:center;max-width:320px;padding:0 20px">
+      <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Refazer avaliação?</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px">Ao refazer o check-up, seus exercícios recomendados podem mudar de acordo com os novos resultados do seu corpo.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn-primary" onclick="refazerAvaliacao()">Refazer avaliação</button>
+        <button class="btn-outline" onclick="this.closest('.ex-done-overlay').remove()">Cancelar</button>
+      </div>
+    </div>`
+  document.body.appendChild(ov)
+}
+
+function refazerAvaliacao() {
+  document.querySelector('.ex-done-overlay')?.remove()
+  localStorage.removeItem('csd_checkup')
+  localStorage.removeItem('csd_answers')
+  localStorage.removeItem('csd_nivel')
+  localStorage.removeItem('csd_lastCheckup')
+  localStorage.removeItem('csd_lastScores')
+  showScreen('s-welcome')
 }
 
 function getBodyStatus(sigCounts) {
@@ -1576,6 +1603,17 @@ function showReport() {
     hipotese = 'Você está realizando o check-up preventivo. Os testes vão identificar se existem compensações que precisam ser trabalhadas antes que virem dor.'
   }
 
+  // Score ring
+  const { scores } = calculateIndex()
+  const circ = 2 * Math.PI * 40
+  const offset = circ - (overall / 100) * circ
+  const catColors = {mobilidade:'#38BDF8',estabilidade:'#4ADE80',controle_motor:'#A78BFA',propulsao:'#FB923C',equilibrio:'#F472B6'}
+  let subHtml = CATEGORY_ORDER.map(c => {
+    const pct = scores[c]; const col = catColors[c]
+    return `<div class="subscore-item"><div class="subscore-header"><span class="subscore-name">${CATEGORY_INFO[c].label}</span><span class="subscore-val" style="font-size:18px;font-weight:800;color:var(--text)">${pct}</span></div><div class="subscore-track"><div class="subscore-fill" style="width:${pct}%;background:${col}"></div></div></div>`
+  }).join('')
+  const msg = getPersonalizedMsg()
+
   // Conclusão
   let conclusao = ''
   const principal = criticalSignal ? SIGNAL_MAP[criticalSignal] : null
@@ -1612,13 +1650,23 @@ function showReport() {
   </div>` : ''
 
   document.getElementById('report-content').innerHTML = `
-    ${odReport}
-    ${goalReport}
-    <div class="report-block fade-in fade-in-d1">
-      <div class="report-block-title">hipótese inicial</div>
-      <p style="font-size:13px;color:var(--muted);line-height:1.7">${hipotese}</p>
-    </div>
     ${sigHtml}
+    ${odReport}
+    <div class="report-block fade-in fade-in-d2">
+      <div class="report-block-title">índice corporal</div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0">
+        <div style="position:relative;width:96px;height:96px">
+          <svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="var(--border)" stroke-width="6"/><circle cx="48" cy="48" r="40" fill="none" stroke="var(--orange)" stroke-width="6" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90 48 48)"/></svg>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:800;color:var(--text)">${overall}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">de 0 a 100</div>
+      </div>
+      <div class="subscores" style="margin-top:8px">${subHtml}</div>
+    </div>
+    <div class="report-block fade-in fade-in-d3">
+      <div class="report-block-title">mapa corporal</div>
+      ${renderBodyMap(signalCounts)}
+    </div>
     <div class="report-conclusion fade-in${sigs.length?' fade-in-d3':''}">
       <div class="report-conclusion-title">📋 conclusão</div>
       <p>${conclusao}</p>

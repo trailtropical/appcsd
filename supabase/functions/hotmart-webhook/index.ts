@@ -104,7 +104,7 @@ serve(async (req) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        from: FROM_EMAIL,
+        from: `Corredor Sem Dor <${FROM_EMAIL}>`,
         to: email,
         subject: "Bem-vindo ao Corredor Sem Dor — Crie sua senha",
         html: emailHtml
