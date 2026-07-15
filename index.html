@@ -397,6 +397,38 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .light-mode .subscore-track{background:#E8E8E5}
 .light-mode .btn-primary{color:#fff}
 
+/* SETTINGS PANEL */
+.settings-overlay{position:fixed;inset:0;background:rgba(15,15,14,.5);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.settings-overlay.open{opacity:1;pointer-events:auto}
+.settings-panel{position:fixed;top:0;right:0;bottom:0;width:80%;max-width:360px;background:var(--surface);z-index:151;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.3)}
+.settings-panel.open{transform:translateX(0)}
+.settings-header{padding:60px 24px 20px;border-bottom:1px solid var(--border)}
+.settings-title{font-size:18px;font-weight:800}
+.settings-body{flex:1;padding:20px 24px;overflow-y:auto}
+.settings-item{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border)}
+.settings-item:last-child{border-bottom:none}
+.settings-item-left{display:flex;align-items:center;gap:12px}
+.settings-item-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.settings-item-label{font-size:14px;font-weight:500}
+.settings-item-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.settings-close{position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted);transition:all .15s}
+.settings-close:hover{border-color:var(--orange);color:var(--orange)}
+
+/* HAMBURGER BTN */
+.hamburger-btn{width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:4px;transition:all .15s}
+.hamburger-btn:hover{border-color:var(--orange)}
+.hamburger-btn span{width:18px;height:2px;background:var(--text);border-radius:1px;transition:all .15s}
+
+/* LIQUID GLASS BUTTONS */
+.btn-glass{width:100%;padding:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;color:var(--text);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.btn-glass::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:14px 14px 0 0;pointer-events:none}
+.btn-glass:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
+.light-mode .btn-glass{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
+.light-mode .btn-glass::before{background:linear-gradient(180deg,rgba(255,255,255,.6),transparent)}
+.light-mode .btn-glass:hover{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.12)}
+.btn-glass-outline{width:100%;padding:14px;background:transparent;border:1px solid var(--border2);border-radius:14px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .2s;color:var(--text);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.btn-glass-outline:hover{background:rgba(255,255,255,.06);border-color:var(--orange)}
+
 /* EXERCÍCIO DETALHE */
 .ex-detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;overflow-y:auto}
 .ex-detail-overlay.open{display:flex}
@@ -467,6 +499,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   <div class="db-hero">
     <div class="db-hero-top">
       <div class="db-greeting"><span class="online"></span> Corredor Sem Dor</div>
+      <button class="hamburger-btn" onclick="openSettings()"><span></span><span></span><span></span></button>
     </div>
     <div class="db-title" id="db-title">Bem-vindo de<br>volta<span>.</span></div>
     <div class="db-phase" id="db-phase"></div>
@@ -1138,33 +1171,21 @@ function renderDashboard() {
     <div class="db-last-eval sr" data-delay="450">Última avaliação: ${lastEval}</div>
 
     <div class="sr" data-delay="500" style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn-outline" onclick="showBonuses()">Ver bônus →</button>
-      <button class="btn-outline" onclick="confirmRefazer()" style="font-size:12px;color:var(--muted)">Refazer avaliação →</button>
-    </div>
-
-    <div class="sr" data-delay="525" style="padding-top:16px;border-top:1px solid var(--border);margin-top:8px">
-      <div onclick="toggleTheme()" style="display:flex;align-items:center;justify-content:space-between;padding:14px;cursor:pointer">
-        <span style="font-size:12px;color:var(--muted)">Modo claro</span>
-        <div id="theme-toggle" style="width:40px;height:22px;border-radius:11px;background:var(--border2);position:relative;transition:background .2s">
-          <div id="theme-dot" style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
-        </div>
-      </div>
+      <button class="btn-glass" onclick="showBonuses()">Ver bônus →</button>
     </div>
 
     <div class="sr" data-delay="550" style="padding-top:8px;border-top:1px solid var(--border)">
-      <button class="btn-outline" onclick="doLogout()" style="font-size:12px;color:var(--muted);width:100%">Sair da conta →</button>
+      <button class="btn-glass-outline" onclick="doLogout()" style="font-size:12px;width:100%">Sair da conta →</button>
     </div>`
 
   setTimeout(() => {
     animateDashboard()
-    // Posição do toggle de tema
-    const dot = document.getElementById('theme-dot')
-    const toggle = document.getElementById('theme-toggle')
-    if (dot && toggle) {
-      const isLight = document.getElementById('s-dashboard').classList.contains('light-mode')
-      dot.style.transform = isLight ? 'translateX(18px)' : 'translateX(0)'
-      toggle.style.background = isLight ? 'var(--orange)' : 'var(--border2)'
-    }
+    // Sincronizar toggles de tema
+    const isLight = document.getElementById('s-dashboard').classList.contains('light-mode')
+    const settingsDot = document.getElementById('settings-theme-dot')
+    const settingsToggle = document.getElementById('settings-theme-toggle')
+    if (settingsDot) settingsDot.style.transform = isLight ? 'translateX(18px)' : 'translateX(0)'
+    if (settingsToggle) settingsToggle.style.background = isLight ? 'var(--orange)' : 'var(--border2)'
   }, 150)
 }
 
@@ -1173,14 +1194,40 @@ function toggleTheme() {
   const isLight = dashboard.classList.toggle('light-mode')
   const dot = document.getElementById('theme-dot')
   const toggle = document.getElementById('theme-toggle')
+  const settingsDot = document.getElementById('settings-theme-dot')
+  const settingsToggle = document.getElementById('settings-theme-toggle')
   if (isLight) {
-    dot.style.transform = 'translateX(18px)'
-    toggle.style.background = 'var(--orange)'
+    if (dot) dot.style.transform = 'translateX(18px)'
+    if (toggle) toggle.style.background = 'var(--orange)'
+    if (settingsDot) settingsDot.style.transform = 'translateX(18px)'
+    if (settingsToggle) settingsToggle.style.background = 'var(--orange)'
   } else {
-    dot.style.transform = 'translateX(0)'
-    toggle.style.background = 'var(--border2)'
+    if (dot) dot.style.transform = 'translateX(0)'
+    if (toggle) toggle.style.background = 'var(--border2)'
+    if (settingsDot) settingsDot.style.transform = 'translateX(0)'
+    if (settingsToggle) settingsToggle.style.background = 'var(--border2)'
   }
   localStorage.setItem('csd_theme', isLight ? 'light' : 'dark')
+}
+
+function openSettings() {
+  document.getElementById('settings-overlay').classList.add('open')
+  document.getElementById('settings-panel').classList.add('open')
+  // Preencher info
+  const lastCheckup = localStorage.getItem('csd_lastCheckup')
+  document.getElementById('settings-last-eval').textContent = lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString('pt-BR') : 'Nenhuma avaliação'
+  if (currentUser) document.getElementById('settings-user-email').textContent = currentUser.email
+  // Sincronizar toggle
+  const isLight = document.getElementById('s-dashboard').classList.contains('light-mode')
+  const settingsDot = document.getElementById('settings-theme-dot')
+  const settingsToggle = document.getElementById('settings-theme-toggle')
+  if (settingsDot) settingsDot.style.transform = isLight ? 'translateX(18px)' : 'translateX(0)'
+  if (settingsToggle) settingsToggle.style.background = isLight ? 'var(--orange)' : 'var(--border2)'
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open')
+  document.getElementById('settings-panel').classList.remove('open')
 }
 
 function confirmRefazer() {
@@ -2478,5 +2525,59 @@ if (!window.location.search.includes('email=')) {
   })()
 }
 </script>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-overlay" id="settings-overlay" onclick="closeSettings()"></div>
+<div class="settings-panel" id="settings-panel">
+  <button class="settings-close" onclick="closeSettings()">✕</button>
+  <div class="settings-header">
+    <div class="settings-title">Configurações</div>
+  </div>
+  <div class="settings-body">
+    <div class="settings-item">
+      <div class="settings-item-left">
+        <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">📊</div>
+        <div>
+          <div class="settings-item-label">Última avaliação</div>
+          <div class="settings-item-sub" id="settings-last-eval">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-item">
+      <div class="settings-item-left">
+        <div class="settings-item-icon" style="background:rgba(74,222,128,.1);color:var(--glut)">🔄</div>
+        <div>
+          <div class="settings-item-label">Refazer avaliação</div>
+          <div class="settings-item-sub">Pode alterar seus exercícios</div>
+        </div>
+      </div>
+      <button class="btn-glass" style="width:auto;padding:8px 16px;font-size:12px" onclick="closeSettings();confirmRefazer()">Refazer</button>
+    </div>
+    <div class="settings-item">
+      <div class="settings-item-left">
+        <div class="settings-item-icon" style="background:rgba(56,189,248,.1);color:#38BDF8">🌓</div>
+        <div>
+          <div class="settings-item-label">Modo claro</div>
+          <div class="settings-item-sub">Alternar aparência</div>
+        </div>
+      </div>
+      <div onclick="toggleTheme()" style="cursor:pointer">
+        <div id="settings-theme-toggle" style="width:40px;height:22px;border-radius:11px;background:var(--border2);position:relative;transition:background .2s">
+          <div id="settings-theme-dot" style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-item" style="border-bottom:none">
+      <div class="settings-item-left">
+        <div class="settings-item-icon" style="background:rgba(239,68,68,.1);color:var(--torn)">🚪</div>
+        <div>
+          <div class="settings-item-label">Sair da conta</div>
+          <div class="settings-item-sub" id="settings-user-email">—</div>
+        </div>
+      </div>
+      <button class="btn-glass" style="width:auto;padding:8px 16px;font-size:12px;border-color:rgba(239,68,68,.2);color:var(--torn)" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
