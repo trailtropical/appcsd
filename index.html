@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0F0F0E">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="logo%20csd%20quad.png">
 <title>Corredor Sem Dor</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -980,6 +983,16 @@ function renderDashboard() {
   const done = localStorage.getItem('csd_checkup') === '1'
   const content = document.getElementById('db-content')
   const phaseEl = document.getElementById('db-phase')
+  const titleEl = document.getElementById('db-title')
+
+  // Saudação personalizada
+  const userName = localStorage.getItem('csd_userName')
+  if (userName) {
+    const firstName = userName.split(' ')[0]
+    titleEl.innerHTML = `Olá, ${firstName}<span>.</span>`
+  } else {
+    titleEl.innerHTML = `Bem-vindo de<br>volta<span>.</span>`
+  }
 
   if (done) {
     const savedAnswers = localStorage.getItem('csd_answers')
@@ -1430,6 +1443,15 @@ async function loadUserData() {
     localStorage.setItem('csd_sessionChecks', JSON.stringify(s.checks || {}))
     localStorage.setItem('csd_planMonth', s.plan_month.toString())
     if (s.session_exercises) localStorage.setItem('csd_sessionExercises', JSON.stringify(s.session_exercises))
+  }
+
+  // Carregar profile (nome)
+  const { data: profile } = await window._sbClient.from('profiles')
+    .select('nome')
+    .eq('id', currentUser.id)
+    .limit(1)
+  if (profile && profile.length > 0 && profile[0].nome) {
+    localStorage.setItem('csd_userName', profile[0].nome)
   }
 }
 

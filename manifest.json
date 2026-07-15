@@ -1,0 +1,23 @@
+{
+  "name": "Corredor Sem Dor",
+  "short_name": "CSD",
+  "description": "Seu programa de reabilitação para corrida",
+  "start_url": "https://trailtropical.github.io/appcsd/",
+  "display": "standalone",
+  "background_color": "#0F0F0E",
+  "theme_color": "#E8500A",
+  "icons": [
+    {
+      "src": "logo%20csd%20quad.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo%20csd%20quad.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
