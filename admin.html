@@ -161,9 +161,24 @@ function adminLogout() {
 const CAT_LABELS = { mobilidade: 'Mobilidade', estabilidade: 'Estabilidade', controle_motor: 'Controle Motor', propulsao: 'Propulsão', equilibrio: 'Equilíbrio' }
 
 async function loadStudents() {
-  const { data: profiles } = await sb.from('profiles').select('*')
-  const { data: checkups } = await sb.from('checkups').select('*').order('first_checkup_at', { ascending: false })
-  const { data: sessions } = await sb.from('sessions').select('*')
+  const { data: { session } } = await sb.auth.getSession()
+  if (!session) return
+
+  const res = await fetch(SB_URL + '/functions/v1/admin-data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + session.access_token
+    },
+    body: JSON.stringify({ email: session.user.email })
+  })
+
+  if (!res.ok) {
+    console.error('Admin data fetch failed')
+    return
+  }
+
+  const { profiles, checkups, sessions } = await res.json()
 
   const students = (profiles || []).map(p => {
     const userCheckups = (checkups || []).filter(c => c.user_id === p.id)
