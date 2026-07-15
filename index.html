@@ -387,6 +387,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .confetti{position:fixed;width:8px;height:8px;border-radius:2px;z-index:201;animation:confettiFall 1.5s ease forwards}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
 
+/* LIGHT MODE - Dashboard */
+.light-mode{--bg:#F5F5F3;--surface:#FFFFFF;--surface2:#EFEFEA;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);--text:#1A1A18;--muted:#6B6B68;--hint:#9A9A97}
+.light-mode .db-hero{background:linear-gradient(180deg,#E8500A 0%,#D4480A 100%)}
+.light-mode .db-greeting{color:rgba(255,255,255,0.8)}
+.light-mode .db-title{color:#fff}
+.light-mode .db-phase{color:rgba(255,255,255,0.7)}.light-mode .db-phase strong{color:#fff}
+.light-mode .score-ring-bg{stroke:#E8E8E5}
+.light-mode .subscore-track{background:#E8E8E5}
+.light-mode .btn-primary{color:#fff}
+
 /* EXERCÍCIO DETALHE */
 .ex-detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;overflow-y:auto}
 .ex-detail-overlay.open{display:flex}
@@ -453,7 +463,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 </div>
 
 <!-- DASHBOARD -->
-<div id="s-dashboard" class="screen">
+<div id="s-dashboard" class="screen light-mode">
   <div class="db-hero">
     <div class="db-hero-top">
       <div class="db-greeting"><span class="online"></span> Corredor Sem Dor</div>
