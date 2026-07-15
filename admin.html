@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSD Admin — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0F0F0E;--surface:#1A1A18;--border:rgba(255,255,255,.06);--text:#F0F0EE;--muted:#8A8A87;--orange:#E8500A;--green:#4ADE80;--red:#EF4444}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-box{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px}
+.login-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.field input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--orange)}
+.btn{display:block;width:100%;padding:14px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:default}
+.error{color:var(--red);font-size:12px;margin-top:8px;display:none}
+
+/* DASHBOARD */
+.dash{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.dash-title{font-size:20px;font-weight:800}
+.dash-badge{font-size:11px;padding:4px 10px;background:rgba(232,80,10,.12);color:var(--orange);border-radius:20px;font-weight:600}
+.dash-logout{font-size:12px;color:var(--muted);background:none;border:1px solid var(--border);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:inherit}
+.dash-logout:hover{border-color:var(--orange);color:var(--orange)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-val{font-size:28px;font-weight:800;color:var(--orange)}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.03em}
+
+.student-list{display:flex;flex-direction:column;gap:8px}
+.student-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border .2s}
+.student-card:hover{border-color:rgba(232,80,10,.3)}
+.student-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.student-name{font-size:14px;font-weight:700}
+.student-email{font-size:11px;color:var(--muted)}
+.student-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge-ok{background:rgba(74,222,128,.12);color:var(--green)}
+.badge-warn{background:rgba(251,146,60,.12);color:#FB923C}
+.badge-crit{background:rgba(239,68,68,.12);color:var(--red)}
+.student-meta{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.student-meta span{font-size:11px;color:var(--muted)}
+.student-meta strong{color:var(--text)}
+
+/* DETAIL MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,14,.92);z-index:100;display:none;overflow-y:auto;padding:24px 16px}
+.modal-overlay.open{display:flex;justify-content:center;align-items:flex-start}
+.modal{width:100%;max-width:600px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;margin:40px auto}
+.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.modal-close:hover{color:var(--text)}
+.modal h2{font-size:18px;font-weight:800;margin-bottom:4px}
+.modal .sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.detail-section{margin-bottom:20px}
+.detail-title{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.detail-row .label{color:var(--muted)}
+.detail-row .val{font-weight:600}
+.score-bar{height:6px;background:var(--border);border-radius:3px;margin-top:4px;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;transition:width .4s}
+.ex-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.ex-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ex-dot.done{background:var(--green)}
+.ex-dot.pending{background:var(--border)}
+.ex-ts{font-size:10px;color:var(--muted);margin-left:auto}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-box">
+    <div class="login-title">CSD Admin</div>
+    <div class="login-sub">Painel de acompanhamento dos alunos</div>
+    <div class="field"><label>Email</label><input type="email" id="adm-email" placeholder="seu@email.com"></div>
+    <div class="field"><label>Senha</label><input type="password" id="adm-pass" placeholder="Sua senha"></div>
+    <div class="error" id="adm-error">Email ou senha inválidos</div>
+    <button class="btn" id="adm-btn" onclick="adminLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash" id="dash-screen" style="display:none">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">Corredor Sem Dor — Admin</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="dash-badge" id="student-count">0 alunos</div>
+      <button class="dash-logout" onclick="adminLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="stats" id="stats-grid"></div>
+  <div class="student-list" id="student-list"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const ADMIN_EMAIL = 'trailtropicalpodcast@gmail.com'
+const SB_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPhO6e5yWL_nkPWgfI_4zBfeziic'
+let sb = null
+
+try {
+  sb = window.supabase.createClient(SB_URL, SB_ANON)
+} catch(e) {
+  console.error('Supabase init error:', e)
+}
+
+async function adminLogin() {
+  const email = document.getElementById('adm-email').value.trim()
+  const pass = document.getElementById('adm-pass').value
+  const errEl = document.getElementById('adm-error')
+  const btn = document.getElementById('adm-btn')
+
+  if (!email || !pass) { errEl.style.display = 'block'; errEl.textContent = 'Preencha todos os campos'; return }
+
+  btn.textContent = 'Entrando...'
+  btn.disabled = true
+  errEl.style.display = 'none'
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass })
+
+  btn.textContent = 'Entrar'
+  btn.disabled = false
+
+  if (error || data.user.email !== ADMIN_EMAIL) {
+    errEl.style.display = 'block'
+    errEl.textContent = 'Acesso não autorizado'
+    if (data?.user) await sb.auth.signOut()
+    return
+  }
+
+  document.getElementById('login-screen').style.display = 'none'
+  document.getElementById('dash-screen').style.display = 'block'
+  loadStudents()
+}
+
+document.getElementById('adm-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin() })
+
+function adminLogout() {
+  sb.auth.signOut()
+  document.getElementById('dash-screen').style.display = 'none'
+  document.getElementById('login-screen').style.display = 'flex'
+}
+
+const CAT_LABELS = { mobilidade: 'Mobilidade', estabilidade: 'Estabilidade', controle_motor: 'Controle Motor', propulsao: 'Propulsão', equilibrio: 'Equilíbrio' }
+
+async function loadStudents() {
+  const { data: profiles } = await sb.from('profiles').select('*')
+  const { data: checkups } = await sb.from('checkups').select('*').order('first_checkup_at', { ascending: false })
+  const { data: sessions } = await sb.from('sessions').select('*')
+
+  const students = (profiles || []).map(p => {
+    const userCheckups = (checkups || []).filter(c => c.user_id === p.id)
+    const userSessions = (sessions || []).filter(s => s.user_id === p.id)
+    const latestCheckup = userCheckups[0]
+    const latestSession = userSessions[0]
+
+    let scores = latestCheckup?.scores || {}
+    let overall = 0
+    if (scores && typeof scores === 'object') {
+      const vals = Object.values(scores).filter(v => typeof v === 'number')
+      if (vals.length) overall = Math.round(vals.reduce((a,b) => a+b, 0) / vals.length)
+    }
+
+    // Count completed exercises
+    const checks = latestSession?.checks || {}
+    let totalEx = 0, doneEx = 0, lastDone = null
+    Object.values(checks).forEach(sessChecks => {
+      Object.entries(sessChecks).forEach(([id, ts]) => {
+        totalEx++
+        if (ts) {
+          doneEx++
+          if (!lastDone || new Date(ts) > new Date(lastDone)) lastDone = ts
+        }
+      })
+    })
+
+    return {
+      ...p,
+      overall,
+      scores,
+      nivel: latestCheckup?.nivel || '—',
+      plan_month: latestSession?.plan_month ?? 0,
+      checkup_count: userCheckups.length,
+      first_checkup: latestCheckup?.first_checkup_at,
+      total_ex: totalEx,
+      done_ex: doneEx,
+      last_activity: lastDone
+    }
+  })
+
+  // Stats
+  const total = students.length
+  const avgScore = total ? Math.round(students.reduce((s,p) => s + p.overall, 0) / total) : 0
+  const withCheckup = students.filter(s => s.checkup_count > 0).length
+  const totalDone = students.reduce((s,p) => s + p.done_ex, 0)
+
+  document.getElementById('student-count').textContent = total + ' aluno' + (total !== 1 ? 's' : '')
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-label">Alunos</div></div>
+    <div class="stat"><div class="stat-val">${withCheckup}</div><div class="stat-label">Com check-up</div></div>
+    <div class="stat"><div class="stat-val">${avgScore}</div><div class="stat-label">Score médio</div></div>
+    <div class="stat"><div class="stat-val">${totalDone}</div><div class="stat-label">Exercícios feitos</div></div>
+  `
+
+  // Student list
+  const list = document.getElementById('student-list')
+  if (!students.length) {
+    list.innerHTML = '<div class="empty">Nenhum aluno encontrado</div>'
+    return
+  }
+
+  list.innerHTML = students.map(s => {
+    const badge = s.overall >= 70 ? 'badge-ok' : s.overall >= 40 ? 'badge-warn' : 'badge-crit'
+    const badgeText = s.overall >= 70 ? 'Bom' : s.overall >= 40 ? 'Atenção' : 'Crítico'
+    const lastAct = s.last_activity ? new Date(s.last_activity).toLocaleDateString('pt-BR') : '—'
+    return `<div class="student-card" onclick='openDetail(${JSON.stringify(s).replace(/'/g,"&#39;")})'>
+      <div class="student-top">
+        <div>
+          <div class="student-name">${s.nome || s.email}</div>
+          <div class="student-email">${s.email}</div>
+        </div>
+        <div class="student-badge ${badge}">${s.overall > 0 ? badgeText + ' ' + s.overall : 'Sem dados'}</div>
+      </div>
+      <div class="student-meta">
+        <span>Check-ups: <strong>${s.checkup_count}</strong></span>
+        <span>Plano: <strong>Mês ${s.plan_month + 1}</strong></span>
+        <span>Exercícios: <strong>${s.done_ex}/${s.total_ex}</strong></span>
+        <span>Última atividade: <strong>${lastAct}</strong></span>
+      </div>
+    </div>`
+  }).join('')
+}
+
+function openDetail(s) {
+  const modal = document.getElementById('modal')
+  const content = document.getElementById('modal-content')
+
+  let scoresHtml = ''
+  if (s.scores && typeof s.scores === 'object') {
+    scoresHtml = Object.entries(s.scores).map(([cat, val]) => {
+      const color = val >= 70 ? 'var(--green)' : val >= 40 ? '#FB923C' : 'var(--red)'
+      return `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:13px"><span>${CAT_LABELS[cat]||cat}</span><strong>${val}</strong></div>
+        <div class="score-bar"><div class="score-fill" style="width:${val}%;background:${color}"></div></div>
+      </div>`
+    }).join('')
+  }
+
+  // Get exercises info
+  let exercisesHtml = ''
+  const sessionExercises = s.session_exercises || {}
+  const checks = s.checks || {}
+  const EX_MAP = getExMap()
+
+  for (let i = 0; i < 3; i++) {
+    const exIds = sessionExercises[`sess_${i}`] || []
+    const sessChecks = checks[`sess_${i}`] || {}
+    if (!exIds.length) continue
+
+    exercisesHtml += `<div style="margin-bottom:12px"><div class="detail-title">Sessão ${i+1}</div>`
+    exIds.forEach(id => {
+      const ex = EX_MAP[id]
+      const name = ex?.name || id
+      const ts = sessChecks[id]
+      const dateStr = ts ? new Date(ts).toLocaleDateString('pt-BR') + ' ' + new Date(ts).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : null
+      exercisesHtml += `<div class="ex-item">
+        <div class="ex-dot ${ts ? 'done' : 'pending'}"></div>
+        <span>${name}</span>
+        ${dateStr ? `<span class="ex-ts">${dateStr}</span>` : ''}
+      </div>`
+    })
+    exercisesHtml += '</div>'
+  }
+
+  content.innerHTML = `
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h2>${s.nome || 'Aluno'}</h2>
+    <div class="sub">${s.email}</div>
+
+    <div class="detail-section">
+      <div class="detail-title">Índice Corporal</div>
+      <div style="font-size:32px;font-weight:800;color:var(--orange)">${s.overall || '—'}<span style="font-size:14px;color:var(--muted)">/100</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Nível: ${s.nivel} · Mês ${s.plan_month + 1} do plano</div>
+    </div>
+
+    ${scoresHtml ? `<div class="detail-section"><div class="detail-title">Scores por categoria</div>${scoresHtml}</div>` : ''}
+
+    <div class="detail-section">
+      <div class="detail-title">Atividade</div>
+      <div class="detail-row"><span class="label">Check-ups realizados</span><span class="val">${s.checkup_count}</span></div>
+      <div class="detail-row"><span class="label">Primeiro check-up</span><span class="val">${s.first_checkup ? new Date(s.first_checkup).toLocaleDateString('pt-BR') : '—'}</span></div>
+      <div class="detail-row"><span class="label">Última atividade</span><span class="val">${s.last_activity ? new Date(s.last_activity).toLocaleDateString('pt-BR') : '—'}</span></div>
+    </div>
+
+    ${exercisesHtml ? `<div class="detail-section"><div class="detail-title">Exercícios</div>${exercisesHtml}</div>` : '<div class="detail-section"><div class="detail-title">Exercícios</div><div class="empty">Nenhum exercício atribuído ainda</div></div>'}
+  `
+
+  modal.classList.add('open')
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open')
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal()
+})
+
+// Exercise name map (subset for display)
+function getExMap() {
+  return {
+    agachamento:{name:'Agachamento completo'},
+    pelvica:{name:'Elevação pélvica'},
+    flexao:{name:'Flexão lateral'},
+    avaliacao:{name:'Avaliação de ombro'},
+    prancho:{name:'Prancha lateral'},
+    afastamento:{name:'Afastamento lateral'},
+    panturrilha:{name:'Elevação de panturrilha'},
+    step:{name:'Step lateral'},
+    mobilidade:{name:'Mobilidade tornozelo'},
+    estabilidade:{name:'Estabilidade unipodal'},
+    gluteo:{name:'Ativação de glúteo'},
+    quadril:{name:'Rotação de quadril'},
+    single:{name:'Agachamento unipodal'},
+    cadera:{name:'Abertura de quadril'},
+    perna:{name:'Extensão de joelho'},
+    // General
+    agachamento_gen:{name:'Agachamento (geral)'},
+    pelvica_gen:{name:'Elevação pélvica (geral)'},
+    flexao_gen:{name:'Flexão lateral (geral)'},
+    panturrilha_gen:{name:'Panturrilha (geral)'},
+    prancho_gen:{name:'Prancha lateral (geral)'},
+    // Specific
+    tornozelo_1:{name:'Mobilidade tornozelo'},
+    panturrilha_1:{name:'Panturrilha'},
+    quadril_1:{name:'Mobilidade quadril'},
+    estabilidade_1:{name:'Estabilidade unipodal'}
+  }
+}
+</script>
+</body>
+</html>

@@ -1864,12 +1864,13 @@ function toggleExCheck(exId, el) {
   const key = `sess_${currentSessionIdx}`
   const checks = getSessionChecks()
   if (!checks[key]) checks[key] = {}
-  checks[key][exId] = !checks[key][exId]
+  const wasDone = checks[key][exId]
+  checks[key][exId] = wasDone ? null : new Date().toISOString()
   localStorage.setItem('csd_sessionChecks', JSON.stringify(checks))
   saveSessionsToSupabase()
 
   const check = el.querySelector('.ex-check')
-  const done = checks[key][exId]
+  const done = !!checks[key][exId]
   check.classList.toggle('done', done)
   check.textContent = done ? '✓' : ''
   el.classList.toggle('checked', done)
@@ -1982,6 +1983,12 @@ function showSessionFromPlan(sessIdx) {
       const ch = card.querySelector('.ex-check')
       ch.classList.add('done')
       ch.textContent = '✓'
+      const ts = checks[id]
+      if (ts) {
+        const d = new Date(ts)
+        const dateStr = d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'})
+        ch.title = 'Feito em ' + dateStr
+      }
     }
   })
 
