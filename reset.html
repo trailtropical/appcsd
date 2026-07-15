@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corredor Sem Dor — Redefinir Senha</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0F0F0E;--surface:#1A1A18;--border:rgba(255,255,255,.06);--text:#F0F0EE;--muted:#8A8A87;--orange:#E8500A;--green:#4ADE80;--red:#EF4444}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.box{width:100%;max-width:400px}
+.hero{text-align:center;margin-bottom:32px}
+.badge{display:inline-block;background:var(--orange);color:#fff;font-weight:800;font-size:18px;padding:8px 16px;border-radius:10px;margin-bottom:16px}
+.title{font-size:22px;font-weight:800;margin-bottom:6px}
+.sub{font-size:13px;color:var(--muted);line-height:1.5}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.field input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--orange)}
+.btn{display:block;width:100%;padding:14px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:default}
+.msg{padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.5;margin-bottom:16px;display:none}
+.msg.ok{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);color:var(--green);display:block}
+.msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);display:block}
+.back{display:block;text-align:center;margin-top:16px;font-size:12px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--orange)}
+.phase{display:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="hero">
+    <div class="badge">CSD</div>
+    <div class="title">Redefinir senha</div>
+    <div class="sub">Informe seu email e enviaremos um link para criar uma nova senha.</div>
+  </div>
+
+  <!-- STEP 1: Email -->
+  <div class="phase active" id="phase-1">
+    <div class="card">
+      <div class="msg" id="msg-1"></div>
+      <div class="field"><label>Email</label><input type="email" id="reset-email" placeholder="seu@email.com"></div>
+      <button class="btn" id="btn-1" onclick="sendReset()">Enviar link de redefinição</button>
+      <a class="back" href="https://trailtropical.github.io/appcsd/">← Voltar para o login</a>
+    </div>
+  </div>
+
+  <!-- STEP 2: New password -->
+  <div class="phase" id="phase-2">
+    <div class="card">
+      <div class="msg" id="msg-2"></div>
+      <div class="field"><label>Nova senha</label><input type="password" id="new-pass" placeholder="Mínimo 6 caracteres"></div>
+      <div class="field"><label>Confirmar senha</label><input type="password" id="new-pass2" placeholder="Repita a senha"></div>
+      <button class="btn" id="btn-2" onclick="resetPassword()">Redefinir senha</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SB_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPhO6e5yWL_nkPWgfI_4zBfeziic'
+let sb = null
+
+try { sb = window.supabase.createClient(SB_URL, SB_ANON) } catch(e) {}
+
+// Check if this is a recovery redirect (has #access_token or #type=recovery)
+const hash = window.location.hash
+if (hash.includes('type=recovery') || hash.includes('access_token')) {
+  showPhase(2)
+}
+
+function showPhase(n) {
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'))
+  document.getElementById('phase-' + n).classList.add('active')
+}
+
+async function sendReset() {
+  const email = document.getElementById('reset-email').value.trim()
+  const msg = document.getElementById('msg-1')
+  const btn = document.getElementById('btn-1')
+
+  if (!email) { msg.className = 'msg err'; msg.textContent = 'Informe seu email.'; return }
+
+  btn.textContent = 'Enviando...'
+  btn.disabled = true
+  msg.className = 'msg'
+  msg.style.display = 'none'
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://trailtropical.github.io/appcsd/reset.html'
+  })
+
+  btn.textContent = 'Enviar link de redefinição'
+  btn.disabled = false
+
+  if (error) {
+    msg.className = 'msg err'
+    msg.textContent = 'Erro: ' + error.message
+  } else {
+    msg.className = 'msg ok'
+    msg.textContent = 'Link enviado! Verifique sua caixa de entrada (e o spam). O link te trará de volta pra cá pra criar a nova senha.'
+  }
+}
+
+async function resetPassword() {
+  const pass = document.getElementById('new-pass').value
+  const pass2 = document.getElementById('new-pass2').value
+  const msg = document.getElementById('msg-2')
+  const btn = document.getElementById('btn-2')
+
+  if (!pass || !pass2) { msg.className = 'msg err'; msg.textContent = 'Preencha ambos os campos.'; return }
+  if (pass.length < 6) { msg.className = 'msg err'; msg.textContent = 'A senha deve ter no mínimo 6 caracteres.'; return }
+  if (pass !== pass2) { msg.className = 'msg err'; msg.textContent = 'As senhas não coincidem.'; return }
+
+  btn.textContent = 'Redefinindo...'
+  btn.disabled = true
+  msg.className = 'msg'
+  msg.style.display = 'none'
+
+  const { error } = await sb.auth.updateUser({ password: pass })
+
+  btn.textContent = 'Redefinir senha'
+  btn.disabled = false
+
+  if (error) {
+    msg.className = 'msg err'
+    msg.textContent = 'Erro: ' + error.message
+  } else {
+    msg.className = 'msg ok'
+    msg.textContent = 'Senha redefinida com sucesso! Redirecionando...'
+    setTimeout(() => {
+      window.location.hash = ''
+      window.location.href = 'https://trailtropical.github.io/appcsd/'
+    }, 2000)
+  }
+}
+
+document.getElementById('reset-email')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendReset() })
+document.getElementById('new-pass2')?.addEventListener('keydown', e => { if (e.key === 'Enter') resetPassword() })
+</script>
+</body>
+</html>
