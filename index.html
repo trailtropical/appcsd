@@ -388,8 +388,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .confetti{position:fixed;width:8px;height:8px;border-radius:2px;z-index:201;animation:confettiFall 1.5s ease forwards}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
 
-/* LIGHT MODE - Dashboard */
-.dark-mode{--bg:#0F0F0E;--surface:#1A1A18;--surface2:#242422;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#F0F0EE;--muted:#8A8A87;--hint:#5A5A57;background:var(--bg)}
+/* DARK MODE */
+.dark-mode{--bg:#0F0F0E;--surface:#1A1A18;--surface2:#242422;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#F0F0EE;--muted:#8A8A87;--hint:#5A5A57;background:linear-gradient(180deg,#1A1A18 0%,#0F0F0E 100%)!important}
+.dark-mode *{border-color:var(--border)}
 .dark-mode .db-hero{background:linear-gradient(180deg,#E8500A 0%,#D4480A 100%)}
 .dark-mode .db-greeting{color:rgba(255,255,255,0.8)}
 .dark-mode .db-title{color:#fff}
@@ -399,6 +400,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .dark-mode .btn-primary{color:#fff}
 .dark-mode .settings-panel{background:#1A1A18}
 .dark-mode .settings-title{color:#F0F0EE}
+.dark-mode .login-card{background:#1A1A18;border-color:rgba(255,255,255,0.14)}
+.dark-mode .field input{background:#242422;border-color:rgba(255,255,255,0.14);color:#F0F0EE}
+.dark-mode .chat-msg.system{background:#1A1A18;border-color:rgba(255,255,255,0.08);color:#F0F0EE}
+.dark-mode .chat-opt{background:#1A1A18;border-color:rgba(255,255,255,0.14);color:#F0F0EE}
+.dark-mode .chat-opt:hover{background:#242422}
+.dark-mode .report-block{background:#1A1A18;border-color:rgba(255,255,255,0.08)}
+.dark-mode .bonus-card{background:#1A1A18;border-color:rgba(255,255,255,0.08)}
+.dark-mode .ex-card{background:#1A1A18;border-color:rgba(255,255,255,0.08)}
+.dark-mode .session-tab{background:#1A1A18;border-color:rgba(255,255,255,0.08);color:#8A8A87}
+.dark-mode .session-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.dark-mode .top-bar{background:#0F0F0E;border-color:rgba(255,255,255,0.08)}
+.dark-mode .back-btn{background:#1A1A18;border-color:rgba(255,255,255,0.14);color:#F0F0EE}
+.dark-mode .body-dot{border-color:rgba(255,255,255,0.08)}
 html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:100vh}
 
 /* SETTINGS PANEL */
@@ -1046,13 +1060,12 @@ function renderDashboard() {
 
   // Restaurar tema
   const savedTheme = localStorage.getItem('csd_theme')
-  const dashboard = document.getElementById('s-dashboard')
   if (savedTheme === 'dark') {
-    dashboard.classList.add('dark-mode')
+    document.body.classList.add('dark-mode')
   } else if (savedTheme === 'light') {
-    dashboard.classList.remove('dark-mode')
+    document.body.classList.remove('dark-mode')
   } else {
-    dashboard.classList.remove('dark-mode') // padrão claro
+    document.body.classList.remove('dark-mode') // padrão claro
   }
 
   if (done) {
@@ -1188,7 +1201,7 @@ function renderDashboard() {
   setTimeout(() => {
     animateDashboard()
     // Sincronizar toggles de tema
-    const isDark = document.getElementById('s-dashboard').classList.contains('dark-mode')
+    const isDark = document.body.classList.contains('dark-mode')
     const settingsDot = document.getElementById('settings-theme-dot')
     const settingsToggle = document.getElementById('settings-theme-toggle')
     if (settingsDot) settingsDot.style.transform = isDark ? 'translateX(18px)' : 'translateX(0)'
@@ -1197,20 +1210,13 @@ function renderDashboard() {
 }
 
 function toggleTheme() {
-  const dashboard = document.getElementById('s-dashboard')
-  const isDark = dashboard.classList.toggle('dark-mode')
-  const dot = document.getElementById('theme-dot')
-  const toggle = document.getElementById('theme-toggle')
+  const isDark = document.body.classList.toggle('dark-mode')
   const settingsDot = document.getElementById('settings-theme-dot')
   const settingsToggle = document.getElementById('settings-theme-toggle')
   if (isDark) {
-    if (dot) dot.style.transform = 'translateX(18px)'
-    if (toggle) toggle.style.background = 'var(--orange)'
     if (settingsDot) settingsDot.style.transform = 'translateX(18px)'
     if (settingsToggle) settingsToggle.style.background = 'var(--orange)'
   } else {
-    if (dot) dot.style.transform = 'translateX(0)'
-    if (toggle) toggle.style.background = 'var(--border2)'
     if (settingsDot) settingsDot.style.transform = 'translateX(0)'
     if (settingsToggle) settingsToggle.style.background = 'var(--border2)'
   }
@@ -1229,7 +1235,7 @@ function openSettings() {
     document.getElementById('settings-user-email').textContent = currentUser.email
   }
   // Sincronizar toggle
-  const isDark = document.getElementById('s-dashboard').classList.contains('dark-mode')
+  const isDark = document.body.classList.contains('dark-mode')
   const settingsDot = document.getElementById('settings-theme-dot')
   const settingsToggle = document.getElementById('settings-theme-toggle')
   if (settingsDot) settingsDot.style.transform = isDark ? 'translateX(18px)' : 'translateX(0)'
