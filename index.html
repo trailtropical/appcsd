@@ -1004,6 +1004,17 @@ function renderDashboard() {
     titleEl.innerHTML = `Bem-vindo de<br>volta<span>.</span>`
   }
 
+  // Restaurar tema
+  const savedTheme = localStorage.getItem('csd_theme')
+  const dashboard = document.getElementById('s-dashboard')
+  if (savedTheme === 'light') {
+    dashboard.classList.add('light-mode')
+  } else if (savedTheme === 'dark') {
+    dashboard.classList.remove('light-mode')
+  } else {
+    dashboard.classList.add('light-mode') // padrão claro
+  }
+
   if (done) {
     const savedAnswers = localStorage.getItem('csd_answers')
     if (savedAnswers) { try { answers = JSON.parse(savedAnswers) } catch(e){} }
@@ -1131,11 +1142,45 @@ function renderDashboard() {
       <button class="btn-outline" onclick="confirmRefazer()" style="font-size:12px;color:var(--muted)">Refazer avaliação →</button>
     </div>
 
-    <div class="sr" data-delay="550" style="padding-top:16px;border-top:1px solid var(--border);margin-top:8px">
+    <div class="sr" data-delay="525" style="padding-top:16px;border-top:1px solid var(--border);margin-top:8px">
+      <div onclick="toggleTheme()" style="display:flex;align-items:center;justify-content:space-between;padding:14px;cursor:pointer">
+        <span style="font-size:12px;color:var(--muted)">Modo claro</span>
+        <div id="theme-toggle" style="width:40px;height:22px;border-radius:11px;background:var(--border2);position:relative;transition:background .2s">
+          <div id="theme-dot" style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sr" data-delay="550" style="padding-top:8px;border-top:1px solid var(--border)">
       <button class="btn-outline" onclick="doLogout()" style="font-size:12px;color:var(--muted);width:100%">Sair da conta →</button>
     </div>`
 
-  setTimeout(animateDashboard, 150)
+  setTimeout(() => {
+    animateDashboard()
+    // Posição do toggle de tema
+    const dot = document.getElementById('theme-dot')
+    const toggle = document.getElementById('theme-toggle')
+    if (dot && toggle) {
+      const isLight = document.getElementById('s-dashboard').classList.contains('light-mode')
+      dot.style.transform = isLight ? 'translateX(18px)' : 'translateX(0)'
+      toggle.style.background = isLight ? 'var(--orange)' : 'var(--border2)'
+    }
+  }, 150)
+}
+
+function toggleTheme() {
+  const dashboard = document.getElementById('s-dashboard')
+  const isLight = dashboard.classList.toggle('light-mode')
+  const dot = document.getElementById('theme-dot')
+  const toggle = document.getElementById('theme-toggle')
+  if (isLight) {
+    dot.style.transform = 'translateX(18px)'
+    toggle.style.background = 'var(--orange)'
+  } else {
+    dot.style.transform = 'translateX(0)'
+    toggle.style.background = 'var(--border2)'
+  }
+  localStorage.setItem('csd_theme', isLight ? 'light' : 'dark')
 }
 
 function confirmRefazer() {
