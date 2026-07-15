@@ -584,7 +584,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <!-- BÔNUS DETALHE -->
 <div id="s-bonus-detail" class="screen">
   <div class="top-bar">
-    <button class="back-btn" onclick="showScreen('s-bonus')">←</button>
+    <button class="back-btn" id="bonus-back-btn" onclick="bonusGoBack()">←</button>
     <div class="top-label" id="bonus-detail-label">Bônus</div>
     <div class="top-badge">extra</div>
   </div>
@@ -865,18 +865,18 @@ const SESSION_INFO = [
 const BONUSES = [
   {id:'ritual', icon:'🔥', css:'b1', title:'Ritual de Corrida',
     desc:'Ativação pré-treino para ligar os músculos certos antes de cada corrida.',
-    sections:[
-      {title:'Bloco Geral', vid:'6a57c43b4ce8f07629b1b5d3',
+    subs:[
+      {title:'Bloco Geral', sub:'Mobilidade, ativação muscular e controle neuromuscular — Complete antes de correr ou treinar.', vid:'6a57c43b4ce8f07629b1b5d3',
         freq:'💡 Frequência recomendada: Antes dos treinos de musculação ou das corridas (3-4x na semana)',
         steps:[
           {label:'1️⃣ Mobilidade Geral (2-3 min)', items:['Volta ao mundo (em pé) – Mobilidade do quadril','Cócoras – Mobilidade do tornozelo/quadril']},
           {label:'2️⃣ Ativação Muscular (3-5 min)', items:['Prancha Frontal – Fortalecimento do core e estabilidade','Elevação de Panturrilha Unilateral – Fortalecimento das panturrilhas']},
           {label:'3️⃣ Controle Neuromuscular (3-5 min)', items:['Teste de Equilíbrio Unilateral – Estabilidade e propriocepção','Step-Down Test (Descida de Degrau) – Controle do movimento']}
         ]},
-      {title:'Planador', vid:null,
+      {title:'Planador', sub:'Aquecimento dinâmico para iniciar as corridas com o corpo preparado.', vid:'6a57c590196f63f892c54c1b',
         freq:'💡 Antes de começar a corrida',
         steps:[
-          {label:'Aquecimento dinâmico', items:['Em breve — vídeo será adicionado']}
+          {label:'Aquecimento dinâmico', items:['Siga o vídeo completo para preparar o corpo antes de correr']}
         ]}
     ],
     items:[]},
@@ -1281,26 +1281,47 @@ function renderBonuses() {
   </div>`).join('')
 }
 
-function showBonusDetail(idx) {
+let currentBonusSub = null
+let currentBonusIdx = null
+
+function bonusGoBack() {
+  if (currentBonusSub !== null) {
+    showBonusDetail(currentBonusIdx)
+  } else {
+    showScreen('s-bonus')
+  }
+}
+
+function showBonusDetail(idx, subIdx) {
   const b = BONUSES[idx]
+  currentBonusIdx = idx
+  currentBonusSub = subIdx !== undefined ? subIdx : null
   let contentHtml = `<div class="bonus-hero-icon">${b.icon}</div><h2>${b.title}</h2><p>${b.desc}</p>`
 
-  if (b.sections) {
-    b.sections.forEach(sec => {
-      contentHtml += `<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
-        <div style="font-size:16px;font-weight:700;margin-bottom:8px">${sec.title}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${sec.freq||''}</div>`
-      if (sec.vid) {
-        contentHtml += `<div style="margin-bottom:16px;border-radius:12px;overflow:hidden">${vturbEmbed(sec.vid)}</div>`
-      }
-      sec.steps.forEach(step => {
-        contentHtml += `<div style="margin-bottom:12px">
-          <div style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:6px">${step.label}</div>
-          <ul class="bonus-items">${step.items.map(i => '<li>'+i+'</li>').join('')}</ul>
-        </div>`
-      })
-      contentHtml += '</div>'
+  if (b.subs && subIdx === undefined) {
+    contentHtml += `<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">`
+    b.subs.forEach((sub, i) => {
+      contentHtml += `<div class="bonus-card" onclick="showBonusDetail(${idx},${i})" style="cursor:pointer">
+        <div class="bonus-icon ${b.css}">${b.icon}</div>
+        <div class="bonus-info"><h3>${sub.title}</h3><p>${sub.sub}</p></div>
+        <div class="bonus-arrow">→</div>
+      </div>`
     })
+    contentHtml += '</div>'
+  } else if (b.subs && subIdx !== undefined) {
+    const sub = b.subs[subIdx]
+    contentHtml = `<div class="bonus-hero-icon">${b.icon}</div>
+      <h2>${sub.title}</h2>
+      <p>${sub.sub}</p>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${sub.freq||''}</div>
+      <div style="margin-bottom:16px;border-radius:12px;overflow:hidden">${vturbEmbed(sub.vid)}</div>`
+    sub.steps.forEach(step => {
+      contentHtml += `<div style="margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:6px">${step.label}</div>
+        <ul class="bonus-items">${step.items.map(i => '<li>'+i+'</li>').join('')}</ul>
+      </div>`
+    })
+    contentHtml += `<button class="btn-outline" onclick="bonusGoBack()" style="margin-top:16px;width:100%">← Voltar</button>`
   } else {
     contentHtml += `<ul class="bonus-items">${b.items.map(i => '<li>'+i+'</li>').join('')}</ul>`
   }
