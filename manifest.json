@@ -1,6 +1,6 @@
 {
   "name": "Corredor Sem Dor",
-  "short_name": "CSD",
+  "short_name": "Corredor Sem Dor",
   "description": "Seu programa de reabilitação para corrida",
   "start_url": "https://trailtropical.github.io/appcsd/",
   "display": "standalone",
