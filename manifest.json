@@ -8,13 +8,13 @@
   "theme_color": "#E8500A",
   "icons": [
     {
-      "src": "logo%20csd%20quad.png",
+      "src": "logo-csd-quad.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "logo%20csd%20quad.png",
+      "src": "logo-csd-quad.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
