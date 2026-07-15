@@ -865,7 +865,21 @@ const SESSION_INFO = [
 const BONUSES = [
   {id:'ritual', icon:'🔥', css:'b1', title:'Ritual de Corrida',
     desc:'Ativação pré-treino para ligar os músculos certos antes de cada corrida.',
-    items:['Ativação de glúteo — 10 pontes unilaterais cada lado','Mobilização de tornozelo — 10 meio-ajoelhados cada lado','Ativação de core — 30s prancha frontal','Propriocepção de pé — 30s equilíbrio unilateral cada lado','3 séries de 10s skipping baixo no local']},
+    sections:[
+      {title:'Bloco Geral', vid:'6a57c43b4ce8f07629b1b5d3',
+        freq:'💡 Frequência recomendada: Antes dos treinos de musculação ou das corridas (3-4x na semana)',
+        steps:[
+          {label:'1️⃣ Mobilidade Geral (2-3 min)', items:['Volta ao mundo (em pé) – Mobilidade do quadril','Cócoras – Mobilidade do tornozelo/quadril']},
+          {label:'2️⃣ Ativação Muscular (3-5 min)', items:['Prancha Frontal – Fortalecimento do core e estabilidade','Elevação de Panturrilha Unilateral – Fortalecimento das panturrilhas']},
+          {label:'3️⃣ Controle Neuromuscular (3-5 min)', items:['Teste de Equilíbrio Unilateral – Estabilidade e propriocepção','Step-Down Test (Descida de Degrau) – Controle do movimento']}
+        ]},
+      {title:'Planador', vid:null,
+        freq:'💡 Antes de começar a corrida',
+        steps:[
+          {label:'Aquecimento dinâmico', items:['Em breve — vídeo será adicionado']}
+        ]}
+    ],
+    items:[]},
   {id:'recuperacao', icon:'🧊', css:'b2', title:'Recuperação Funcional',
     desc:'Protocolo pós-treino para liberar tensão e acelerar a recuperação.',
     items:['Rolo de panturrilha — 60s cada perna','Rolo de quadríceps — 60s cada perna','Alongamento de iliopsoas — 45s cada lado','Liberação de glúteo com bola — 60s cada lado','Elevação de perna na parede — 5min','Respiração diafragmática — 10 ciclos profundos']},
@@ -1269,12 +1283,30 @@ function renderBonuses() {
 
 function showBonusDetail(idx) {
   const b = BONUSES[idx]
+  let contentHtml = `<div class="bonus-hero-icon">${b.icon}</div><h2>${b.title}</h2><p>${b.desc}</p>`
+
+  if (b.sections) {
+    b.sections.forEach(sec => {
+      contentHtml += `<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">${sec.title}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${sec.freq||''}</div>`
+      if (sec.vid) {
+        contentHtml += `<div style="margin-bottom:16px;border-radius:12px;overflow:hidden">${vturbEmbed(sec.vid)}</div>`
+      }
+      sec.steps.forEach(step => {
+        contentHtml += `<div style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:6px">${step.label}</div>
+          <ul class="bonus-items">${step.items.map(i => '<li>'+i+'</li>').join('')}</ul>
+        </div>`
+      })
+      contentHtml += '</div>'
+    })
+  } else {
+    contentHtml += `<ul class="bonus-items">${b.items.map(i => '<li>'+i+'</li>').join('')}</ul>`
+  }
+
   document.getElementById('bonus-detail-label').textContent = b.title
-  document.getElementById('bonus-detail-content').innerHTML = `
-    <div class="bonus-hero-icon">${b.icon}</div>
-    <h2>${b.title}</h2>
-    <p>${b.desc}</p>
-    <ul class="bonus-items">${b.items.map(i => '<li>'+i+'</li>').join('')}</ul>`
+  document.getElementById('bonus-detail-content').innerHTML = contentHtml
   showScreen('s-bonus-detail')
 }
 
