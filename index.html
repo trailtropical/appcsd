@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo-csd-quad.jpg">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js')</script>
 <title>Corredor Sem Dor</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -44,6 +45,21 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .btn-primary:active{transform:scale(.98);opacity:.9}
 .btn-primary:disabled{opacity:.35;cursor:not-allowed}
 .login-footer{font-size:11px;color:var(--hint);text-align:center;margin-top:20px;line-height:1.6}
+.btn-download{width:100%;padding:14px;background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,transform .1s;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-download:active{transform:scale(.98);background:var(--surface2)}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:28px 24px;max-width:340px;width:100%;text-align:center}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.modal-btns{display:flex;gap:10px}
+.modal-btn{flex:1;padding:14px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface2);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,transform .1s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.modal-btn:active{transform:scale(.96)}
+.modal-btn.android{background:var(--orange);color:#fff;border-color:var(--orange)}
+.modal-btn.ios{background:var(--surface);color:var(--text)}
+.modal-btn-icon{font-size:24px}
+.ios-steps{text-align:left;margin-top:16px;font-size:13px;color:var(--muted);line-height:1.7}
+.ios-steps b{color:var(--text);font-weight:600}
 
 /* TOP BAR */
 .top-bar{padding:52px 20px 12px;display:flex;align-items:center;gap:12px;background:var(--bg);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border)}
@@ -496,6 +512,26 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="sua-senha"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar</button>
     <div class="login-footer"><a href="https://trailtropical.github.io/appcsd/reset.html" style="color:var(--orange);text-decoration:none">Esqueci minha senha</a></div>
+    <button class="btn-download" onclick="openDownloadModal()"><span>📱</span> Baixar App</button>
+  </div>
+</div>
+
+<!-- MODAL BAIXAR APP -->
+<div class="modal-overlay" id="download-modal" onclick="if(event.target===this)closeDownloadModal()">
+  <div class="modal-box">
+    <div class="modal-title">Seu celular é:</div>
+    <div class="modal-sub">Escolha o sistema do seu celular</div>
+    <div class="modal-btns">
+      <button class="modal-btn android" onclick="installAndroid()"><span class="modal-btn-icon">🤖</span>Android</button>
+      <button class="modal-btn ios" onclick="showIosSteps()"><span class="modal-btn-icon">🍎</span>iPhone</button>
+    </div>
+    <div class="ios-steps" id="ios-steps" style="display:none">
+      <div style="margin-bottom:10px;font-size:14px;color:var(--text);font-weight:600">Como adicionar à tela inicial:</div>
+      <div>1. Toque no ícone <b>Compartilhar</b> □↑ no Safari</div>
+      <div>2. Role para baixo e toque em <b>Adicionar à Tela de Início</b></div>
+      <div>3. Toque em <b>Adicionar</b> no canto superior</div>
+      <div style="margin-top:12px;color:var(--orange);font-size:12px">Pronto! O app aparecerá na sua tela inicial.</div>
+    </div>
   </div>
 </div>
 
@@ -1477,6 +1513,31 @@ function showBonusDetail(idx, subIdx) {
   document.getElementById('bonus-detail-label').textContent = b.title
   document.getElementById('bonus-detail-content').innerHTML = contentHtml
   showScreen('s-bonus-detail')
+}
+
+// ══ BAIXAR APP ══
+let deferredPrompt = null
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e })
+
+function openDownloadModal() {
+  document.getElementById('download-modal').classList.add('show')
+  document.getElementById('ios-steps').style.display = 'none'
+}
+function closeDownloadModal() {
+  document.getElementById('download-modal').classList.remove('show')
+}
+async function installAndroid() {
+  if (!deferredPrompt) {
+    alert('Para instalar, abra este site no navegador do seu Android e use a opção "Adicionar à tela de início" no menu do Chrome.')
+    return
+  }
+  deferredPrompt.prompt()
+  const { outcome } = await deferredPrompt.userChoice
+  deferredPrompt = null
+  closeDownloadModal()
+}
+function showIosSteps() {
+  document.getElementById('ios-steps').style.display = 'block'
 }
 
 // ══ LOGIN ══
