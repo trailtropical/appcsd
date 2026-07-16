@@ -527,7 +527,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     </div>
     <div class="ios-steps" id="ios-steps" style="display:none">
       <div style="margin-bottom:10px;font-size:14px;color:var(--text);font-weight:600">Como adicionar à tela inicial:</div>
-      <div>1. Toque no ícone <b>Compartilhar</b> □↑ no Safari</div>
+      <div>1. Toque no ícone <b>Compartilhar</b> □↑</div>
       <div>2. Role para baixo e toque em <b>Adicionar à Tela de Início</b></div>
       <div>3. Toque em <b>Adicionar</b> no canto superior</div>
       <div style="margin-top:12px;color:var(--orange);font-size:12px">Pronto! O app aparecerá na sua tela inicial.</div>
@@ -1518,6 +1518,7 @@ function showBonusDetail(idx, subIdx) {
 // ══ BAIXAR APP ══
 let deferredPrompt = null
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e })
+window.addEventListener('appinstalled', () => { deferredPrompt = null; closeDownloadModal() })
 
 function openDownloadModal() {
   document.getElementById('download-modal').classList.add('show')
@@ -1527,14 +1528,22 @@ function closeDownloadModal() {
   document.getElementById('download-modal').classList.remove('show')
 }
 async function installAndroid() {
-  if (!deferredPrompt) {
-    alert('Para instalar, abra este site no navegador do seu Android e use a opção "Adicionar à tela de início" no menu do Chrome.')
+  if (deferredPrompt) {
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    deferredPrompt = null
+    closeDownloadModal()
     return
   }
-  deferredPrompt.prompt()
-  const { outcome } = await deferredPrompt.userChoice
-  deferredPrompt = null
-  closeDownloadModal()
+  const isAndroid = /android/i.test(navigator.userAgent)
+  const isChrome = /chrome/i.test(navigator.userAgent) && !/edg/i.test(navigator.userAgent)
+  if (isAndroid && isChrome) {
+    alert('Toque nos 3 pontinhos (⋮) no canto superior direito → "Instalar app" ou "Adicionar à tela de início".')
+  } else if (isAndroid) {
+    alert('Abra este site no Chrome do Android → toque nos 3 pontinhos (⋮) → "Instalar app".')
+  } else {
+    alert('Para instalar, abra este site no navegador do seu Android e use a opção "Adicionar à tela de início" no menu.')
+  }
 }
 function showIosSteps() {
   document.getElementById('ios-steps').style.display = 'block'
