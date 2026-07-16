@@ -1524,30 +1524,38 @@ function showBonusDetail(idx, subIdx) {
 
 // ══ BAIXAR APP ══
 let deferredPrompt = null
-let swReady = false
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault()
   deferredPrompt = e
-  swReady = true
   const btn = document.querySelector('.btn-download')
-  if (btn) btn.style.display = ''
+  if (btn) btn.innerHTML = '<span>📲</span> Baixar App'
 })
 
 window.addEventListener('appinstalled', () => {
   deferredPrompt = null
   closeDownloadModal()
+  const btn = document.querySelector('.btn-download')
+  if (btn) btn.innerHTML = '<span>✅</span> App Instalado'
 })
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then(() => { swReady = true })
-}
+function isAndroid() { return /android/i.test(navigator.userAgent) }
+function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) }
 
 function openDownloadModal() {
   document.getElementById('download-modal').classList.add('show')
   document.getElementById('ios-steps').style.display = 'none'
   document.getElementById('android-steps').style.display = 'none'
+
+  if (deferredPrompt) {
+    document.getElementById('android-steps').style.display = 'none'
+  } else if (isAndroid()) {
+    document.getElementById('android-steps').style.display = 'block'
+  } else if (isIOS()) {
+    document.getElementById('ios-steps').style.display = 'block'
+  }
 }
+
 function closeDownloadModal() {
   document.getElementById('download-modal').classList.remove('show')
 }
@@ -1562,6 +1570,7 @@ async function installAndroid() {
   }
   document.getElementById('android-steps').style.display = 'block'
 }
+
 function showIosSteps() {
   document.getElementById('ios-steps').style.display = 'block'
 }
