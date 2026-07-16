@@ -320,9 +320,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .chat-opt.selected{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
 .chat-opt.sel{background:var(--orange);border-color:var(--orange);color:#fff}
 .chat-slider-wrap{display:flex;flex-direction:column;gap:8px;padding:8px 0}
-.chat-slider-wrap input[type=range]{-webkit-appearance:none;width:100%;height:6px;background:var(--border2);border-radius:3px;outline:none}
-.chat-slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--orange);border:2px solid var(--bg);cursor:pointer;box-shadow:0 0 8px var(--orange-glow)}
-.chat-slider-val{text-align:center;font-size:36px;font-weight:800;color:var(--orange);font-family:'Syne',sans-serif}
+.chat-slider-wrap input[type=range]{-webkit-appearance:none;width:100%;height:8px;background:linear-gradient(to right,var(--glut) 0%,var(--orange) 50%,#EF4444 100%);border-radius:4px;outline:none;cursor:pointer}
+.chat-slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:var(--orange);border:3px solid var(--bg);cursor:grab;box-shadow:0 0 12px var(--orange-glow),0 2px 8px rgba(0,0,0,.3);animation:pulse-thumb 2s infinite}
+.chat-slider-wrap input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;animation:none;transform:scale(1.1)}
+@keyframes pulse-thumb{0%,100%{box-shadow:0 0 12px var(--orange-glow),0 2px 8px rgba(0,0,0,.3)}50%{box-shadow:0 0 20px var(--orange-glow),0 2px 12px rgba(0,0,0,.3)}}
+.chat-slider-val{text-align:center;font-size:40px;font-weight:800;color:var(--orange);font-family:'Syne',sans-serif}
+.chat-slider-hint{text-align:center;font-size:12px;color:var(--muted);margin-top:-4px}
+.chat-slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:-2px}
 .chat-msg .highlight{color:var(--orange);font-weight:600}
 
 /* RELATÓRIO */
@@ -2432,7 +2436,9 @@ function renderOptions(q) {
   if (q.type === 'slider') {
     const v = onboardingData[q.id] !== undefined ? onboardingData[q.id] : Math.floor((q.min+q.max)/2)
     const html = `<div class="chat-slider-wrap"><div class="chat-slider-val" id="slider-val">${v}</div>
+      <div class="chat-slider-hint">↔ Deslize para ajustar</div>
       <input type="range" min="${q.min}" max="${q.max}" value="${v}" id="slider-input" oninput="document.getElementById('slider-val').textContent=this.value">
+      <div class="chat-slider-labels"><span>${q.min} — Nenhuma</span><span>${q.max} — Insuportável</span></div>
       <button class="btn-primary" style="margin-top:16px" onclick="selectOnbOpt('${q.id}',parseInt(document.getElementById('slider-input').value))">Confirmar →</button></div>`
     appendChatHtml(html)
   } else if (q.type === 'single') {
