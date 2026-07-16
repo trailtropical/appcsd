@@ -863,7 +863,7 @@ const EX = {
   e_cocoras:{name:'Cócoras',di:'3 séries · 45s',dm:'3 séries · 60s',da:'3 séries · 60s com carga leve',tag:'tornozelo',tc:'torn',why:'Mobiliza o tornozelo progressivamente em posição de carga total.',vid:'6a54e6240a9f72b511fbefb4'},
   e_meio_ajoel:{name:'Meio Ajoelhado',di:'3 séries · 12 reps cada lado',dm:'3 séries · 15 reps',da:'3 séries · 15 reps com elástico',tag:'tornozelo',tc:'torn',why:'Aumenta a dorsiflexão — movimento essencial a cada passada na corrida.',vid:'6a54e6181e490ba6e5ff98c0'},
   e_pe_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'tornozelo',tc:'torn',why:'Ativa os estabilizadores do tornozelo sem compensação visual.',vid:'6a54e61e6bda3ac633cd7f78'},
-  e_agach_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 12 reps unilateral',tag:'tornozelo',tc:'torn',why:'Combina mobilidade de tornozelo com força de panturrilha.'},
+  e_agach_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 12 reps unilateral',tag:'tornozelo',tc:'torn',why:'Combina mobilidade de tornozelo com força de panturrilha.',vid:'6a54e6133c9d9bf04f45ed85'},
   e_saltos_quad:{name:'Saltos no quadrado',di:null,dm:null,da:'3 séries · 20 saltos',tag:'tornozelo',tc:'torn',why:'Treina a absorção de impacto rápido — exatamente o que acontece na corrida.',adv_only:true,vid:'6a54e62a3c9d9bf04f45edbf'},
 
   // QUADRIL MOBILIDADE
@@ -878,7 +878,7 @@ const EX = {
 
   // PROPRIOCEPÇÃO
   e_prop_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'propriocepção',tc:'prop',why:'Treina o sistema proprioceptivo sem compensação visual.',vid:'6a54e61e6bda3ac633cd7f78'},
-  e_prop_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 10 reps unilateral',tag:'propriocepção',tc:'prop',why:'Combina equilíbrio, propriocepção e força de tornozelo em um único movimento.'},
+  e_prop_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 10 reps unilateral',tag:'propriocepção',tc:'prop',why:'Combina equilíbrio, propriocepção e força de tornozelo em um único movimento.',vid:'6a54e6133c9d9bf04f45ed85'},
   e_prop_step:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps',da:'3 séries · 10 reps com pausa',tag:'propriocepção',tc:'prop',why:'Propriocepção dinâmica — controle real em movimento de impacto.',vid:'6a54e6133c9d9bf04f45ed85'},
 
   // PANTURRILHA
@@ -893,8 +893,8 @@ const EX = {
 
   // EXERCÍCIOS ADICIONAIS
   e_agach_salto:{name:'Agachamento com Salto',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'quadríceps',tc:'qfor',why:'Ativa o quadríceps com explosividade — compensa fraqueza e inativação muscular.',vid:'6a54e6133c9d9bf04f45ed85'},
-  e_prancha_lat:{name:'Prancha Lateral Dinâmica',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Fortalece core lateral — estabilidade do tronco essencial para corrida sustentada.',vid:'6a54de507e2e4092887dabe9'},
-  e_escalador:{name:'Escalador',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Combina core, flexores e coordenação — prepara o corpo para a dinâmica da corrida.',vid:'6a54de65bb80b1338edbb5f6'}
+  e_prancha_lat:{name:'Prancha Lateral Dinâmica',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Fortalece core lateral — estabilidade do tronco essencial para corrida sustentada.',vid:'6a54de65bb80b1338edbb5f6'},
+  e_escalador:{name:'Escalador',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Combina core, flexores e coordenação — prepara o corpo para a dinâmica da corrida.',vid:'6a54de507e2e4092887dabe9'}
 }
 
 // ══ MAPA SINAL → SESSÕES ══
@@ -2010,13 +2010,24 @@ function renderPlanView() {
   const sessoes = sessKeys.map(k => {
     const ids = []
     const seen = new Set()
+    const seenNames = new Set()
     sigs.forEach(sig => {
       const info = SIGNAL_MAP[sig]; if (!info) return
-      ;(info[k]||[]).forEach(id => { if (!seen.has(id)) { seen.add(id); ids.push(id) } })
+      ;(info[k]||[]).forEach(id => {
+        if (seen.has(id)) return
+        const ex = EX[id]
+        if (!ex || seenNames.has(ex.name)) return
+        seen.add(id); seenNames.add(ex.name); ids.push(id)
+      })
     })
     if (criticalSignal) {
       const critInfo = SIGNAL_MAP[criticalSignal]
-      if (critInfo && critInfo[k]) critInfo[k].forEach(id => { if (!seen.has(id)) { seen.add(id); ids.push(id) } })
+      if (critInfo && critInfo[k]) critInfo[k].forEach(id => {
+        if (seen.has(id)) return
+        const ex = EX[id]
+        if (!ex || seenNames.has(ex.name)) return
+        seen.add(id); seenNames.add(ex.name); ids.push(id)
+      })
     }
     if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
     return ids
@@ -2135,15 +2146,22 @@ function showSessionFromPlan(sessIdx) {
   // 1. Specific exercises from decision engine
   let specific = [...new Set(sessoes[si] || [])]
 
-  // 2. Prioritize: critical signal exercises first, then rest
+  // 2. Prioritize: critical signal exercises first, then rest (dedup by name)
   let critIds = []
   if (criticalSignal) {
     const ci = SIGNAL_MAP[criticalSignal]
     if (ci && ci[sessionKey]) critIds = ci[sessionKey]
   }
   let finalIds = []
-  critIds.forEach(id => { if (!finalIds.includes(id)) finalIds.push(id) })
-  specific.forEach(id => { if (!finalIds.includes(id)) finalIds.push(id) })
+  const finalNames = new Set()
+  const addIfNew = (id) => {
+    if (finalIds.includes(id)) return
+    const ex = EX[id]
+    if (!ex || finalNames.has(ex.name)) return
+    finalIds.push(id); finalNames.add(ex.name)
+  }
+  critIds.forEach(addIfNew)
+  specific.forEach(addIfNew)
 
   // 3. Cap at MAX (5), but keep critical ones
   const MAX = 5, MIN = 4
@@ -2152,13 +2170,15 @@ function showSessionFromPlan(sessIdx) {
 
   // 4. Fill with general exercises if under MIN
   if (finalIds.length < MIN) {
-    const conflictNames = new Set(specific.map(id => EX[id]?.name).filter(Boolean))
     const pool = GERAL_ORDEM.flatMap(b => b.ids).filter(id => {
       if (finalIds.includes(id)) return false
       const ex = EX[id]
-      return ex && !conflictNames.has(ex.name)
+      return ex && !finalNames.has(ex.name)
     })
-    finalIds = finalIds.concat(pool.slice(0, MIN - finalIds.length))
+    pool.slice(0, MIN - finalIds.length).forEach(id => {
+      const ex = EX[id]
+      if (ex && !finalNames.has(ex.name)) { finalIds.push(id); finalNames.add(ex.name) }
+    })
   }
 
   // 5. Render as flat list
