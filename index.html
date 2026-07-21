@@ -2206,6 +2206,7 @@ function toggleExCheck(exId, el) {
         const checks = getSessionChecks()
         checks['sess_0'] = {}
         checks['sess_1'] = {}
+        checks['sess_2'] = {}
         localStorage.setItem('csd_sessionChecks', JSON.stringify(checks))
         saveSessionsToSupabase()
       }
