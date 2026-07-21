@@ -1,7 +1,5 @@
-const CACHE_NAME = 'csd-v10'
+const CACHE_NAME = 'csd-v11'
 const ASSETS = [
-  './',
-  './index.html',
   './manifest.json',
   './logo-csd-quad.jpg'
 ]
@@ -27,13 +25,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
 
   if (url.pathname.endsWith('index.html') || url.pathname.endsWith('/') || url.pathname === '') {
-    e.respondWith(
-      fetch(e.request).then(r => {
-        const clone = r.clone()
-        caches.open(CACHE_NAME).then(c => c.put(e.request, clone))
-        return r
-      }).catch(() => caches.match(e.request))
-    )
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)))
     return
   }
 
