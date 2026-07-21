@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo-csd-quad.jpg">
-<script>(()=>{const v='8',s=localStorage.getItem('csd_cache_version');if(s!==v){(async()=>{if('caches'in window){const k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)))}if('serviceWorker'in navigator){const r=await navigator.serviceWorker.getRegistration();if(r)await r.unregister()}localStorage.setItem('csd_cache_version',v);location.reload()})()}})()</script>
+<script>(()=>{const v='9',s=localStorage.getItem('csd_cache_version');if(s!==v){(async()=>{if('caches'in window){const k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)))}if('serviceWorker'in navigator){const r=await navigator.serviceWorker.getRegistration();if(r)await r.unregister()}localStorage.setItem('csd_cache_version',v);location.reload()})()}})()</script>
 <script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>{r.addEventListener('updatefound',()=>{if(r.installing){r.installing.addEventListener('statechange',()=>{if(r.installing.state==='installed'&&navigator.serviceWorker.controller){r.installing.postMessage('SKIP_WAITING');location.reload()}})}});r.update()})}</script>
 <title>Corredor Sem Dor</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -2183,27 +2183,21 @@ function getSessionChecks() {
 }
 
 function tryClearAllSessions() {
-  const sessoes = (() => {
-    try { const v = JSON.parse(localStorage.getItem('csd_sessoes')); return Array.isArray(v) ? v : [] } catch(e) { return [] }
-  })()
-  if (sessoes.length < 3) return false
-  const session2Ids = sessoes[2] || []
-  if (session2Ids.length === 0) return false
-  const checks = getSessionChecks()
-  const key2 = 'sess_2'
-  const s2done = session2Ids.every(id => checks[key2] && checks[key2][id])
-  if (!s2done) return false
+  if (currentSessionIdx !== 2) return false
+  const domCards = document.querySelectorAll('#sessao-exercises .ex-card')
+  if (!domCards.length) return false
+  const checks = getSessionChecks()[`sess_2`] || {}
+  const allDone = Array.from(domCards).every(c => checks[c.dataset.exid])
+  if (!allDone) return false
   const c = getSessionChecks()
   c['sess_0'] = {}
   c['sess_1'] = {}
   c['sess_2'] = {}
   localStorage.setItem('csd_sessionChecks', JSON.stringify(c))
-  saveSessionsToSupabase()
-  setTimeout(goToDashboard, 100)
   return true
 }
 
-function toggleExCheck(exId, el) {
+async function toggleExCheck(exId, el) {
   const key = `sess_${currentSessionIdx}`
   const checks = getSessionChecks()
   if (!checks[key]) checks[key] = {}
@@ -2217,13 +2211,18 @@ function toggleExCheck(exId, el) {
   check.textContent = done ? '✓' : ''
   el.classList.toggle('checked', done)
 
+  let cleared = false
   if (done) {
-    const allDoneInSession = tryClearAllSessions()
-    if (allDoneInSession) {
-      setTimeout(showDoneAnimation, 400)
-    }
+    cleared = tryClearAllSessions()
   }
-  saveSessionsToSupabase()
+
+  await saveSessionsToSupabase()
+
+  if (cleared) {
+    setTimeout(showDoneAnimation, 400)
+    setTimeout(goToDashboard, 600)
+    return
+  }
 
   const pct = getCompletionPct()
   const fill = document.querySelector('.db-progress-fill')

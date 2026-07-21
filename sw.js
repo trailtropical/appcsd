@@ -1,4 +1,4 @@
-const CACHE_NAME = 'csd-v8'
+const CACHE_NAME = 'csd-v9'
 const ASSETS = [
   './',
   './index.html',
