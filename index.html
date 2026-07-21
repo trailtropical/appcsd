@@ -2200,7 +2200,16 @@ function toggleExCheck(exId, el) {
     const allCards = document.querySelectorAll('#sessao-exercises .ex-card')
     const allChecks = getSessionChecks()[`sess_${currentSessionIdx}`] || {}
     const allDone = Array.from(allCards).every(c => allChecks[c.dataset.exid])
-    if (allDone) setTimeout(showDoneAnimation, 400)
+    if (allDone) {
+      setTimeout(showDoneAnimation, 400)
+      if (currentSessionIdx === 2) {
+        const checks = getSessionChecks()
+        checks['sess_0'] = {}
+        checks['sess_1'] = {}
+        localStorage.setItem('csd_sessionChecks', JSON.stringify(checks))
+        saveSessionsToSupabase()
+      }
+    }
   }
 
   const pct = getCompletionPct()
