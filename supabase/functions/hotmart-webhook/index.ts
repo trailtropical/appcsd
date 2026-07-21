@@ -14,17 +14,22 @@ serve(async (req) => {
   }
 
   try {
-    // Verify Hotmart token (skip if HOTMART_TOKEN is not set)
     const hottok = req.headers.get("x-hotmart-hottok")
     if (HOTMART_TOKEN && HOTMART_TOKEN !== "placeholder" && hottok !== HOTMART_TOKEN) {
-      console.log("[hotmart] Invalid token:", hottok, "expected:", HOTMART_TOKEN)
+      console.log("[hotmart] Invalid token:", hottok)
       return new Response("Unauthorized", { status: 401 })
     }
 
-    const body = await req.json()
-    console.log("[hotmart] Event:", JSON.stringify(body))
+    let body
+    try {
+      body = await req.json()
+    } catch (e) {
+      console.log("[hotmart] Failed to parse body")
+      return new Response("Invalid JSON", { status: 400 })
+    }
 
-    // Only process approved purchases
+    console.log("[hotmart] Payload:", JSON.stringify(body).substring(0, 500))
+
     const event = body.event || body.data?.status || ""
     const validEvents = ["PURCHASE_COMPLETE", "PURCHASE_APPROVED", "COMPLETED", "APPROVED"]
     if (!validEvents.includes(event)) {
@@ -32,20 +37,17 @@ serve(async (req) => {
       return new Response(JSON.stringify({ ignored: true, event }), { status: 200 })
     }
 
-    // Extract buyer data
     const buyer = body.data?.buyer || body.buyer || {}
     const email = buyer.email || ""
     const name = buyer.name || ""
 
     if (!email) {
-      console.log("[hotmart] No email found")
+      console.log("[hotmart] No email in payload")
       return new Response("No email", { status: 400 })
     }
 
-    // Create Supabase client with service role
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-    // Send email via Resend with signup link
     const signupUrl = `${APP_URL}?email=${encodeURIComponent(email)}`
     const firstName = name.split(" ")[0] || "atleta"
 
@@ -78,22 +80,18 @@ serve(async (req) => {
       })
     })
 
+    const resendBody = await resendResponse.text()
+    console.log("[hotmart] Resend status:", resendResponse.status, "body:", resendBody)
+
     if (!resendResponse.ok) {
-      const resendError = await resendResponse.text()
-      console.error("[hotmart] Resend error:", resendError)
-      return new Response("Error sending email", { status: 500 })
+      return new Response(JSON.stringify({ error: "Resend failed", details: resendBody }), { status: 500 })
     }
 
     console.log("[hotmart] Email sent to:", email)
-
-    return new Response(JSON.stringify({
-      success: true,
-      email_sent: true,
-      email: email
-    }), { status: 200 })
+    return new Response(JSON.stringify({ success: true, email }), { status: 200 })
 
   } catch (error) {
-    console.error("[hotmart] Error:", error.message)
-    return new Response("Internal error", { status: 500 })
+    console.error("[hotmart] Catch:", error.message)
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
   }
 })
