@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script>(()=>{const v='15';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html?t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -22,7 +23,7 @@
   --prop:#A78BFA;--pant:#F472B6;--qfor:#FB923C;--flex:#FBBF24;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-#app{max-width:430px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column}
+#app{max-width:430px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column;touch-action:pan-y}
 .screen{display:none;flex-direction:column;min-height:100svh}
 .screen.active{display:flex}
 
@@ -432,7 +433,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .dark-mode .top-bar{background:#0F0F0E;border-color:rgba(255,255,255,0.08)}
 .dark-mode .back-btn{background:#1A1A18;border-color:rgba(255,255,255,0.14);color:#F0F0EE}
 .dark-mode .body-dot{border-color:rgba(255,255,255,0.08)}
-html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:100vh}
+html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:100vh;overscroll-behavior:none}
+
+/* PULL-TO-REFRESH */
+#ptr-indicator{position:fixed;top:0;left:0;right:0;z-index:200;text-align:center;font-size:13px;color:var(--muted);padding:12px 0 8px;transform:translateY(-50px);transition:opacity .3s;pointer-events:none;font-weight:500}
+#ptr-indicator.ptr-pull{opacity:1}
+#ptr-indicator.ptr-ready{opacity:1;color:var(--torn);font-weight:600}
+#ptr-indicator.ptr-refreshing{transform:translateY(0)!important;opacity:1;color:var(--torn)}
+#ptr-indicator.ptr-idle{opacity:0;transform:translateY(-50px)!important;transition:all .3s ease!important}
 
 /* SETTINGS PANEL */
 .settings-overlay{position:fixed;inset:0;background:rgba(15,15,14,.5);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s ease}
@@ -2682,6 +2690,46 @@ if (!window.location.search.includes('email=')) {
     }
   })()
 }
+
+// Pull-to-refresh
+(function() {
+  const el = document.getElementById('app')
+  if (!el) return
+  let startY = 0, pulling = false, moved = 0
+  const indicator = document.createElement('div')
+  indicator.id = 'ptr-indicator'
+  indicator.innerHTML = '↓ Puxe para atualizar'
+  document.body.appendChild(indicator)
+  el.addEventListener('touchstart', e => {
+    if (window.scrollY > 0) return
+    startY = e.touches[0].clientY
+    pulling = true
+    moved = 0
+    indicator.className = 'ptr-idle'
+  }, { passive: true })
+  el.addEventListener('touchmove', e => {
+    if (!pulling) return
+    moved = e.touches[0].clientY - startY
+    if (moved < 0) { pulling = false; indicator.className = 'ptr-idle'; return }
+    moved = Math.min(moved, 120)
+    indicator.style.transform = `translateY(${moved}px)`
+    indicator.className = moved > 60 ? 'ptr-ready' : 'ptr-pull'
+    indicator.innerHTML = moved > 60 ? '🔄 Solte para atualizar' : '↓ Puxe para atualizar'
+  }, { passive: true })
+  el.addEventListener('touchend', () => {
+    if (!pulling) return
+    pulling = false
+    if (moved > 60) {
+      indicator.className = 'ptr-refreshing'
+      indicator.innerHTML = '🔄 Atualizando…'
+      localStorage.setItem('csd_cache_version', '0')
+      setTimeout(() => location.href = './index.html?t=' + Date.now(), 400)
+    } else {
+      indicator.className = 'ptr-idle'
+      indicator.style.transform = 'translateY(0)'
+    }
+  }, { passive: true })
+})()
 </script>
 
 <!-- SETTINGS PANEL -->
