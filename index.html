@@ -1141,7 +1141,7 @@ function renderDashboard() {
   const msg = getPersonalizedMsg()
 
   const m = PLAN_MONTHS[currentPlanMonth]
-  phaseEl.innerHTML = `Seu plano está ativo!<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
+  phaseEl.innerHTML = `Seu plano está ativo<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
 
   const progressPct = getCompletionPct()
 
@@ -1731,7 +1731,7 @@ async function saveCheckupToSupabase(overall) {
 
 async function saveSessionsToSupabase() {
   if (!window._sbClient || !currentUser) return
-  const sessoes = JSON.parse(localStorage.getItem('csd_sessoes') || '{}')
+  const sessoes = (() => { try { const v=JSON.parse(localStorage.getItem('csd_sessoes')); return Array.isArray(v) ? v : [] } catch(e) { return [] } })()
   const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
   const sessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
   const planMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
@@ -2181,6 +2181,27 @@ function getSessionChecks() {
   try { return JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}') } catch(e) { return {} }
 }
 
+function tryClearAllSessions() {
+  const sessoes = (() => {
+    try { const v = JSON.parse(localStorage.getItem('csd_sessoes')); return Array.isArray(v) ? v : [] } catch(e) { return [] }
+  })()
+  if (sessoes.length < 3) return
+  const session2Ids = sessoes[2] || []
+  if (session2Ids.length === 0) return
+  const checks = getSessionChecks()
+  const key2 = 'sess_2'
+  const s2done = session2Ids.every(id => checks[key2] && checks[key2][id])
+  if (!s2done) return
+  const c = getSessionChecks()
+  c['sess_0'] = {}
+  c['sess_1'] = {}
+  c['sess_2'] = {}
+  localStorage.setItem('csd_sessionChecks', JSON.stringify(c))
+  saveSessionsToSupabase().then(() => {
+    location.reload()
+  })
+}
+
 function toggleExCheck(exId, el) {
   const key = `sess_${currentSessionIdx}`
   const checks = getSessionChecks()
@@ -2196,22 +2217,8 @@ function toggleExCheck(exId, el) {
   el.classList.toggle('checked', done)
 
   if (done) {
-    const domIds = Array.from(document.querySelectorAll('#sessao-exercises .ex-card')).map(c => c.dataset.exid).filter(Boolean)
-    const sessoes = JSON.parse(localStorage.getItem('csd_sessoes') || '[]')
-    const plannedIds = (sessoes[currentSessionIdx] || []).filter(Boolean)
-    const allRelevantIds = [...new Set([...domIds, ...plannedIds])]
-    const checks = getSessionChecks()[`sess_${currentSessionIdx}`] || {}
-    const allDone = allRelevantIds.length > 0 && allRelevantIds.every(id => checks[id])
-    if (allDone) {
-      setTimeout(showDoneAnimation, 400)
-      if (currentSessionIdx === 2) {
-        const c = getSessionChecks()
-        c['sess_0'] = {}
-        c['sess_1'] = {}
-        c['sess_2'] = {}
-        localStorage.setItem('csd_sessionChecks', JSON.stringify(c))
-      }
-    }
+    setTimeout(showDoneAnimation, 400)
+    tryClearAllSessions()
   }
   saveSessionsToSupabase()
 
