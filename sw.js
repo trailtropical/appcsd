@@ -1,4 +1,4 @@
-const CACHE_NAME = 'csd-v2'
+const CACHE_NAME = 'csd-v3'
 const ASSETS = [
   './',
   './index.html',
@@ -19,25 +19,17 @@ self.addEventListener('activate', e => {
   )
 })
 
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting()
+})
+
 self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url)
-
-  if (url.pathname.endsWith('index.html') || url.pathname.endsWith('/') || url.pathname === '') {
-    e.respondWith(
-      fetch(e.request).then(r => {
-        const clone = r.clone()
-        caches.open(CACHE_NAME).then(c => c.put(e.request, clone))
-        return r
-      }).catch(() => caches.match(e.request))
-    )
-    return
-  }
-
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
+  caches.match(e.request).then(r => {
+    if (r) return r
+    return fetch(e.request).then(resp => {
       const clone = resp.clone()
       caches.open(CACHE_NAME).then(c => c.put(e.request, clone))
       return resp
-    }))
-  )
+    })
+  })
 })

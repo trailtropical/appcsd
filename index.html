@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo-csd-quad.jpg">
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(reg=>{reg.update()})}</script>
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>{r.addEventListener('updatefound',()=>{if(r.installing){r.installing.addEventListener('statechange',()=>{if(r.installing.state==='installed'&&navigator.serviceWorker.controller){r.installing.postMessage('SKIP_WAITING');location.reload()}})}});r.update()})}</script>
 <title>Corredor Sem Dor</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -2196,9 +2196,12 @@ function toggleExCheck(exId, el) {
   el.classList.toggle('checked', done)
 
   if (done) {
-    const allCards = document.querySelectorAll('#sessao-exercises .ex-card')
-    const allChecks = getSessionChecks()[`sess_${currentSessionIdx}`] || {}
-    const allDone = Array.from(allCards).every(c => allChecks[c.dataset.exid])
+    const domIds = Array.from(document.querySelectorAll('#sessao-exercises .ex-card')).map(c => c.dataset.exid).filter(Boolean)
+    const sessoes = JSON.parse(localStorage.getItem('csd_sessoes') || '[]')
+    const plannedIds = (sessoes[currentSessionIdx] || []).filter(Boolean)
+    const allRelevantIds = [...new Set([...domIds, ...plannedIds])]
+    const checks = getSessionChecks()[`sess_${currentSessionIdx}`] || {}
+    const allDone = allRelevantIds.length > 0 && allRelevantIds.every(id => checks[id])
     if (allDone) {
       setTimeout(showDoneAnimation, 400)
       if (currentSessionIdx === 2) {
