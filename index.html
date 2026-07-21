@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='16';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html?t='+Date.now()}})()</script>
+<script>(()=>{const v='17';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html?t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -1148,7 +1148,7 @@ function renderDashboard() {
   const msg = getPersonalizedMsg()
 
   const m = PLAN_MONTHS[currentPlanMonth]
-  phaseEl.innerHTML = `Seu plano está ativo<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
+  phaseEl.innerHTML = `Seu plano está ativo!<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
 
   const progressPct = getCompletionPct()
 
@@ -2188,19 +2188,21 @@ function getSessionChecks() {
   try { return JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}') } catch(e) { return {} }
 }
 
-function tryClearAllSessions() {
-  if (currentSessionIdx !== 2) return false
+function handleSessionComplete() {
   const domCards = document.querySelectorAll('#sessao-exercises .ex-card')
   if (!domCards.length) return false
-  const checks = getSessionChecks()[`sess_2`] || {}
+  const checks = getSessionChecks()[`sess_${currentSessionIdx}`] || {}
   const allDone = Array.from(domCards).every(c => checks[c.dataset.exid])
   if (!allDone) return false
-  const c = getSessionChecks()
-  c['sess_0'] = {}
-  c['sess_1'] = {}
-  c['sess_2'] = {}
-  localStorage.setItem('csd_sessionChecks', JSON.stringify(c))
-  return true
+  if (currentSessionIdx === 2) {
+    const c = getSessionChecks()
+    c['sess_0'] = {}
+    c['sess_1'] = {}
+    c['sess_2'] = {}
+    localStorage.setItem('csd_sessionChecks', JSON.stringify(c))
+    return 'clear'
+  }
+  return 'animate'
 }
 
 async function toggleExCheck(exId, el) {
@@ -2217,17 +2219,21 @@ async function toggleExCheck(exId, el) {
   check.textContent = done ? '✓' : ''
   el.classList.toggle('checked', done)
 
-  let cleared = false
+  let result = false
   if (done) {
-    cleared = tryClearAllSessions()
+    result = handleSessionComplete()
   }
 
   await saveSessionsToSupabase()
 
-  if (cleared) {
+  if (result === 'clear') {
     setTimeout(showDoneAnimation, 400)
     setTimeout(goToDashboard, 600)
     return
+  }
+
+  if (result === 'animate') {
+    setTimeout(showDoneAnimation, 400)
   }
 
   const pct = getCompletionPct()
