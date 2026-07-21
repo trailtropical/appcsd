@@ -1083,13 +1083,14 @@ function getPersonalizedMsg() {
 }
 
 function getNextSession() {
-  const d = new Date().getDay()
-  if (d === 1) return { idx: 0, label: 'Hoje', day: 'Segunda-feira' }
-  if (d === 3) return { idx: 1, label: 'Hoje', day: 'Quarta-feira' }
-  if (d === 5) return { idx: 2, label: 'Hoje', day: 'Sexta-feira' }
-  if (d < 1 || d > 5) return { idx: 0, label: 'Próxima', day: 'Segunda-feira' }
-  if (d < 3) return { idx: 1, label: 'Próxima', day: 'Quarta-feira' }
-  return { idx: 2, label: 'Próxima', day: 'Sexta-feira' }
+  const checks = getSessionChecks()
+  const days = ['Segunda-feira','Quarta-feira','Sexta-feira']
+  for (let i = 0; i < 3; i++) {
+    const s = checks[`sess_${i}`]
+    if (!s || Object.keys(s).length === 0) return { idx: i, label: 'Próximo', day: days[i] }
+    if (!Object.keys(s).every(k => s[k])) return { idx: i, label: 'Próximo', day: days[i] }
+  }
+  return { idx: 0, label: 'Próximo', day: 'Segunda-feira' }
 }
 
 function togglePlanMonth(idx) {
