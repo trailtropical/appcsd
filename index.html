@@ -2687,11 +2687,13 @@ async function doSignupConfirm() {
   showScreen('s-welcome')
 }
 
+// Auto-login: se tem sessão válida, vai pro dashboard (skip se veio da Hotmart)
+const _hasEmail = window.location.search.includes('email=')
+
 // Detectar redirect da Hotmart ao carregar
 checkHotmartRedirect()
 
-// Auto-login: se tem sessão válida, vai pro dashboard
-if (!window.location.search.includes('email=')) {
+if (!_hasEmail) {
   (async () => {
     if (window._sbClient) {
       const { data: { session } } = await window._sbClient.auth.getSession()
