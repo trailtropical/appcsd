@@ -1466,6 +1466,7 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active')
   window.scrollTo(0,0)
   if (id === 's-dashboard') setTimeout(animateDashboard, 200)
+  if (id === 's-welcome') setTimeout(showInstallModal, 600)
 }
 
 function animateDashboard() {
