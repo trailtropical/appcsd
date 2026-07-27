@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='19';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='20';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -498,6 +498,49 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 @keyframes barGrow{from{width:0}to{width:var(--target-w)}}
 @keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 @keyframes ringDraw{from{stroke-dashoffset:251.3}to{stroke-dashoffset:var(--ring-offset)}}
+
+/* ══ PWA INSTALL MODAL — Liquid Glass ══ */
+.install-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .4s ease}
+.install-overlay.open{opacity:1;pointer-events:auto}
+.install-overlay.open .install-modal{transform:scale(1) translateY(0);opacity:1}
+.install-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.install-modal{position:relative;width:100%;max-width:400px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:36px 28px 28px;box-shadow:0 32px 64px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.05) inset;transform:scale(.92) translateY(20px);opacity:0;transition:all .5s cubic-bezier(.22,1,.36,1);text-align:center;color:#F0F0EE}
+.dark-mode .install-modal{background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border-color:rgba(255,255,255,.12)}
+.install-modal-icon{font-size:48px;margin-bottom:12px;display:block}
+.install-modal-title{font-size:22px;font-weight:800;margin-bottom:8px;line-height:1.3}
+.install-modal-text{font-size:14px;color:rgba(240,240,238,.65);margin-bottom:20px;line-height:1.5}
+.install-benefits{text-align:left;background:rgba(255,255,255,.05);border-radius:14px;padding:16px 20px;margin-bottom:24px}
+.install-benefit{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;color:rgba(240,240,238,.8)}
+.install-benefit-icon{width:22px;text-align:center;flex-shrink:0}
+.install-btn{width:100%;padding:16px;background:#E8500A;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.install-btn:hover{background:#d64709;transform:scale(1.02)}
+.install-btn:active{transform:scale(.98)}
+.install-btn:disabled{opacity:.5;cursor:default;transform:none}
+.install-skip{width:100%;padding:10px;background:transparent;color:rgba(240,240,238,.4);border:none;font-size:13px;font-family:inherit;cursor:pointer;transition:color .2s}
+.install-skip:hover{color:rgba(240,240,238,.7)}
+.install-success{text-align:center;padding:12px 0}
+.install-success-icon{font-size:56px;display:block;margin-bottom:10px}
+.install-success-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.install-success-sub{font-size:13px;color:rgba(240,240,238,.55)}
+
+/* Tutorial iOS */
+.install-tutorial-backdrop{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .4s ease}
+.install-tutorial-backdrop.open{opacity:1;pointer-events:auto}
+.install-tutorial{width:100%;max-width:380px;background:rgba(28,28,26,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:32px 24px 24px;text-align:center;color:#F0F0EE}
+.install-tutorial-title{font-size:20px;font-weight:700;margin-bottom:24px}
+.install-step{display:flex;align-items:center;gap:16px;margin-bottom:20px;text-align:left}
+.install-step-num{width:32px;height:32px;border-radius:50%;background:rgba(232,80,10,.2);color:#E8500A;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.install-step-content{flex:1}
+.install-step-icon{font-size:20px;margin-bottom:2px}
+.install-step-label{font-size:13px;font-weight:600}
+.install-step-desc{font-size:12px;color:rgba(240,240,238,.5)}
+.install-step-arrow{text-align:center;font-size:18px;color:rgba(232,80,10,.5);margin:-8px 0 12px 16px}
+.install-tutorial-btn{width:100%;padding:14px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:14px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:8px}
+.install-tutorial-btn:hover{background:rgba(255,255,255,.14)}
+
+/* Browser-specific messages */
+.install-browser-note{font-size:12px;color:rgba(240,240,238,.45);margin-top:14px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:12px;line-height:1.4}
+.install-browser-note strong{color:rgba(240,240,238,.7)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -543,6 +586,59 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
       <div>3. Confirme tocando em <b>"Instalar"</b></div>
       <div style="margin-top:12px;color:var(--orange);font-size:12px">Pronto! O app aparecerá na sua tela inicial.</div>
     </div>
+  </div>
+</div>
+
+<!-- PWA INSTALL MODAL -->
+<div class="install-overlay" id="install-overlay">
+  <div class="install-backdrop" onclick="closeInstallModal()"></div>
+  <div class="install-modal" id="install-modal">
+    <span class="install-modal-icon">📱</span>
+    <div class="install-modal-title">Instale o aplicativo<br>Corredor Sem Dor</div>
+    <div class="install-modal-text">A melhor experiência acontece usando o aplicativo instalado.</div>
+    <div class="install-benefits">
+      <div class="install-benefit"><span class="install-benefit-icon">⚡</span>Abertura instantânea</div>
+      <div class="install-benefit"><span class="install-benefit-icon">🖥</span>Tela cheia — sem navegador</div>
+      <div class="install-benefit"><span class="install-benefit-icon">🚀</span>Acesso muito mais rápido</div>
+      <div class="install-benefit"><span class="install-benefit-icon">📲</span>Experiência de app nativo</div>
+    </div>
+    <button class="install-btn" id="install-btn" onclick="handleInstall()">Instalar aplicativo</button>
+    <button class="install-skip" onclick="dismissInstall()">Agora não</button>
+  </div>
+</div>
+
+<!-- TUTORIAL iOS -->
+<div class="install-tutorial-backdrop" id="install-tutorial">
+  <div class="install-tutorial">
+    <div class="install-tutorial-title">Instalar no iPhone</div>
+    <div class="install-step">
+      <div class="install-step-num">1</div>
+      <div class="install-step-content">
+        <div class="install-step-icon">⎙</div>
+        <div class="install-step-label">Toque em Compartilhar</div>
+        <div class="install-step-desc">No menu inferior do Safari</div>
+      </div>
+    </div>
+    <div class="install-step-arrow">↓</div>
+    <div class="install-step">
+      <div class="install-step-num">2</div>
+      <div class="install-step-content">
+        <div class="install-step-icon">➕</div>
+        <div class="install-step-label">Adicionar à Tela de Início</div>
+        <div class="install-step-desc">Role a lista e toque nesta opção</div>
+      </div>
+    </div>
+    <div class="install-step-arrow">↓</div>
+    <div class="install-step">
+      <div class="install-step-num">3</div>
+      <div class="install-step-content">
+        <div class="install-step-icon">✅</div>
+        <div class="install-step-label">Toque em Adicionar</div>
+        <div class="install-step-desc">Confirme no canto superior direito</div>
+      </div>
+    </div>
+    <div id="install-tutorial-note" class="install-browser-note"></div>
+    <button class="install-tutorial-btn" onclick="closeInstallTutorial()">Entendi</button>
   </div>
 </div>
 
@@ -1132,6 +1228,7 @@ function renderDashboard() {
       <div class="db-empty-sub">Complete o check-up de 7 testes para descubrir onde seu corpo está falhando na corrida.</div>
       <button class="btn-primary" onclick="showScreen('s-welcome')">Iniciar check-up →</button>
     </div>`
+    setTimeout(showInstallModal, 600)
     return
   }
 
@@ -1254,6 +1351,7 @@ function renderDashboard() {
     const settingsToggle = document.getElementById('settings-theme-toggle')
     if (settingsDot) settingsDot.style.transform = isDark ? 'translateX(18px)' : 'translateX(0)'
     if (settingsToggle) settingsToggle.style.background = isDark ? 'var(--orange)' : 'var(--border2)'
+    setTimeout(showInstallModal, 800)
   }, 150)
 }
 
@@ -1578,6 +1676,101 @@ async function installAndroid() {
 
 function showIosSteps() {
   document.getElementById('ios-steps').style.display = 'block'
+}
+
+// ══ PWA INSTALL SYSTEM ══
+const PWA = {
+  deferredPrompt: null,
+  get platform() {
+    if (/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios'
+    if (/android/i.test(navigator.userAgent)) return 'android'
+    return 'desktop'
+  },
+  get browser() {
+    const ua = navigator.userAgent
+    if (ua.includes('Firefox/')) return 'firefox'
+    if (ua.includes('Edg/') || ua.includes('Edge/')) return 'edge'
+    if (ua.includes('OPR/') || ua.includes('Opera/')) return 'opera'
+    if (ua.includes('SamsungBrowser/')) return 'samsung'
+    if (/iPhone|iPad|iPod/.test(ua) && ua.includes('CriOS/')) return 'chrome-ios'
+    if (/iPhone|iPad|iPod/.test(ua) && ua.includes('FxiOS/')) return 'firefox-ios'
+    if (/iPhone|iPad|iPod/.test(ua) && ua.includes('EdgiOS/')) return 'edge-ios'
+    if (/iPhone|iPad|iPod/.test(ua) && !/(CriOS|FxiOS|EdgiOS)/.test(ua)) return 'safari'
+    if (ua.includes('Chrome/')) return 'chrome'
+    return 'other'
+  },
+  get isInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+  },
+  get canInstall() {
+    return !!PWA.deferredPrompt
+  }
+}
+
+// Listen for beforeinstallprompt
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault()
+  PWA.deferredPrompt = e
+  document.getElementById('install-btn').textContent = 'Instalar aplicativo'
+})
+
+window.addEventListener('appinstalled', () => {
+  PWA.deferredPrompt = null
+  closeInstallModal()
+  const btn = document.getElementById('install-btn')
+  if (btn) btn.textContent = '✓ Instalado'
+})
+
+function showInstallModal() {
+  const dismissed = localStorage.getItem('csd_install_dismissed')
+  if (dismissed) {
+    const daysSince = (Date.now() - parseInt(dismissed)) / 86400000
+    if (daysSince < 3) return
+  }
+  const overlay = document.getElementById('install-overlay')
+  overlay.classList.add('open')
+}
+
+function closeInstallModal() {
+  document.getElementById('install-overlay').classList.remove('open')
+}
+
+function dismissInstall() {
+  localStorage.setItem('csd_install_dismissed', Date.now().toString())
+  closeInstallModal()
+}
+
+async function handleInstall() {
+  if (PWA.platform === 'ios') {
+    showIOSTutorial()
+    closeInstallModal()
+  } else if (PWA.canInstall) {
+    await PWA.deferredPrompt.prompt()
+    const { outcome } = await PWA.deferredPrompt.userChoice
+    PWA.deferredPrompt = null
+    if (outcome === 'accepted') localStorage.setItem('csd_install_done', '1')
+  } else {
+    closeInstallModal()
+    if (PWA.platform === 'android') document.getElementById('download-modal').classList.add('show')
+  }
+}
+
+function showIOSTutorial() {
+  const tutorial = document.getElementById('install-tutorial')
+  const note = document.getElementById('install-tutorial-note')
+  tutorial.classList.add('open')
+
+  if (PWA.browser === 'chrome-ios') {
+    note.innerHTML = 'No Chrome do iPhone, use o menu <strong>Compartilhar</strong> (⎙) e escolha <strong>Adicionar à Tela de Início</strong>.'
+  } else if (PWA.browser === 'firefox-ios' || PWA.browser === 'edge-ios') {
+    note.innerHTML = 'Este navegador não suporta instalação direta. Abra esta página no <strong>Safari</strong> para instalar o app.'
+  } else {
+    note.innerHTML = ''
+  }
+}
+
+function closeInstallTutorial() {
+  document.getElementById('install-tutorial').classList.remove('open')
 }
 
 // ══ LOGIN ══
@@ -2759,6 +2952,12 @@ if (!_hasEmail) {
       <div class="settings-item-left">
         <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">🔄</div>
         <div class="settings-item-label">Refazer avaliação</div>
+      </div>
+    </div>
+    <div class="settings-item" style="cursor:pointer" onclick="closeSettings();closeInstallTutorial();showInstallModal()">
+      <div class="settings-item-left">
+        <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">📱</div>
+        <div class="settings-item-label">Instalar aplicativo</div>
       </div>
     </div>
     <div class="settings-item">
