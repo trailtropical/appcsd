@@ -298,9 +298,18 @@ async function adminLogin() {
     errEl.style.display='block'; errEl.textContent='Acesso não autorizado'
     if (data?.user) sb.auth.signOut(); return
   }
-  // Ensure admin role
-  const { data: prof } = await sb.from('profiles').select('role').eq('id', data.user.id).single()
-  if (prof?.role !== 'admin') await sb.from('profiles').update({ role: 'admin' }).eq('id', data.user.id)
+  try {
+    const { data: prof } = await sb.from('profiles').select('role').eq('id', data.user.id).maybeSingle()
+    if (!prof) {
+      await sb.from('profiles').insert({ id: data.user.id, email: data.user.email, role: 'admin' })
+    } else if (prof.role !== 'admin') {
+      await sb.from('profiles').update({ role: 'admin' }).eq('id', data.user.id)
+    }
+  } catch(e) {
+    console.error('Admin role setup error:', e)
+    errEl.style.display='block'; errEl.textContent='Erro ao configurar admin: '+e.message
+    return
+  }
   currentUser = data.user
   $('login-screen').style.display='none'; $('dash-screen').style.display='block'
   loadDashboard()
