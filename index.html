@@ -1547,7 +1547,7 @@ const TAG_COLORS = {
   flex:'color:var(--flex);border-color:var(--flex)'
 }
 
-function renderExCard(exId, num, isEspecifico, isCritico) {
+function renderExCard(exId, num, isEspecifico, isCritico, isExtra) {
   const ex = EX[exId]
   if (!ex) return ''
   if (ex.adv_only && nivel !== 'adv') return ''
@@ -1555,12 +1555,13 @@ function renderExCard(exId, num, isEspecifico, isCritico) {
   const tagStyle = TAG_COLORS[ex.tc] || ''
   const cardClass = isCritico ? 'ex-card critico' : isEspecifico ? 'ex-card especifico' : 'ex-card geral'
   const tagCrit = isCritico ? '<span class="ex-tag critico">★ Crítico</span>' : ''
+  const tagExtra = isExtra ? '<span class="ex-tag" style="background:rgba(232,80,10,.15);color:var(--orange)">📌 Extra</span>' : ''
   return `<div class="${cardClass} fade-in" data-exid="${exId}">
     <div class="ex-check" onclick="event.stopPropagation();toggleExCheck('${exId}',this.parentElement)"></div>
     <div class="ex-body">
       <div class="ex-name">${ex.name}</div>
       <div class="ex-detail">${detail}</div>
-      <div class="ex-tags"><span class="ex-tag" style="${tagStyle}">${ex.tag}</span>${tagCrit}</div>
+      <div class="ex-tags"><span class="ex-tag" style="${tagStyle}">${ex.tag}</span>${tagCrit}${tagExtra}</div>
       <div class="ex-why">${ex.why}</div>
     </div>
   </div>`
@@ -1942,6 +1943,22 @@ async function saveSessionsToSupabase() {
     })
   }
   console.log('[CSD] Sessões salvas no Supabase')
+}
+
+async function logExercise(exerciseId, sessIdx, done) {
+  if (!window._sbClient || !currentUser) return
+  const sessionKey = ['a','b','c'][sessIdx]
+  try {
+    await window._sbClient.from('exercise_logs').insert({
+      user_id: currentUser.id,
+      exercise_id: exerciseId,
+      session_id: sessionKey,
+      checked: done,
+      done_at: done ? new Date().toISOString() : null
+    })
+  } catch(e) {
+    console.warn('[CSD] logExercise error:', e)
+  }
 }
 
 document.getElementById('login-senha')?.addEventListener('keydown', ev => { if (ev.key === 'Enter') doLogin() })
@@ -2414,6 +2431,7 @@ async function toggleExCheck(exId, el) {
   }
 
   await saveSessionsToSupabase()
+  await logExercise(exId, currentSessionIdx, done)
 
   if (result === 'clear') {
     setTimeout(showDoneAnimation, 400)
@@ -2548,6 +2566,30 @@ function showSessionFromPlan(sessIdx) {
     const card = e.target.closest('[data-exid]')
     if (card && !e.target.closest('.ex-check')) showExerciseDetail(card.dataset.exid)
   }
+
+  // ══ Protocol extras: load from Supabase ══
+  ;(async () => {
+    if (!window._sbClient || !currentUser) return
+    try {
+      const { data: extras } = await window._sbClient.from('protocol_extras')
+        .select('exercise_id').eq('user_id', currentUser.id).eq('active', true)
+      if (extras && extras.length > 0) {
+        const extraIds = extras.map(e => e.exercise_id).filter(id => !finalIds.includes(id))
+        if (extraIds.length > 0) {
+          let extraHtml = `<div style="margin-top:16px;padding-top:16px;border-top:2px dashed var(--border2)"><div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📌 Exercícios extras</div>`
+          extraIds.forEach(id => {
+            const ex = EX[id]
+            if (!ex) return
+            extraHtml += renderExCard(id, n, false, false, true)
+            n++
+          })
+          extraHtml += `</div>`
+          wrap.insertAdjacentHTML('beforeend', extraHtml)
+        }
+      }
+    } catch(e) { console.warn('[CSD] extras error:', e) }
+  })()
+
   showScreen('s-session-detail')
 }
 
