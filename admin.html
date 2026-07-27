@@ -328,7 +328,7 @@ async function loadDashboard() {
   $('dash-sub').textContent = 'Carregando dados...'
   try {
     const [profiles, checkups, sessions, exlogs, extras, notes] = await Promise.all([
-      sb.from('profiles').select('*').neq('role','admin'),
+      sb.from('profiles').select('*').or('role.neq.admin,role.is.null'),
       sb.from('checkups').select('*'),
       sb.from('sessions').select('*'),
       sb.from('exercise_logs').select('*'),
