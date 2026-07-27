@@ -276,7 +276,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 <script>
 const SB_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPPhO6e5yWL_nkPWgfI_4zBfeziic'
-const ADMIN_EMAIL = 'trailtropicalpodcast@gmail.com'
 let sb, currentUser, allStudents = [], filteredStudents = [], currentStudentId = null
 let activeTab = 'timeline'
 
@@ -294,20 +293,8 @@ async function adminLogin() {
   btn.textContent='Entrando...'; btn.disabled=true; errEl.style.display='none'
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass })
   btn.textContent='Entrar'; btn.disabled=false
-  if (error || data.user.email !== ADMIN_EMAIL) {
-    errEl.style.display='block'; errEl.textContent='Acesso não autorizado'
-    if (data?.user) sb.auth.signOut(); return
-  }
-  try {
-    const { data: prof } = await sb.from('profiles').select('role').eq('id', data.user.id).maybeSingle()
-    if (!prof) {
-      await sb.from('profiles').insert({ id: data.user.id, email: data.user.email, role: 'admin' })
-    } else if (prof.role !== 'admin') {
-      await sb.from('profiles').update({ role: 'admin' }).eq('id', data.user.id)
-    }
-  } catch(e) {
-    console.error('Admin role setup error:', e)
-    errEl.style.display='block'; errEl.textContent='Erro ao configurar admin: '+e.message
+  if (error) {
+    errEl.style.display='block'; errEl.textContent='Email ou senha inválidos'
     return
   }
   currentUser = data.user
@@ -317,7 +304,7 @@ async function adminLogin() {
 $('adm-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin() })
 async function checkSession() {
   const { data: { session } } = await sb.auth.getSession()
-  if (session?.user?.email === ADMIN_EMAIL) {
+  if (session?.user) {
     currentUser = session.user
     $('login-screen').style.display='none'; $('dash-screen').style.display='block'
     loadDashboard()
