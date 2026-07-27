@@ -319,6 +319,14 @@ async function checkSession() {
   const { data: { session } } = await sb.auth.getSession()
   if (session?.user?.email === ADMIN_EMAIL) {
     currentUser = session.user
+    try {
+      const { data: prof } = await sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle()
+      if (!prof) {
+        await sb.from('profiles').insert({ id: currentUser.id, email: currentUser.email, role: 'admin' })
+      } else if (prof.role !== 'admin') {
+        await sb.from('profiles').update({ role: 'admin' }).eq('id', currentUser.id)
+      }
+    } catch(e) { console.warn('Admin role check error:', e) }
     $('login-screen').style.display='none'; $('dash-screen').style.display='block'
     loadDashboard()
   }
