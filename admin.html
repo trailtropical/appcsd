@@ -320,12 +320,7 @@ async function checkSession() {
   if (session?.user?.email === ADMIN_EMAIL) {
     currentUser = session.user
     try {
-      const { data: prof } = await sb.from('profiles').select('role').eq('id', currentUser.id).maybeSingle()
-      if (!prof) {
-        await sb.from('profiles').insert({ id: currentUser.id, email: currentUser.email, role: 'admin' })
-      } else if (prof.role !== 'admin') {
-        await sb.from('profiles').update({ role: 'admin' }).eq('id', currentUser.id)
-      }
+      await sb.rpc('ensure_admin_profile')
     } catch(e) { console.warn('Admin role check error:', e) }
     $('login-screen').style.display='none'; $('dash-screen').style.display='block'
     loadDashboard()
@@ -344,20 +339,23 @@ function clamp(v,mn,mx) { return Math.max(mn,Math.min(mx,v)) }
 async function loadDashboard() {
   $('dash-sub').textContent = 'Carregando dados...'
   try {
-    const [profiles, checkups, sessions, exlogs, extras, notes] = await Promise.all([
-      sb.from('profiles').select('*').or('role.neq.admin,role.is.null'),
-      sb.from('checkups').select('*'),
-      sb.from('sessions').select('*'),
-      sb.from('exercise_logs').select('*'),
-      sb.from('protocol_extras').select('*'),
-      sb.from('student_notes').select('*')
-    ])
-    const students = (profiles.data||[]).map(p => {
-      const pCheckups = (checkups.data||[]).filter(c => c.user_id === p.id).sort((a,b) => new Date(b.created_at)-new Date(a.created_at))
-      const pSessions = (sessions.data||[]).filter(s => s.user_id === p.id).sort((a,b) => new Date(b.created_at)-new Date(a.created_at))
-      const pLogs = (exlogs.data||[]).filter(l => l.user_id === p.id).sort((a,b) => new Date(b.done_at)-new Date(a.done_at))
-      const pExtras = (extras.data||[]).filter(e => e.user_id === p.id)
-      const pNotes = (notes.data||[]).filter(n => n.user_id === p.id)
+    const { data: result, error: rpcError } = await sb.rpc('get_admin_data')
+    if (rpcError) throw rpcError
+    if (result?.error) throw new Error(result.error)
+
+    const profiles = result?.profiles || []
+    const checkups = result?.checkups || []
+    const sessions = result?.sessions || []
+    const exlogs = result?.exercise_logs || []
+    const extras = result?.protocol_extras || []
+    const notes = result?.student_notes || []
+
+    const students = profiles.map(p => {
+      const pCheckups = checkups.filter(c => c.user_id === p.id).sort((a,b) => new Date(b.created_at)-new Date(a.created_at))
+      const pSessions = sessions.filter(s => s.user_id === p.id).sort((a,b) => new Date(b.created_at)-new Date(a.created_at))
+      const pLogs = exlogs.filter(l => l.user_id === p.id).sort((a,b) => new Date(b.done_at)-new Date(a.done_at))
+      const pExtras = extras.filter(e => e.user_id === p.id)
+      const pNotes = notes.filter(n => n.user_id === p.id)
       const latestCheckup = pCheckups[0]
       const latestSession = pSessions[0]
       let scores = latestCheckup?.scores || {}
