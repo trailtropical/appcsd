@@ -901,7 +901,7 @@ const TESTS = [
     ]},
   {id:'stepdown', eyebrow:'Teste 5 — Controle motor de quadril', title:'Step-down test',
     video:'step-down descida de degrau',
-    videoEmbed:'<div style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0"><iframe frameborder="0" allowfullscreen src="https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/6a511166de3fa61569679e08/v4/embed.html" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="origin"></iframe></div></div>',
+    videoEmbed:'<div style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0"><iframe frameborder="0" allowfullscreen src="https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/6a67b75cab208488526e0974/v4/embed.html" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="origin"></iframe></div></div>',
     videoScript:'https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js', hint:'O que aconteceu durante a descida?',
     options:[
       {id:'controle', label:'Dificuldade em controlar a descida', sub:'Falta de estabilidade ou dor no joelho', signals:['quadril_forca']},
@@ -999,7 +999,7 @@ const EX = {
   g_prancha:{name:'Prancha Frontal',di:'3 séries · 20s',dm:'3 séries · 30s',da:'3 séries · 45s',tag:'core',tc:'flex',why:'Ativa o core — base de estabilidade para a corrida.',vid:'6a54de5f0a7249098836dd59'},
   g_panturrilha:{name:'Elevação de Panturrilha Unilateral',di:'3 séries · 8 reps · mãos na parede',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'força',tc:'pant',why:'Prepara a panturrilha e o tornozelo para o impacto da corrida.',vid:'6a54deb92c2f06556e0e0e9c'},
   g_equilibrio:{name:'Equilíbrio Unilateral',di:'2 séries · 30s · olhos abertos',dm:'2 séries · 30s · olhos fechados',da:'2 séries · 45s · olhos fechados',tag:'propriocepção',tc:'prop',why:'Treina a comunicação entre sistema nervoso e músculos estabilizadores.',vid:'6a54e61e6bda3ac633cd7f78'},
-  g_stepdown:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'controle',tc:'qfor',why:'Controle excêntrico — protege o joelho a cada passada.',vid:'6a54e6133c9d9bf04f45ed85'},
+  g_stepdown:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'controle',tc:'qfor',why:'Controle excêntrico — protege o joelho a cada passada.',vid:'6a67b75cab208488526e0974'},
   g_terra:{name:'Levantamento Terra 1 perna',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'cadeia post.',tc:'glut',why:'Fortalece isquiotibiais, glúteo e lombar — a base que sustenta a corrida no cansaço.',vid:'6a54deb40a7249098836deca'},
 
   // TORNOZELO
@@ -1022,13 +1022,13 @@ const EX = {
   // PROPRIOCEPÇÃO
   e_prop_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'propriocepção',tc:'prop',why:'Treina o sistema proprioceptivo sem compensação visual.',vid:'6a54e61e6bda3ac633cd7f78'},
   e_prop_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 10 reps unilateral',tag:'propriocepção',tc:'prop',why:'Combina equilíbrio, propriocepção e força de tornozelo em um único movimento.',vid:'6a54e6133c9d9bf04f45ed85'},
-  e_prop_step:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps',da:'3 séries · 10 reps com pausa',tag:'propriocepção',tc:'prop',why:'Propriocepção dinâmica — controle real em movimento de impacto.',vid:'6a54e6133c9d9bf04f45ed85'},
+  e_prop_step:{name:'Step-Down',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps',da:'3 séries · 10 reps com pausa',tag:'propriocepção',tc:'prop',why:'Propriocepção dinâmica — controle real em movimento de impacto.',vid:'6a67b75cab208488526e0974'},
 
   // PANTURRILHA
   e_plant:{name:'Plantiflexão',di:'3 séries · 12 reps · mãos na parede',dm:'3 séries · 15 reps · sem apoio',da:'3 séries · 15 reps · superfície inclinada',tag:'panturrilha',tc:'pant',why:'Fortalece a panturrilha de forma progressiva e segura.',vid:'6a54debe8c9a9181a2105568'},
 
   // CONTROLE MOTOR QUADRIL
-  e_step_esp:{name:'Step-Down',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps com pausa no fundo',tag:'controle',tc:'qfor',why:'O exercício mais específico para controle motor do quadril e glúteo médio.',vid:'6a54e6133c9d9bf04f45ed85'},
+  e_step_esp:{name:'Step-Down',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps com pausa no fundo',tag:'controle',tc:'qfor',why:'O exercício mais específico para controle motor do quadril e glúteo médio.',vid:'6a67b75cab208488526e0974'},
   e_skatista:{name:'Agachamento Skatista',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps + pausa',tag:'controle',tc:'qfor',why:'Treina controle unilateral do joelho e quadril em padrão de impacto.',vid:'6a54deac8c9a9181a210550b'},
 
   // FLEXORES
