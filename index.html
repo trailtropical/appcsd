@@ -1766,8 +1766,9 @@ function showIOSTutorial() {
   const stepDescs = document.querySelectorAll('#install-tutorial .install-step-desc')
   const stepLabels = document.querySelectorAll('#install-tutorial .install-step-label')
 
+  note.innerHTML = ''
+
   if (PWA.browser === 'chrome-ios') {
-    note.innerHTML = '💡 No Chrome, o Compartilhar (⎙) fica na barra inferior direto.'
     stepDescs[0].textContent = 'Na barra inferior do Chrome'
     stepDescs[1].textContent = 'Role e toque nesta opção'
     stepDescs[2].textContent = 'Confirme no canto superior'
@@ -1779,13 +1780,12 @@ function showIOSTutorial() {
   } else if (PWA.browser === 'edge-ios') {
     note.innerHTML = '💡 O Edge no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong>.'
   } else {
-    // Safari (padrão)
-    note.innerHTML = '💡 No Safari, primeiro toque nos 3 pontos (⋯) para abrir o menu.'
+    // Safari
     stepDescs[0].textContent = 'Toque nos 3 pontos (⋯)'
     stepDescs[1].textContent = 'Depois toque em Compartilhar (⎙) e role até Adicionar à Tela de Início'
     stepDescs[2].textContent = 'Toque em Adicionar no canto superior'
     stepLabels[0].textContent = 'Toque nos 3 pontos'
-    stepLabels[1].textContent = 'Adicionar à Tela de Início'
+    stepLabels[1].textContent = 'Compartilhar > Adicionar à Tela de Início'
     stepLabels[2].textContent = 'Toque em Adicionar'
   }
 }
