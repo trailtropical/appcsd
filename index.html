@@ -611,30 +611,41 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 <div class="install-tutorial-backdrop" id="install-tutorial">
   <div class="install-tutorial">
     <div class="install-tutorial-title">Instalar no iPhone</div>
-    <div class="install-step">
-      <div class="install-step-num">1</div>
-      <div class="install-step-content">
-        <div class="install-step-icon">⎙</div>
-        <div class="install-step-label">Toque em Compartilhar</div>
-        <div class="install-step-desc">No menu inferior do Safari</div>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="install-step-num">1</div>
+        <div class="install-step-content">
+          <div class="install-step-icon">⋯</div>
+          <div class="install-step-label">Toque nos 3 pontos</div>
+          <div class="install-step-desc"></div>
+        </div>
       </div>
-    </div>
-    <div class="install-step-arrow">↓</div>
-    <div class="install-step">
-      <div class="install-step-num">2</div>
-      <div class="install-step-content">
-        <div class="install-step-icon">➕</div>
-        <div class="install-step-label">Adicionar à Tela de Início</div>
-        <div class="install-step-desc">Role a lista e toque nesta opção</div>
+      <div class="install-step-arrow">↓</div>
+      <div class="install-step">
+        <div class="install-step-num">2</div>
+        <div class="install-step-content">
+          <div class="install-step-icon">⎙</div>
+          <div class="install-step-label">Depois toque em Compartilhar</div>
+          <div class="install-step-desc"></div>
+        </div>
       </div>
-    </div>
-    <div class="install-step-arrow">↓</div>
-    <div class="install-step">
-      <div class="install-step-num">3</div>
-      <div class="install-step-content">
-        <div class="install-step-icon">✅</div>
-        <div class="install-step-label">Toque em Adicionar</div>
-        <div class="install-step-desc">Confirme no canto superior direito</div>
+      <div class="install-step-arrow">↓</div>
+      <div class="install-step">
+        <div class="install-step-num">3</div>
+        <div class="install-step-content">
+          <div class="install-step-icon">➕</div>
+          <div class="install-step-label">Role até Adicionar à Tela de Início</div>
+          <div class="install-step-desc"></div>
+        </div>
+      </div>
+      <div class="install-step-arrow">↓</div>
+      <div class="install-step">
+        <div class="install-step-num">4</div>
+        <div class="install-step-content">
+          <div class="install-step-icon">✅</div>
+          <div class="install-step-label">Toque em Adicionar no canto superior</div>
+          <div class="install-step-desc"></div>
+        </div>
       </div>
     </div>
     <div id="install-tutorial-note" class="install-browser-note"></div>
@@ -1762,32 +1773,44 @@ function showIOSTutorial() {
   const tutorial = document.getElementById('install-tutorial')
   const note = document.getElementById('install-tutorial-note')
   tutorial.classList.add('open')
-
-  const stepDescs = document.querySelectorAll('#install-tutorial .install-step-desc')
-  const stepLabels = document.querySelectorAll('#install-tutorial .install-step-label')
-
   note.innerHTML = ''
 
+  const stepsEl = tutorial.querySelector('.install-steps')
+  if (!stepsEl) return
+
+  let steps = []
   if (PWA.browser === 'chrome-ios') {
-    stepDescs[0].textContent = 'Na barra inferior do Chrome'
-    stepDescs[1].textContent = 'Role e toque nesta opção'
-    stepDescs[2].textContent = 'Confirme no canto superior'
-    stepLabels[0].textContent = 'Toque em Compartilhar'
-    stepLabels[1].textContent = 'Adicionar à Tela de Início'
-    stepLabels[2].textContent = 'Toque em Adicionar'
+    steps = [
+      {n:1,ico:'⎙',l:'Toque em Compartilhar',d:''},
+      {n:2,ico:'➕',l:'Role até Adicionar à Tela de Início',d:''},
+      {n:3,ico:'✅',l:'Toque em Adicionar no canto superior',d:''}
+    ]
   } else if (PWA.browser === 'firefox-ios') {
     note.innerHTML = '💡 O Firefox no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong>.'
+    return
   } else if (PWA.browser === 'edge-ios') {
     note.innerHTML = '💡 O Edge no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong>.'
+    return
   } else {
     // Safari
-    stepDescs[0].textContent = 'Toque nos 3 pontos (⋯)'
-    stepDescs[1].textContent = 'Depois toque em Compartilhar (⎙) e role até Adicionar à Tela de Início'
-    stepDescs[2].textContent = 'Toque em Adicionar no canto superior'
-    stepLabels[0].textContent = 'Toque nos 3 pontos'
-    stepLabels[1].textContent = 'Compartilhar > Adicionar à Tela de Início'
-    stepLabels[2].textContent = 'Toque em Adicionar'
+    steps = [
+      {n:1,ico:'⋯',l:'Toque nos 3 pontos',d:''},
+      {n:2,ico:'⎙',l:'Depois toque em Compartilhar',d:''},
+      {n:3,ico:'➕',l:'Role até Adicionar à Tela de Início',d:''},
+      {n:4,ico:'✅',l:'Toque em Adicionar no canto superior',d:''}
+    ]
   }
+
+  stepsEl.innerHTML = steps.map((s,i) =>
+    `<div class="install-step">
+      <div class="install-step-num">${s.n}</div>
+      <div class="install-step-content">
+        <div class="install-step-icon">${s.ico}</div>
+        <div class="install-step-label">${s.l}</div>
+        <div class="install-step-desc">${s.d}</div>
+      </div>
+    </div>${i < steps.length-1 ? '<div class="install-step-arrow">↓</div>' : ''}`
+  ).join('')
 }
 
 function closeInstallTutorial() {
