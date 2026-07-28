@@ -574,7 +574,6 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     </div>
     <div class="ios-steps" id="ios-steps" style="display:none">
       <div style="margin-bottom:10px;font-size:14px;color:var(--text);font-weight:600">Como adicionar à tela inicial:</div>
-      <img src="./assets/ios-install.gif" alt="Instalação iOS" style="width:100%;border-radius:10px;margin-bottom:12px">
       <div>1. Toque no ícone <b>Compartilhar</b> □↑</div>
       <div>2. Role para baixo e toque em <b>Adicionar à Tela de Início</b></div>
       <div>3. Toque em <b>Adicionar</b> no canto superior</div>
@@ -1765,11 +1764,16 @@ function showIOSTutorial() {
   tutorial.classList.add('open')
 
   if (PWA.browser === 'chrome-ios') {
-    note.innerHTML = 'No Chrome do iPhone, use o menu <strong>Compartilhar</strong> (⎙) e escolha <strong>Adicionar à Tela de Início</strong>.'
-  } else if (PWA.browser === 'firefox-ios' || PWA.browser === 'edge-ios') {
-    note.innerHTML = 'Este navegador não suporta instalação direta. Abra esta página no <strong>Safari</strong> para instalar o app.'
+    note.innerHTML = '💡 No Chrome do iPhone, toque no menu <strong>Compartilhar</strong> (⎙) da barra inferior, role e escolha <strong>Adicionar à Tela de Início</strong>.'
+  } else if (PWA.browser === 'firefox-ios') {
+    note.innerHTML = '💡 O Firefox no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong> e siga os passos ao lado.'
+    document.querySelector('#install-tutorial .install-step:nth-child(2) .install-step-desc').textContent = 'No Safari'
+  } else if (PWA.browser === 'edge-ios') {
+    note.innerHTML = '💡 O Edge no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong> e siga os passos ao lado.'
+    document.querySelector('#install-tutorial .install-step:nth-child(2) .install-step-desc').textContent = 'No Safari'
   } else {
     note.innerHTML = ''
+    document.querySelector('#install-tutorial .install-step:nth-child(2) .install-step-desc').textContent = 'No menu inferior do Safari'
   }
 }
 
