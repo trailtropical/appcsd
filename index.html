@@ -1755,7 +1755,7 @@ async function handleInstall() {
     if (outcome === 'accepted') localStorage.setItem('csd_install_done', '1')
   } else {
     closeInstallModal()
-    if (PWA.platform === 'android') document.getElementById('download-modal').classList.add('show')
+    document.getElementById('download-modal').classList.add('show')
   }
 }
 
