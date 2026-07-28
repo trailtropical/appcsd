@@ -2462,11 +2462,13 @@ async function toggleExCheck(exId, el) {
   checks[key][exId] = wasDone ? null : new Date().toISOString()
   localStorage.setItem('csd_sessionChecks', JSON.stringify(checks))
 
-  const check = el.querySelector('.ex-check')
+  const check = el?.querySelector('.ex-check')
   const done = !!checks[key][exId]
-  check.classList.toggle('done', done)
-  check.textContent = done ? '✓' : ''
-  el.classList.toggle('checked', done)
+  if (check) {
+    check.classList.toggle('done', done)
+    check.textContent = done ? '✓' : ''
+  }
+  if (el) el.classList.toggle('checked', done)
 
   let result = false
   if (done) {
@@ -2655,13 +2657,23 @@ function showExerciseDetail(id) {
     videoWrap.classList.remove('has-video')
   }
 
+  const checks = getSessionChecks()[`sess_${currentSessionIdx}`] || {}
+  const isDone = !!checks[id]
+
   let detailHtml = `<div class="ex-detail-name">${ex.name}</div>`
   const detailText = getDetail(ex)
   if (detailText) detailHtml += `<div class="ex-detail-detail">${detailText}</div>`
   if (ex.why) detailHtml += `<div class="ex-detail-why">${ex.why}</div>`
   if (ex.adv_only) detailHtml += `<div style="margin-top:8px;font-size:11px;color:var(--orange);font-weight:600">🔒 Avançado — apenas após dominar nível intermediário</div>`
+  detailHtml += `<button class="btn-primary" style="margin-top:16px" onclick="checkFromDetail('${id}')">${isDone ? '✓ Concluído' : 'Marcar como concluído'}</button>`
   document.getElementById('ex-detail-body').innerHTML = detailHtml
   document.getElementById('ex-detail').classList.add('open')
+}
+
+async function checkFromDetail(exId) {
+  const card = document.querySelector(`#sessao-exercises .ex-card[data-exid="${exId}"]`)
+  await toggleExCheck(exId, card)
+  closeExDetail()
 }
 function closeExDetail() {
   document.getElementById('ex-detail').classList.remove('open')
