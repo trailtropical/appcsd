@@ -1723,11 +1723,13 @@ window.addEventListener('appinstalled', () => {
   if (btn) btn.textContent = '✓ Instalado'
 })
 
-function showInstallModal() {
-  const dismissed = localStorage.getItem('csd_install_dismissed')
-  if (dismissed) {
-    const daysSince = (Date.now() - parseInt(dismissed)) / 86400000
-    if (daysSince < 3) return
+function showInstallModal(force = false) {
+  if (!force) {
+    const dismissed = localStorage.getItem('csd_install_dismissed')
+    if (dismissed) {
+      const daysSince = (Date.now() - parseInt(dismissed)) / 86400000
+      if (daysSince < 3) return
+    }
   }
   const overlay = document.getElementById('install-overlay')
   overlay.classList.add('open')
@@ -2997,7 +2999,7 @@ if (!_hasEmail) {
         <div class="settings-item-label">Refazer avaliação</div>
       </div>
     </div>
-    <div class="settings-item" style="cursor:pointer" onclick="closeSettings();closeInstallTutorial();showInstallModal()">
+    <div class="settings-item" style="cursor:pointer" onclick="closeSettings();closeInstallTutorial();showInstallModal(true)">
       <div class="settings-item-left">
         <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">📱</div>
         <div class="settings-item-label">Instalar aplicativo</div>
