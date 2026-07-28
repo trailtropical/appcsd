@@ -1763,17 +1763,30 @@ function showIOSTutorial() {
   const note = document.getElementById('install-tutorial-note')
   tutorial.classList.add('open')
 
+  const stepDescs = document.querySelectorAll('#install-tutorial .install-step-desc')
+  const stepLabels = document.querySelectorAll('#install-tutorial .install-step-label')
+
   if (PWA.browser === 'chrome-ios') {
-    note.innerHTML = '💡 No Chrome do iPhone, toque no menu <strong>Compartilhar</strong> (⎙) da barra inferior, role e escolha <strong>Adicionar à Tela de Início</strong>.'
+    note.innerHTML = '💡 No Chrome, o Compartilhar (⎙) fica na barra inferior direto.'
+    stepDescs[0].textContent = 'Na barra inferior do Chrome'
+    stepDescs[1].textContent = 'Role e toque nesta opção'
+    stepDescs[2].textContent = 'Confirme no canto superior'
+    stepLabels[0].textContent = 'Toque em Compartilhar'
+    stepLabels[1].textContent = 'Adicionar à Tela de Início'
+    stepLabels[2].textContent = 'Toque em Adicionar'
   } else if (PWA.browser === 'firefox-ios') {
-    note.innerHTML = '💡 O Firefox no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong> e siga os passos ao lado.'
-    document.querySelector('#install-tutorial .install-step:nth-child(2) .install-step-desc').textContent = 'No Safari'
+    note.innerHTML = '💡 O Firefox no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong>.'
   } else if (PWA.browser === 'edge-ios') {
-    note.innerHTML = '💡 O Edge no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong> e siga os passos ao lado.'
-    document.querySelector('#install-tutorial .install-step:nth-child(2) .install-step-desc').textContent = 'No Safari'
+    note.innerHTML = '💡 O Edge no iPhone não suporta instalação. <strong>Abra esta página no Safari</strong>.'
   } else {
-    note.innerHTML = ''
-    document.querySelector('#install-tutorial .install-step:nth-child(2) .install-step-desc').textContent = 'No menu inferior do Safari'
+    // Safari (padrão)
+    note.innerHTML = '💡 No Safari, primeiro toque nos 3 pontos (⋯) para abrir o menu.'
+    stepDescs[0].textContent = 'Toque nos 3 pontos (⋯)'
+    stepDescs[1].textContent = 'Depois toque em Compartilhar (⎙) e role até Adicionar à Tela de Início'
+    stepDescs[2].textContent = 'Toque em Adicionar no canto superior'
+    stepLabels[0].textContent = 'Toque nos 3 pontos'
+    stepLabels[1].textContent = 'Adicionar à Tela de Início'
+    stepLabels[2].textContent = 'Toque em Adicionar'
   }
 }
 
