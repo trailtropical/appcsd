@@ -319,6 +319,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .chat-opt:hover{background:var(--surface2);border-color:var(--orange)}
 .chat-opt.selected{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
 .chat-opt.sel{background:var(--orange);border-color:var(--orange);color:#fff}
+.custom-pain-wrap{margin-top:10px;width:100%}
+.custom-pain-input{width:100%;padding:14px;background:var(--surface);border:1px solid var(--border2);border-radius:16px;font-size:16px;color:var(--text);font-family:inherit;outline:none;transition:border-color .15s}
+.custom-pain-input:focus{border-color:var(--orange)}
+.custom-pain-input::placeholder{color:var(--muted)}
 .chat-slider-wrap{display:flex;flex-direction:column;gap:8px;padding:8px 0}
 .chat-slider-wrap input[type=range]{-webkit-appearance:none;width:100%;height:8px;background:linear-gradient(to right,var(--glut) 0%,var(--orange) 50%,#EF4444 100%);border-radius:4px;outline:none;cursor:pointer}
 .chat-slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:var(--orange);border:3px solid var(--bg);cursor:grab;box-shadow:0 0 12px var(--orange-glow),0 2px 8px rgba(0,0,0,.3);animation:pulse-thumb 2s infinite}
@@ -1128,7 +1132,7 @@ const BONUSES = [
 // ══ ONBOARDING ══
 const ONBOARDING = [
   {id:'painToday',q:'Hoje você sente alguma <span class="highlight">dor</span> durante a corrida?',type:'single',opts:['Sim','Não']},
-  {id:'painLocation',q:'Onde você sente essa dor?',type:'multi',opts:['Joelho','Quadril','Panturrilha','Tornozelo','Pé','Canela','Lombar'],show:d=>d.painToday==='Sim'},
+  {id:'painLocation',q:'Onde você sente essa dor?',type:'multi',opts:['Joelho','Quadril','Panturrilha','Tornozelo','Pé','Canela','Lombar','Outro lugar'],show:d=>d.painToday==='Sim'},
   {id:'painIntensity',q:'Qual a <span class="highlight">intensidade</span> da dor? (0 = nenhuma, 10 = insuportável)',type:'slider',min:0,max:10},
   {id:'painMoment',q:'Quando ela <span class="highlight">aparece</span>?',type:'single',opts:['Logo no início','Durante a corrida','No final','Após correr','No dia seguinte'],show:d=>d.painToday==='Sim'},
   {id:'painDuration',q:'Há <span class="highlight">quanto tempo</span> você convive com isso?',type:'single',opts:['Menos de 1 semana','1–4 semanas','1–3 meses','Mais de 3 meses']},
@@ -2765,7 +2769,10 @@ function renderOptions(q) {
     appendChatHtml(html)
   } else if (q.type === 'multi') {
     const saved = onboardingData[q.id] || []
-    const html = `<div class="chat-opts">${q.opts.map(o => `<div class="chat-opt${saved.includes(o)?' selected':''}" data-val="${o}" onclick="toggleMultiOpt('${q.id}','${o}',this)">${o}</div>`).join('')}</div>
+    const html = `<div class="chat-opts">${q.opts.map(o => {
+      const extra = o === 'Outro lugar' ? `<div class="custom-pain-wrap" id="custom-pain-wrap" style="display:${saved.includes(o)?'block':'none'}"><input type="text" id="custom-pain-input" class="custom-pain-input" placeholder="Escreva o local da dor..." oninput="this.dataset.dirty='1'"></div>` : ''
+      return `<div class="chat-opt${saved.includes(o)?' selected':''}" data-val="${o}" onclick="toggleMultiOpt('${q.id}','${o}',this)">${o}</div>${extra}`
+    }).join('')}</div>
       <button class="btn-primary" style="margin-top:16px" onclick="confirmMultiOpt('${q.id}')">Confirmar →</button>`
     appendChatHtml(html)
   }
@@ -2780,10 +2787,23 @@ function toggleMultiOpt(id, val, el) {
   opts.querySelectorAll('.chat-opt').forEach(o => {
     o.classList.toggle('selected',arr.includes(o.dataset.val))
   })
+  if (val === 'Outro lugar') {
+    const wrap = document.getElementById('custom-pain-wrap')
+    if (wrap) wrap.style.display = arr.includes('Outro lugar') ? 'block' : 'none'
+  }
 }
 
 function confirmMultiOpt(id) {
-  selectOnbOpt(id, onboardingData[id] || [])
+  let arr = onboardingData[id] || []
+  if (id === 'painLocation') {
+    const input = document.getElementById('custom-pain-input')
+    const custom = input && input.value ? input.value.trim() : ''
+    if (arr.includes('Outro lugar')) {
+      arr = arr.filter(v => v !== 'Outro lugar')
+      if (custom) arr.push(custom)
+    }
+  }
+  selectOnbOpt(id, arr)
 }
 
 function selectOnbOpt(id, val) {
