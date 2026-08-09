@@ -1009,7 +1009,7 @@ function vturbEmbed(vid) {
 }
 const EX = {
   // BLOCO GERAL
-  g_volta_mundo:{name:'Volta ao mundo',di:'2 séries · 30s cada lado · 4 apoios',dm:'2 séries · 30s cada lado · em pé',da:'2 séries · 30s cada lado · em pé',tag:'mobilidade',tc:'qmob',why:'Abre o quadril em todas as direções antes de sair para correr.',vid:'6a54dede0a9f72b511fbdb30'},
+  g_volta_mundo:{name:'Volta ao mundo',di:'2 séries · 30s cada lado · 4 apoios',dm:'2 séries · 30s cada lado · em pé',da:'2 séries · 30s cada lado · em pé',vidi:'6a54dec82c2f06556e0e0ef7',tag:'mobilidade',tc:'qmob',why:'Abre o quadril em todas as direções antes de sair para correr.',vid:'6a54dede0a9f72b511fbdb30'},
   g_cocoras:{name:'Cócoras',di:'2 séries · 30 segundos',dm:'2 séries · 45 segundos',da:'2 séries · 60 segundos',tag:'mobilidade',tc:'qmob',why:'Mobiliza tornozelo e quadril simultaneamente.',vid:'6a54e6240a9f72b511fbefb4'},
   g_prancha:{name:'Prancha Frontal',di:'3 séries · 20s',dm:'3 séries · 30s',da:'3 séries · 45s',tag:'core',tc:'flex',why:'Ativa o core — base de estabilidade para a corrida.',vid:'6a54de5f0a7249098836dd59'},
   g_panturrilha:{name:'Elevação de Panturrilha Unilateral',di:'3 séries · 8 reps · mãos na parede',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'força',tc:'pant',why:'Prepara a panturrilha e o tornozelo para o impacto da corrida.',vid:'6a54deb92c2f06556e0e0e9c'},
@@ -1025,7 +1025,7 @@ const EX = {
   e_saltos_quad:{name:'Saltos no quadrado',di:null,dm:null,da:'3 séries · 20 saltos',tag:'tornozelo',tc:'torn',why:'Treina a absorção de impacto rápido — exatamente o que acontece na corrida.',adv_only:true,vid:'6a54e62a3c9d9bf04f45edbf'},
 
   // QUADRIL MOBILIDADE
-  e_volta_mundo:{name:'Volta ao mundo',di:'3 séries · 30s · 4 apoios',dm:'3 séries · 30s · em pé',da:'3 séries · 30s · em pé com carga',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.',vid:'6a54dede0a9f72b511fbdb30'},
+  e_volta_mundo:{name:'Volta ao mundo',di:'3 séries · 30s · 4 apoios',dm:'3 séries · 30s · em pé',da:'3 séries · 30s · em pé com carga',vidi:'6a54dec82c2f06556e0e0ef7',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.',vid:'6a54dede0a9f72b511fbdb30'},
   e_noventa:{name:'90/90',di:'3 séries · 60s cada lado',dm:'3 séries · 60s + rotação ativa',da:'3 séries · 90s + pressão ativa',tag:'quadril mob.',tc:'qmob',why:'Trabalha rotação interna e externa do quadril simultaneamente.',vid:'6a54dec2453615a5c5ae7b22'},
   e_iliopsoas:{name:'Alongamento do Iliopsoas',di:'3 séries · 45s cada lado',dm:'3 séries · 60s',da:'3 séries · 60s com elevação de braço',tag:'flexores',tc:'flex',why:'Alonga o flexor de quadril que encurta com horas sentado e limita a passada.',vid:'6a54e6ce1e490ba6e5ff99d5'},
 
@@ -1550,6 +1550,12 @@ function getDetail(ex) {
   if (nivel === 'init') return ex.di || ex.dm
   if (nivel === 'adv')  return ex.da || ex.dm
   return ex.dm
+}
+
+function getExVid(ex) {
+  if (nivel === 'init' && ex.vidi) return ex.vidi
+  if (nivel === 'adv' && ex.vida) return ex.vida
+  return ex.vid
 }
 
 const TAG_COLORS = {
@@ -2653,8 +2659,9 @@ function showExerciseDetail(id) {
   document.getElementById('ex-video-label').textContent = 'Vídeo: ' + ex.name
 
   const videoWrap = document.querySelector('.ex-detail-video')
-  if (ex.vid) {
-    videoWrap.innerHTML = vturbEmbed(ex.vid)
+  const exVid = getExVid(ex)
+  if (exVid) {
+    videoWrap.innerHTML = vturbEmbed(exVid)
     videoWrap.classList.add('has-video')
   } else {
     videoWrap.innerHTML = '<div class="play-btn">▶</div><div class="video-label">Vídeo em breve</div>'
