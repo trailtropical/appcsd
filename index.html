@@ -99,8 +99,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .welcome-cta{padding:0 24px 40px;display:flex;flex-direction:column;gap:8px}
 
 /* TESTES */
-#s-test{background:var(--bg)}
-.test-content{padding:20px 24px calc(40px + env(safe-area-inset-bottom) + 32px);flex:1;display:flex;flex-direction:column;gap:18px}
+#s-test{background:var(--bg);overflow-y:auto}
+.test-content{padding:20px 24px 24px;flex:1;display:flex;flex-direction:column;gap:18px}
 .test-eyebrow{font-size:11px;font-weight:600;color:var(--orange);letter-spacing:.07em;text-transform:uppercase}
 .test-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2}
 
@@ -2042,7 +2042,7 @@ function startCheckup() {
 }
 
 function goBack() {
-  if (currentTest > 0) { currentTest--; loadTest(currentTest) }
+  if (currentTest > 0) { currentTest--; loadTest(currentTest); window.scrollTo(0,0) }
   else showScreen('s-welcome')
 }
 
