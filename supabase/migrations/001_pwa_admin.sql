@@ -3,6 +3,9 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone text DEFAULT '';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS photo_url text DEFAULT '';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role text DEFAULT 'user';
 
+-- ══ sessions — add completed_weeks ══
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS completed_weeks integer DEFAULT 0;
+
 -- ══ exercise_logs ══
 CREATE TABLE IF NOT EXISTS exercise_logs (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

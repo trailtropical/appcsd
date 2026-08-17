@@ -369,6 +369,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .plan-week-toggle{color:var(--muted);font-size:12px;transition:transform .2s}
 .plan-week-body{display:none;padding:0 14px 14px;flex-direction:column;gap:6px}
 .plan-week-body.open{display:flex}
+.plan-week-card.week-done{border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.03)}
 .plan-session-btn{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text);font-family:inherit;text-align:left;transition:border-color .15s}
 .plan-session-btn:hover{border-color:var(--border2)}
 .plan-session-btn .sess-day{color:var(--orange);font-weight:600}
@@ -1430,6 +1431,8 @@ function refazerAvaliacao() {
   localStorage.removeItem('csd_nivel')
   localStorage.removeItem('csd_lastCheckup')
   localStorage.removeItem('csd_lastScores')
+  localStorage.removeItem('csd_completedWeeks')
+  completedWeeks = 0
   showScreen('s-welcome')
 }
 
@@ -1910,6 +1913,10 @@ async function loadUserData() {
     localStorage.setItem('csd_sessionChecks', JSON.stringify(s.checks || {}))
     localStorage.setItem('csd_planMonth', s.plan_month.toString())
     if (s.session_exercises) localStorage.setItem('csd_sessionExercises', JSON.stringify(s.session_exercises))
+    if (s.completed_weeks != null) {
+      localStorage.setItem('csd_completedWeeks', s.completed_weeks.toString())
+      completedWeeks = s.completed_weeks
+    }
   }
 
   // Carregar profile (nome)
@@ -1983,16 +1990,17 @@ async function saveSessionsToSupabase() {
   const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
   const sessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
   const planMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
+  const completed = parseInt(localStorage.getItem('csd_completedWeeks') || '0')
   // Upsert: uma sessão por user_id
   const { data: existing } = await window._sbClient.from('sessions')
     .select('id').eq('user_id', currentUser.id).limit(1)
   if (existing && existing.length > 0) {
     await window._sbClient.from('sessions').update({
-      exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises
+      exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises, completed_weeks: completed
     }).eq('id', existing[0].id)
   } else {
     await window._sbClient.from('sessions').insert({
-      user_id: currentUser.id, exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises
+      user_id: currentUser.id, exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises, completed_weeks: completed
     })
   }
   console.log('[CSD] Sessões salvas no Supabase')
@@ -2341,10 +2349,11 @@ const PLAN_MONTHS = [
 ]
 
 let currentPlanMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
-let currentPlanWeek = 0
+let currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
+let completedWeeks = parseInt(localStorage.getItem('csd_completedWeeks') || '0')
 
 function showPlan() {
-  currentPlanWeek = 0
+  currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
   renderPlanMonths()
   renderPlanView()
   showScreen('s-protocol')
@@ -2420,9 +2429,12 @@ function renderPlanView() {
 
 function renderPlanWeek(idx, label) {
   const isOpen = idx === currentPlanWeek
-  return `<div class="plan-week-card">
+  const isDone = idx < completedWeeks
+  const isCurrent = idx === completedWeeks
+  const statusIcon = isDone ? ' <span style="color:var(--glut);font-size:12px">✓ Concluída</span>' : isCurrent ? ' <span style="color:var(--orange);font-size:11px;font-weight:600">● Atual</span>' : ''
+  return `<div class="plan-week-card${isDone ? ' week-done' : ''}">
     <div class="plan-week-header" onclick="togglePlanWeek(${idx})">
-      <div class="plan-week-name">${label}</div>
+      <div class="plan-week-name">${label}${statusIcon}</div>
       <div class="plan-week-toggle" style="transform:rotate(${isOpen?180:0}deg)">▾</div>
     </div>
     <div class="plan-week-body${isOpen?' open':''}">
@@ -2462,6 +2474,8 @@ function handleSessionComplete() {
   const allDone = Array.from(domCards).every(c => checks[c.dataset.exid])
   if (!allDone) return false
   if (currentSessionIdx === 2) {
+    completedWeeks = Math.min(4, completedWeeks + 1)
+    localStorage.setItem('csd_completedWeeks', completedWeeks.toString())
     const c = getSessionChecks()
     c['sess_0'] = {}
     c['sess_1'] = {}
@@ -2497,13 +2511,13 @@ async function toggleExCheck(exId, el) {
   await logExercise(exId, currentSessionIdx, done)
 
   if (result === 'clear') {
-    setTimeout(showDoneAnimation, 400)
+    setTimeout(() => showDoneAnimation(true), 400)
     setTimeout(goToDashboard, 600)
     return
   }
 
   if (result === 'animate') {
-    setTimeout(showDoneAnimation, 400)
+    setTimeout(() => showDoneAnimation(false), 400)
   }
 
   const pct = getCompletionPct()
@@ -2513,7 +2527,7 @@ async function toggleExCheck(exId, el) {
   if (pctEl) pctEl.textContent = pct + '%'
 }
 
-function showDoneAnimation() {
+function showDoneAnimation(weekComplete) {
   const colors = ['#4ADE80','#38BDF8','#FB923C','#F472B6','#A78BFA','#FBBF24']
   for (let i = 0; i < 30; i++) {
     const c = document.createElement('div')
@@ -2528,7 +2542,9 @@ function showDoneAnimation() {
   }
   const ov = document.createElement('div')
   ov.className = 'ex-done-overlay'
-  ov.innerHTML = `<div class="ex-done-icon">🎉</div><div class="ex-done-title">Parabéns!</div><div class="ex-done-sub">Treino completo. Continue firme na jornada.</div>`
+  ov.innerHTML = weekComplete
+    ? `<div class="ex-done-icon">🎉</div><div class="ex-done-title">Semana completa!</div><div class="ex-done-sub">Todos os treinos da semana foram finalizados. Continue firme na jornada.</div>`
+    : `<div class="ex-done-icon">🎉</div><div class="ex-done-title">Parabéns!</div><div class="ex-done-sub">Treino completo. Continue firme na jornada.</div>`
   ov.onclick = () => ov.remove()
   document.body.appendChild(ov)
   setTimeout(() => ov.remove(), 3000)
@@ -2876,10 +2892,7 @@ function getCompletionPct() {
 }
 
 function getCurrentWeek() {
-  const first = localStorage.getItem('csd_firstCheckup')
-  if (!first) return 1
-  const days = Math.floor((Date.now() - parseInt(first)) / 86400000)
-  return Math.min(4, Math.floor(days / 7) + 1)
+  return Math.min(4, completedWeeks + 1)
 }
 
 // ══ REAVALIAÇÃO ══
@@ -2913,6 +2926,8 @@ function startReavaliacao() {
     const { overall } = calculateIndex()
     localStorage.setItem('csd_lastScores',JSON.stringify({overall,scores:calculateIndex().scores,date:Date.now()}))
   }
+  localStorage.removeItem('csd_completedWeeks')
+  completedWeeks = 0
   showScreen('s-welcome')
 }
 
