@@ -2349,8 +2349,8 @@ const PLAN_MONTHS = [
 ]
 
 let currentPlanMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
-let currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
 let completedWeeks = parseInt(localStorage.getItem('csd_completedWeeks') || '0')
+let currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
 
 function showPlan() {
   currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
