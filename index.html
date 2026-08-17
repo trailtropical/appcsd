@@ -2370,36 +2370,44 @@ function switchPlanMonth(idx) {
 function renderPlanView() {
   const m = PLAN_MONTHS[currentPlanMonth]
   const view = document.getElementById('plan-view')
-  // Build protocol data for week 1 (same protocol repeated for all 4 weeks)
-  const sigs = Object.keys(signalCounts)
-  const sessKeys = ['a','b','c']
-  const sessoes = sessKeys.map(k => {
-    const ids = []
-    const seen = new Set()
-    const seenNames = new Set()
-    sigs.forEach(sig => {
-      const info = SIGNAL_MAP[sig]; if (!info) return
-      ;(info[k]||[]).forEach(id => {
-        if (seen.has(id)) return
-        const ex = EX[id]
-        if (!ex || seenNames.has(ex.name)) return
-        seen.add(id); seenNames.add(ex.name); ids.push(id)
+
+  let sessoes
+  const saved = localStorage.getItem('csd_sessoes')
+  if (saved) {
+    try { sessoes = JSON.parse(saved) } catch(e) { sessoes = null }
+  }
+
+  if (!sessoes || !Array.isArray(sessoes) || sessoes.length < 3 || (sessoes[0].length === 0 && sessoes[1].length === 0 && sessoes[2].length === 0)) {
+    const sigs = Object.keys(signalCounts)
+    const sessKeys = ['a','b','c']
+    sessoes = sessKeys.map(k => {
+      const ids = []
+      const seen = new Set()
+      const seenNames = new Set()
+      sigs.forEach(sig => {
+        const info = SIGNAL_MAP[sig]; if (!info) return
+        ;(info[k]||[]).forEach(id => {
+          if (seen.has(id)) return
+          const ex = EX[id]
+          if (!ex || seenNames.has(ex.name)) return
+          seen.add(id); seenNames.add(ex.name); ids.push(id)
+        })
       })
+      if (criticalSignal) {
+        const critInfo = SIGNAL_MAP[criticalSignal]
+        if (critInfo && critInfo[k]) critInfo[k].forEach(id => {
+          if (seen.has(id)) return
+          const ex = EX[id]
+          if (!ex || seenNames.has(ex.name)) return
+          seen.add(id); seenNames.add(ex.name); ids.push(id)
+        })
+      }
+      if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
+      return ids
     })
-    if (criticalSignal) {
-      const critInfo = SIGNAL_MAP[criticalSignal]
-      if (critInfo && critInfo[k]) critInfo[k].forEach(id => {
-        if (seen.has(id)) return
-        const ex = EX[id]
-        if (!ex || seenNames.has(ex.name)) return
-        seen.add(id); seenNames.add(ex.name); ids.push(id)
-      })
-    }
-    if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
-    return ids
-  })
-  localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
-  saveSessionsToSupabase()
+    localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
+    saveSessionsToSupabase()
+  }
 
   const weeks = ['Semana 1','Semana 2','Semana 3','Semana 4']
   view.innerHTML = `
