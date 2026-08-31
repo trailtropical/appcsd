@@ -24,13 +24,14 @@ serve(async (req) => {
     }
 
     const status = body.status || ""
-    if (status !== "approved") {
+    const validStatuses = ["approved", "active", "confirmed", "paid"]
+    if (!validStatuses.includes(status)) {
       console.log("[guru] Ignoring status:", status)
       return new Response(JSON.stringify({ ignored: true, status }), { status: 200 })
     }
 
-    const email = body.contact?.email || ""
-    const name = body.contact?.name || ""
+    const email = body.contact?.email || body.buyer?.email || body.email || ""
+    const name = body.contact?.name || body.buyer?.name || body.name || ""
 
     if (!email) {
       console.log("[guru] No email in payload")

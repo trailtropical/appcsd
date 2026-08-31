@@ -1023,7 +1023,8 @@ const EX = {
   e_meio_ajoel:{name:'Meio Ajoelhado',di:'3 séries · 12 reps cada lado',dm:'3 séries · 15 reps',da:'3 séries · 15 reps com elástico',tag:'tornozelo',tc:'torn',why:'Aumenta a dorsiflexão — movimento essencial a cada passada na corrida.',vid:'6a54e6181e490ba6e5ff98c0'},
   e_pe_fechado:{name:'1 pé c/ olhos fechados',di:'3 séries · 30s cada lado',dm:'3 séries · 45s',da:'3 séries · 60s · superfície instável',tag:'tornozelo',tc:'torn',why:'Ativa os estabilizadores do tornozelo sem compensação visual.',vid:'6a54e61e6bda3ac633cd7f78'},
   e_agach_ponta:{name:'Agachamento ponta do pé',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 12 reps unilateral',tag:'tornozelo',tc:'torn',why:'Combina mobilidade de tornozelo com força de panturrilha.',vid:'6a54e6133c9d9bf04f45ed85'},
-  e_saltos_quad:{name:'Saltos no quadrado',di:null,dm:null,da:'3 séries · 20 saltos',tag:'tornozelo',tc:'torn',why:'Treina a absorção de impacto rápido — exatamente o que acontece na corrida.',adv_only:true,vid:'6a54e62a3c9d9bf04f45edbf'},
+  e_saltos_quad:{name:'Saltos no quadrado',di:'3 séries · 12 saltos',dm:'3 séries · 16 saltos',da:'3 séries · 20 saltos',tag:'tornozelo',tc:'torn',why:'Treina a absorção de impacto rápido — exatamente o que acontece na corrida.',vid:'6a54e62a3c9d9bf04f45edbf'},
+  e_joelho_parede:{name:'Joelho na Parede',di:'3 séries · 30s cada lado',dm:'3 séries · 45s cada lado',da:'3 séries · 60s cada lado',tag:'tornozelo',tc:'torn',why:'Ganho de dorsiflexão em carga com o joelho avançando sobre a ponta do pé.',vid:'6a91cc56b8cb77a9126afd5a'},
 
   // QUADRIL MOBILIDADE
   e_volta_mundo:{name:'Volta ao mundo',di:'3 séries · 30s · 4 apoios',dm:'3 séries · 30s · em pé',da:'3 séries · 30s · em pé com carga',vidi:'6a54dec82c2f06556e0e0ef7',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.',vid:'6a54dede0a9f72b511fbdb30'},
@@ -1053,25 +1054,87 @@ const EX = {
   // EXERCÍCIOS ADICIONAIS
   e_agach_salto:{name:'Agachamento com Salto',di:'3 séries · 8 reps',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'quadríceps',tc:'qfor',why:'Ativa o quadríceps com explosividade — compensa fraqueza e inativação muscular.',vid:'6a54deb03c9d9bf04f45d869'},
   e_prancha_lat:{name:'Prancha Lateral Dinâmica',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Fortalece core lateral — estabilidade do tronco essencial para corrida sustentada.',vid:'6a54de65bb80b1338edbb5f6'},
-  e_escalador:{name:'Escalador',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Combina core, flexores e coordenação — prepara o corpo para a dinâmica da corrida.',vid:'6a54de507e2e4092887dabe9'}
+  e_escalador:{name:'Escalador',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'core',tc:'flex',why:'Combina core, flexores e coordenação — prepara o corpo para a dinâmica da corrida.',vid:'6a54de507e2e4092887dabe9'},
+
+  // ── NOVOS EXERCÍCIOS (M2/M3) — vídeos pendentes, usar placeholders ──
+  // TORNOZELO
+  e_relogio_pe:{name:'Relógio com o Pé',di:null,dm:'2 séries · 30s cada lado',da:'2 séries · 45s cada lado',tag:'tornozelo',tc:'torn',why:'Mobilidade ativa do tornozelo em todas as direções sobre apoio do pé.',vid:'6a91cc67ba9e65956da34cd1'},
+  e_salto_lat_cong:{name:'Salto Lateral e Congela',di:null,dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'tornozelo',tc:'torn',why:'Absorção de impacto lateral com controle e estabilização imediata.',vid:'6a91cc6ecb84361f3454d75d'},
+  // PANTURRILHA
+  e_caminhada_ponta:{name:'Caminhada na Ponta dos Pés',di:'3 séries · 20 passos',dm:'3 séries · 30 passos',da:'3 séries · 40 passos',tag:'panturrilha',tc:'pant',why:'Fortalece panturrilha em carga dinâmica contínua.',vid:'6a91cc3aa1adb2e9d492623a'},
+  e_iso_pant_1pe:{name:'Isometria Panturrilha 1 Perna',di:null,dm:'3 séries · 30s cada lado',da:'3 séries · 45s cada lado',tag:'panturrilha',tc:'pant',why:'Resistência isométrica unilateral para estabilidade do tornozelo.',vid:'6a91cc459fa2c0570e3c3a83'},
+  e_plant_6kg:{name:'Plantiflexão c/ Peso Extra (6kg)',di:'3 séries · 12 reps',dm:'3 séries · 15 reps · c/ peso extra de 6kg',da:'3 séries · 15 reps · c/ peso extra de 6kg',tag:'panturrilha',tc:'pant',why:'Progressão avançada da panturrilha com carga extra de 6kg para força sustentada na corrida.',vid:'6a54debe8c9a9181a2105568'},
+  e_caminhada_ponta_6kg:{name:'Caminhada na Ponta c/ Peso (6kg)',di:'3 séries · 20 passos',dm:'3 séries · 30 passos · c/ peso extra de 6kg',da:'3 séries · 30 passos · c/ peso extra de 6kg',tag:'panturrilha',tc:'pant',why:'Panturrilha em carga dinâmica contínua com peso extra de 6kg.',vid:'6a91cc3aa1adb2e9d492623a'},
+  // QUADRIL MOBILIDADE
+  e_cossack_assist:{name:'Cossack Assistido',di:null,dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'quadril mob.',tc:'qmob',why:'Mobilidade lateral do quadril com apoio progressivo.',vid:'6a91cc367f584747a34f6138'},
+  e_cossack:{name:'Cossack',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'quadril mob.',tc:'qmob',why:'Mobilidade profunda lateral do quadril sem apoio.',vid:'6a91cc3266ff92fe0131b051'},
+  e_shin_box:{name:'90/90 levanta',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 8 reps cada lado',tag:'quadril mob.',tc:'qmob',why:'Rotações interna e externa do quadril para controle avançado.',vid:'6a92d1526e5e64f1eff47986'},
+  // GLÚTEO
+  e_aviaozinho:{name:'Aviãozinho',di:null,dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'glúteo',tc:'glut',why:'Equilíbrio e ativação do glúteo médio em apoio unilateral.',vid:'6a91cc52a1adb2e9d4926259'},
+  e_elev_lat_degrau:{name:'Elevação Lateral do Quadril',di:null,dm:'3 séries · 10 reps cada lado',da:'3 séries · 12 reps cada lado',tag:'glúteo',tc:'glut',why:'Fortalece abdutores e estabilidade pélvica lateral.',vid:'6a91cc5ea1adb2e9d492626b'},
+  e_desliz_isoquit:{name:'Deslizamento de Isquiotibiais',di:null,dm:'3 séries · 6 reps',da:'3 séries · 8 reps',tag:'glúteo',tc:'glut',why:'Fortalecimento excêntrico dos isquiotibiais sobre superfície deslizante.',vid:'6a91cc63619f4f1a9226499d'},
+  e_copen_isom:{name:'Copenhagen Isometria',di:null,dm:'3 séries · 20s cada lado',da:'3 séries · 30s cada lado',tag:'glúteo',tc:'glut',why:'Fortalece adutores e glúteos para estabilidade do quadril.',vid:'6a91cc2e03a5f237c689b5dd'},
+  e_desliz_unilat:{name:'Deslizamento Unilateral',di:'3 séries · 4 reps cada lado',dm:'3 séries · 6 reps cada lado',da:'3 séries · 6 reps cada lado',tag:'glúteo',tc:'glut',why:'Isquiotibiais excêntricos em desafio unilateral máximo.',vid:'6a91cc5a0ee9e58ad80b92b5'},
+  e_copen_mov:{name:'Copenhagen c/ Movimento',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 8 reps cada lado',tag:'glúteo',tc:'glut',why:'Adutores e glúteos em carga dinâmica para corrida.',vid:'6a91cc4e03a5f237c689b5fa'},
+  e_prancha_lat_abd:{name:'Prancha Lateral c/ Abdução',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'glúteo',tc:'glut',why:'Core lateral e glúteo médio em estabilização combinada.',vid:'6a91cc6b07e388cdb3dee0ab'},
+  // QUADRIL FORÇA
+  e_step_lateral:{name:'Step-Down Lateral',di:null,dm:'3 séries · 8 reps cada lado',da:'3 séries · 10 reps cada lado',tag:'controle',tc:'qfor',why:'Controle excêntrico lateral do quadril e joelho.',vid:'6a91cc85b39e699fb51bd00a'},
+  e_sentar_levantar_1pe:{name:'Sentar e Levantar na Cadeira',di:'2 séries · 6 reps',dm:'3 séries · 8 reps',da:'3 séries · 10 reps',tag:'controle',tc:'qfor',why:'Padrão de agachar/levantar com carga corporal, controlando o quadril e o joelho.',vid:'6a91cc7d24c2566c45709898'},
+  e_salto_cong:{name:'Salto e Congela',di:null,dm:'3 séries · 8 reps',da:'3 séries · 10 reps',tag:'controle',tc:'qfor',why:'Pliometria básica com aterrissagem controlada e estabilização.',vid:'6a91cc76b8cb77a9126afd83'},
+  e_aterrissagem_unilat:{name:'Aterrissagem Unilateral',di:'3 séries · 4 reps cada lado',dm:'3 séries · 6 reps cada lado',da:'3 séries · 6 reps cada lado',tag:'controle',tc:'qfor',why:'Impacto unilateral com absorção e estabilização do quadril.',vid:'6a91cc4a662f50c73d0de78c'},
+  // FLEXORES/CORE
+  e_deadbug:{name:'Dead Bug',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps cada lado',da:'3 séries · 12 reps cada lado',tag:'core',tc:'flex',why:'Controle lombopélvico com movimento antagonista de membros.',vid:'6a91cc416b3b17990bb71592'},
+  e_urso_estatico:{name:'Urso Estático',di:'3 séries · 20s',dm:'3 séries · 30s',da:'3 séries · 45s',tag:'core',tc:'flex',why:'Ativação isométrica do core em posição quadrupedal.',vid:'6a91cc81cb84361f3454d78e'},
+  e_toque_ombro_urso:{name:'Toque de Ombros no Urso',di:null,dm:'3 séries · 8 toques cada lado',da:'3 séries · 10 toques cada lado',tag:'core',tc:'flex',why:'Estabilidade do core com transferência de peso unilateral.',vid:'6a91cc72ba9e65956da34ce3'},
+  e_pressao_anti_rot:{name:'Anti-Rotação c/ Elástico',di:'3 séries · 6 reps cada lado',dm:'3 séries · 8 reps cada lado',da:'3 séries · 8 reps cada lado',tag:'core',tc:'flex',why:'Resistência rotacional para controle avançado do tronco.',vid:'6a91cc2ab39e699fb51bcfb3'},
+  e_bird_dog:{name:'Bird Dog',di:'3 séries · 8 reps cada lado',dm:'3 séries · 10 reps cada lado',da:'3 séries · 12 reps cada lado',tag:'core',tc:'flex',why:'Estabilidade lombopélvica com extensão e oposição de membros.',vid:'6a91cc3e7f584747a34f615c'}
 }
 
-// ══ MAPA SINAL → SESSÕES ══
+// ══ MAPA SINAL → MESES (TIERS) ══
+// M1 = exercícios iniciais (id atual), M2, M3 = novos. c/ pontuação de malha.
 const SIGNAL_MAP = {
   tornozelo:{label:'Restrição de tornozelo',color:'var(--torn)',
-    a:['e_cocoras','e_meio_ajoel'],b:['e_pe_fechado','e_agach_ponta'],c:['e_cocoras','e_meio_ajoel','e_agach_ponta','e_saltos_quad']},
+    months:[
+      {a:['e_cocoras','e_meio_ajoel','e_joelho_parede'],b:['e_pe_fechado','e_agach_ponta'],c:['e_cocoras','e_meio_ajoel','e_agach_ponta']},
+      {a:['e_relogio_pe'],b:['e_cocoras','e_agach_ponta'],c:['e_relogio_pe','e_meio_ajoel']},
+      {a:['e_salto_lat_cong'],b:['e_relogio_pe','e_salto_lat_cong'],c:['e_salto_lat_cong','e_agach_ponta']}
+    ]},
   quadril_mob:{label:'Restrição de mobilidade de quadril',color:'var(--qmob)',
-    a:['e_volta_mundo','e_noventa'],b:['e_iliopsoas'],c:['e_volta_mundo','e_noventa']},
+    months:[
+      {a:['e_volta_mundo','e_noventa'],b:['e_iliopsoas'],c:['e_volta_mundo','e_noventa']},
+      {a:['e_cossack_assist'],b:['e_volta_mundo','e_cossack_assist'],c:['e_cossack_assist','e_noventa']},
+      {a:['e_cossack','e_shin_box'],b:['e_cossack','e_noventa'],c:['e_shin_box','e_cossack_assist']}
+    ]},
   gluteo:{label:'Fraqueza de glúteo',color:'var(--glut)',
-    a:['e_elev_pelv'],b:['e_coice','e_bulg'],c:['e_elev_pelv','e_coice']},
+    months:[
+      {a:['e_elev_pelv'],b:['e_coice','e_bulg'],c:['e_elev_pelv','e_coice']},
+      {a:['e_bulg','e_aviaozinho'],b:['e_elev_lat_degrau','e_desliz_isoquit'],c:['e_aviaozinho','e_copen_isom']},
+      {a:['e_desliz_unilat','e_prancha_lat_abd'],b:['e_copen_mov','e_bulg'],c:['e_copen_mov','e_prancha_lat_abd']}
+    ]},
   propriocepcao:{label:'Déficit de propriocepção',color:'var(--prop)',
-    a:['e_prop_fechado'],b:['e_prop_ponta','e_prop_step'],c:['e_prop_fechado','e_prop_ponta']},
+    months:[
+      {a:['e_prop_fechado'],b:['e_prop_ponta','e_prop_step'],c:['e_prop_fechado','e_prop_ponta']},
+      {a:['e_aviaozinho'],b:['e_prop_fechado','e_aviaozinho'],c:['e_aviaozinho','e_prop_ponta']},
+      {a:['e_salto_lat_cong'],b:['e_prop_step','e_salto_lat_cong'],c:['e_salto_lat_cong','e_aviaozinho']}
+    ]},
   panturrilha:{label:'Fraqueza de panturrilha',color:'var(--pant)',
-    a:['e_plant'],b:['e_plant'],c:['e_plant']},
+    months:[
+      {a:['e_plant'],b:['e_plant'],c:['e_plant']},
+      {a:['e_caminhada_ponta'],b:['e_iso_pant_1pe'],c:['e_caminhada_ponta','e_iso_pant_1pe']},
+      {a:['e_plant_6kg'],b:['e_caminhada_ponta_6kg'],c:['e_plant_6kg','e_caminhada_ponta_6kg','e_iso_pant_1pe']}
+    ]},
   quadril_forca:{label:'Déficit de controle motor de quadril',color:'var(--qfor)',
-    a:['e_step_esp'],b:['e_skatista','e_step_esp','e_agach_salto'],c:['e_skatista','e_agach_salto']},
+    months:[
+      {a:['e_step_esp'],b:['e_skatista','e_step_esp'],c:['e_skatista','e_agach_salto']},
+      {a:['e_step_lateral'],b:['e_sentar_levantar_1pe','e_salto_cong'],c:['e_step_lateral','e_copen_isom']},
+      {a:['e_aterrissagem_unilat'],b:['e_salto_cong','e_aterrissagem_unilat'],c:['e_aterrissagem_unilat','e_copen_mov']}
+    ]},
   flexores:{label:'Encurtamento de flexores de quadril',color:'var(--flex)',
-    a:['e_iliopsoas_esp'],b:['e_iliopsoas_esp','e_prancha_lat','e_escalador'],c:['e_iliopsoas_esp','e_escalador']}
+    months:[
+      {a:['e_iliopsoas_esp'],b:['e_prancha_lat','e_escalador'],c:['e_iliopsoas_esp','e_escalador']},
+      {a:['e_deadbug','e_bird_dog'],b:['e_urso_estatico','e_deadbug'],c:['e_deadbug','e_escalador']},
+      {a:['e_pressao_anti_rot','e_prancha_lat_abd'],b:['e_toque_ombro_urso','e_prancha_lat'],c:['e_pressao_anti_rot','e_toque_ombro_urso']}
+    ]}
 }
 
 const SIGNAL_ORDER = ['tornozelo','quadril_mob','gluteo','propriocepcao','panturrilha','quadril_forca','flexores']
@@ -1127,7 +1190,7 @@ const BONUSES = [
     items:[]},
   {id:'evolucao', icon:'📈', css:'b3', title:'Evolução Segura',
     desc:'Como aumentar volume de corrida sem reincidência de dor.',
-    items:['Regra dos 10% — nunca aumentar volume semanal > 10%','Semana de descompressão a cada 4 semanas (reduz 40% do volume)','Sinal verde: só aumentar se o protocolo A/B/C foi completo por 2 semanas','Sinal amarelo: dor leve durante corrida = volta 1 semana no volume','Sinal vermelho: dor moderada/forte = para 3 dias, volta com protocolo A','Auto-check-up a cada 30 dias para monitorar evolução']}
+    items:['Regra dos 10% — nunca aumentar volume semanal > 10%','Semana de descompressão a cada 4 semanas (reduz 40% do volume)','Sinal verde: só aumentar se o protocolo A/B/C foi completo por 2 semanas','Sinal amarelo: dor leve durante corrida = volta 1 semana no volume','Sinal vermelho: dor moderada/forte = para 3 dias, volta com protocolo A','Ao completar as 4 semanas de um mês, refaça a avaliação para liberar o próximo mês']}
 ]
 
 // ══ ONBOARDING ══
@@ -1150,6 +1213,14 @@ let signalCounts = {}
 let onboardingData = {}
 let onboardingStep = 0
 let onboardingLocked = false
+
+// Nível (tier) de progressão por sinal — armazenado em csd_signalTiers
+let signalTiers = (() => {
+  try { return JSON.parse(localStorage.getItem('csd_signalTiers') || '{}') } catch(e) { return {} }
+})()
+let prevSignalCounts = (() => {
+  try { return JSON.parse(localStorage.getItem('csd_prevSignals') || '{}') } catch(e) { return {} }
+})()
 
 // ══ ÍNDICE CORPORAL ══
 function calculateIndex() {
@@ -1276,18 +1347,24 @@ function renderDashboard() {
   if (criticalSignal) { const cc = CONSEQUENCES[criticalSignal]; if (cc) whyText = cc.effect }
 
   const lastCheckup = localStorage.getItem('csd_lastCheckup')
-  let reavDays = 30
-  if (lastCheckup) reavDays = Math.max(0, 30 - Math.floor((Date.now() - parseInt(lastCheckup)) / 86400000))
-  const reavReady = reavDays <= 0
-  const lastEval = lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'
+  const pendingReav = localStorage.getItem('csd_pendingReav') === '1'
 
-  content.innerHTML = `
-    <div class="db-next sr" onclick="goToSession(${next.idx})" data-delay="0">
+  const nextCard = pendingReav
+    ? `<div class="db-next db-pending sr" onclick="startReavaliacao()" data-delay="0" style="border-color:var(--orange)">
+        <div class="db-next-top"><span class="db-next-badge" style="background:rgba(251,146,60,.15);color:var(--orange)">● Avaliação pendente</span></div>
+        <div class="db-next-title">Libere o próximo mês</div>
+        <div class="db-next-focus">Você completou as 4 semanas. Refazer a avaliação agora para desbloquear os exercícios do ${PLAN_MONTHS[Math.min(2,currentPlanMonth+1)].label}.</div>
+        <button class="btn-primary" style="width:100%">Refazer avaliação →</button>
+      </div>`
+    : `<div class="db-next sr" onclick="goToSession(${next.idx})" data-delay="0">
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Seu próximo treino</div>
       <div class="db-next-title">Treino ${['A','B','C'][next.idx]}</div>
       <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
       <button class="btn-primary" style="width:100%">▶ Começar</button>
-    </div>
+    </div>`
+
+  content.innerHTML = `
+    ${nextCard}
 
     <div class="db-progress sr" data-delay="0">
       <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct" data-count="${progressPct}">0%</span></div>
@@ -1309,12 +1386,6 @@ function renderDashboard() {
       <div class="db-meta-side"><div class="db-meta-label">Índice Atual</div><div class="db-meta-val">${overall}</div></div>
       <div class="db-meta-arrow">↓</div>
       <div class="db-meta-side"><div class="db-meta-label">Meta do Mês</div><div class="db-meta-val" style="color:var(--glut)">${target}</div></div>
-    </div>
-
-    <div class="db-countdown sr" data-delay="250">
-      ${reavReady
-        ? `<span style="font-size:16px">📊</span> Seu corpo mudou — <strong style="cursor:pointer;color:#38BDF8" onclick="showReavaliacao()">refaça o check-up</strong> para ver sua evolução`
-        : `<span>⏳</span> Próxima reavaliação em <strong>${reavDays} dias</strong>`}
     </div>
 
     <div class="body-map-wrap sr" data-delay="300">${renderBodyMap(signalCounts)}</div>
@@ -1349,7 +1420,7 @@ function renderDashboard() {
       </div>
     </div>
 
-    <div class="db-last-eval sr" data-delay="450">Última avaliação: ${lastEval}</div>
+    <div class="db-last-eval sr" data-delay="450">Última avaliação: ${lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'}</div>
 
     <div class="sr" data-delay="500" style="display:flex;flex-direction:column;gap:8px">
       <button class="btn-glass" onclick="showBonuses()">Ver bônus →</button>
@@ -1574,7 +1645,6 @@ const TAG_COLORS = {
 function renderExCard(exId, num, isEspecifico, isCritico, isExtra) {
   const ex = EX[exId]
   if (!ex) return ''
-  if (ex.adv_only && nivel !== 'adv') return ''
   const detail = getDetail(ex)
   const tagStyle = TAG_COLORS[ex.tc] || ''
   const cardClass = isCritico ? 'ex-card critico' : isEspecifico ? 'ex-card especifico' : 'ex-card geral'
@@ -1912,10 +1982,30 @@ async function loadUserData() {
     localStorage.setItem('csd_sessoes', JSON.stringify(s.exercicios))
     localStorage.setItem('csd_sessionChecks', JSON.stringify(s.checks || {}))
     localStorage.setItem('csd_planMonth', s.plan_month.toString())
+    currentPlanMonth = Math.min(2, parseInt(s.plan_month) || 0)
     if (s.session_exercises) localStorage.setItem('csd_sessionExercises', JSON.stringify(s.session_exercises))
     if (s.completed_weeks != null) {
       localStorage.setItem('csd_completedWeeks', s.completed_weeks.toString())
       completedWeeks = s.completed_weeks
+    }
+    // Deriva a pendência de reavaliação a partir das semanas concluídas
+    if (s.completed_weeks >= 4 && currentPlanMonth < 2) {
+      localStorage.setItem('csd_pendingReav', '1')
+    }
+    // Sincroniza tiers de progressão e sinais anteriores vindos do Supabase
+    if (s.signal_tiers) {
+      try {
+        const t = (typeof s.signal_tiers === 'string') ? JSON.parse(s.signal_tiers) : s.signal_tiers
+        signalTiers = t || {}
+        localStorage.setItem('csd_signalTiers', JSON.stringify(signalTiers))
+      } catch(e) {}
+    }
+    if (s.prev_signals) {
+      try {
+        const p = (typeof s.prev_signals === 'string') ? JSON.parse(s.prev_signals) : s.prev_signals
+        prevSignalCounts = p || {}
+        localStorage.setItem('csd_prevSignals', JSON.stringify(prevSignalCounts))
+      } catch(e) {}
     }
   }
 
@@ -1991,17 +2081,19 @@ async function saveSessionsToSupabase() {
   const sessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
   const planMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
   const completed = parseInt(localStorage.getItem('csd_completedWeeks') || '0')
+  const signalTiersData = (() => { try { return JSON.parse(localStorage.getItem('csd_signalTiers') || '{}') } catch(e) { return {} } })()
+  const prevSignalsData = (() => { try { return JSON.parse(localStorage.getItem('csd_prevSignals') || '{}') } catch(e) { return {} } })()
   // Upsert: uma sessão por user_id
   const { data: existing } = await window._sbClient.from('sessions')
     .select('id').eq('user_id', currentUser.id).limit(1)
+  const row = {
+    exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises, completed_weeks: completed,
+    signal_tiers: signalTiersData, prev_signals: prevSignalsData
+  }
   if (existing && existing.length > 0) {
-    await window._sbClient.from('sessions').update({
-      exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises, completed_weeks: completed
-    }).eq('id', existing[0].id)
+    await window._sbClient.from('sessions').update(row).eq('id', existing[0].id)
   } else {
-    await window._sbClient.from('sessions').insert({
-      user_id: currentUser.id, exercicios: sessoes, checks: checks, plan_month: planMonth, session_exercises: sessionExercises, completed_weeks: completed
-    })
+    await window._sbClient.from('sessions').insert({ user_id: currentUser.id, ...row })
   }
   console.log('[CSD] Sessões salvas no Supabase')
 }
@@ -2026,17 +2118,15 @@ document.getElementById('login-senha')?.addEventListener('keydown', ev => { if (
 
 // ══ CHECK-UP ══
 function startCheckup() {
-  currentTest = 0; answers = {}; nivel = 'mid'; criticalSignal = null; signalCounts = {}
-  // Check if reavaliação
-  const reav = checkReavaliacao()
-  if (reav && !localStorage.getItem('csd_reav_confirm')) {
-    // Save old scores
-    if (Object.keys(signalCounts).length > 0) {
+  // Capture previous state BEFORE resetting, if there is any prior checkup
+  if (Object.keys(signalCounts).length > 0 || localStorage.getItem('csd_checkup')) {
+    try {
       const idx = calculateIndex()
       localStorage.setItem('csd_lastScores',JSON.stringify({overall:idx.overall,scores:idx.scores,date:Date.now()}))
-    }
-    localStorage.setItem('csd_reav_confirm','1')
+    } catch(e) {}
+    capturePrevSignals()
   }
+  currentTest = 0; answers = {}; nivel = 'mid'; criticalSignal = null; signalCounts = {}
   loadTest(0)
   showScreen('s-test')
 }
@@ -2168,6 +2258,76 @@ function getActiveSignals() {
   return { sigCounts, sigSources }
 }
 
+// ══ TIERS DE PROGRESSÃO (M1/M2/M3) ══
+// Tier por sinal. Ajusta conforme melhora (menos falhas no reteste).
+function getSignalTier(sig) {
+  return (signalTiers[sig] !== undefined) ? signalTiers[sig] : 0
+}
+function setSignalTier(sig, tier) {
+  signalTiers[sig] = Math.max(0, Math.min(2, tier))
+  localStorage.setItem('csd_signalTiers', JSON.stringify(signalTiers))
+}
+
+// Seleciona os exercícios de um sinal para o mês atual (dedup por nome).
+function signalExercisesForMonth(sig, monthIdx, sessionKey) {
+  const info = SIGNAL_MAP[sig]; if (!info) return []
+  if (!info.months || !info.months[monthIdx]) return []
+  const tier = info.months[monthIdx]
+  const list = tier[sessionKey] || []
+  return list.filter((id,i) => list.indexOf(id) === i && EX[id])
+}
+
+// Captura o estado anterior antes de um novo check-up (para comparar evolução).
+function capturePrevSignals() {
+  if (Object.keys(signalCounts).length > 0) {
+    localStorage.setItem('csd_prevSignals', JSON.stringify(signalCounts))
+  }
+  const saved = localStorage.getItem('csd_signalTiers')
+  if (saved) try { signalTiers = JSON.parse(saved) } catch(e) {}
+  prevSignalCounts = (() => { try { return JSON.parse(localStorage.getItem('csd_prevSignals') || '{}') } catch(e) { return {} } })()
+}
+
+// Reteste: ajusta o tier de cada sinal comparando falhas atuais vs anteriores.
+// Melhorou (menos falhas) → sobe 1 tier (mantendo 1 exercício do próximo tier,
+// evitando o do mês anterior). Piorou/igual → fica. Novo sinal → tier 1.
+function computeNewTiers(freshCounts) {
+  const newTiers = {}
+  SIGNAL_ORDER.forEach(sig => {
+    const prev = prevSignalCounts[sig] || 0
+    const now = freshCounts[sig] || 0
+    const had = prev > 0
+    if (!had && now > 0) {
+      newTiers[sig] = 1                      // novo sinal ativo → tier 1
+    } else if (had && now === 0) {
+      newTiers[sig] = getSignalTier(sig)     // resolvido → mantém tier para manutenção leve
+    } else if (had && now < prev) {
+      newTiers[sig] = Math.min(2, getSignalTier(sig) + 1)  // melhorou → sobe
+    } else {
+      newTiers[sig] = getSignalTier(sig)     // piorou/igual → fica
+    }
+  })
+  return newTiers
+}
+
+// Resolvido: distribui 1 exercício de manutenção do próximo tier por sessão,
+// evitando os exercícios do mês anterior (anti-repetição).
+function resolvedMaintenanceExercises(sig, resolvedTier, monthIdx) {
+  const info = SIGNAL_MAP[sig]; if (!info || !info.months) return []
+  const targetMonth = Math.min(2, resolvedTier + 1)
+  const prevUsed = new Set()
+  ;(info.months[resolvedTier] || []).forEach(m => (m.a||[]).concat(m.b||[],m.c||[]).forEach(id => prevUsed.add(id)))
+  const pick = ['a','b','c'].map(k => {
+    const list = (info.months[targetMonth] || {})[k] || []
+    const cand = list.filter(id => EX[id] && !prevUsed.has(id))
+    return cand[0] || ''
+  })
+  return { a:[pick[0]], b:[pick[1]], c:[pick[2]] }
+}
+
+// Array mês atual em uso (0,1,2).
+function currentMonthIdx() {
+  return Math.max(0, Math.min(2, currentPlanMonth))
+}
 function showReport() {
   const { sigCounts, sigSources } = getActiveSignals()
   const sigs = Object.keys(sigCounts)
@@ -2265,12 +2425,22 @@ function showReport() {
   if (!localStorage.getItem('csd_firstCheckup')) localStorage.setItem('csd_firstCheckup', Date.now().toString())
   localStorage.setItem('csd_answers',JSON.stringify(answers))
   localStorage.setItem('csd_nivel',nivel)
-  // Advance plan month after reavaliação
-  if (localStorage.getItem('csd_reav_confirm')) {
+  // Advance plan month + adjust tiers only when the student completed the month (4 weeks)
+  if (localStorage.getItem('csd_pendingReav') === '1') {
+    const fresh = Object.keys(signalCounts).length > 0 ? signalCounts : {}
+    const newTiers = computeNewTiers(fresh)
+    SIGNAL_ORDER.forEach(sig => setSignalTier(sig, newTiers[sig] || 0))
+    // Avança o mês do plano (M1→M2→M3)
     currentPlanMonth = Math.min(2, currentPlanMonth + 1)
     localStorage.setItem('csd_planMonth', currentPlanMonth.toString())
+    localStorage.removeItem('csd_sessoes')
+    ;[0,1,2].forEach(i => localStorage.removeItem('csd_sessoes_m' + i))
+    // limpa histórico de sinais anteriores p/ próxima comparação
+    localStorage.setItem('csd_prevSignals', JSON.stringify(signalCounts))
+    try { prevSignalCounts = JSON.parse(localStorage.getItem('csd_prevSignals') || '{}') } catch(e) {}
+    localStorage.removeItem('csd_pendingReav')
+    saveSessionsToSupabase()
   }
-  localStorage.removeItem('csd_reav_confirm')
 
   // Salvar no Supabase
   saveCheckupToSupabase(overall)
@@ -2373,6 +2543,11 @@ function switchPlanMonth(idx) {
   const m = PLAN_MONTHS[currentPlanMonth]
   document.getElementById('plan-badge').textContent = m.label.toLowerCase()
   document.querySelectorAll('.plan-month-btn').forEach((b,i) => b.classList.toggle('active',i===idx))
+  // re-gera sessões para o mês selecionado (diferente tier)
+  const cacheKey = 'csd_sessoes_m' + currentMonthIdx()
+  const cached = localStorage.getItem(cacheKey)
+  if (cached) localStorage.setItem('csd_sessoes', cached)
+  else localStorage.removeItem('csd_sessoes')
   renderPlanView()
 }
 
@@ -2388,33 +2563,38 @@ function renderPlanView() {
 
   if (!sessoes || !Array.isArray(sessoes) || sessoes.length < 3 || (sessoes[0].length === 0 && sessoes[1].length === 0 && sessoes[2].length === 0)) {
     const sigs = Object.keys(signalCounts)
+    const monthIdx = currentMonthIdx()
     const sessKeys = ['a','b','c']
     sessoes = sessKeys.map(k => {
       const ids = []
       const seen = new Set()
       const seenNames = new Set()
+      const addEx = (id) => {
+        if (!id || seen.has(id)) return
+        const ex = EX[id]
+        if (!ex || seenNames.has(ex.name)) return
+        seen.add(id); seenNames.add(ex.name); ids.push(id)
+      }
       sigs.forEach(sig => {
-        const info = SIGNAL_MAP[sig]; if (!info) return
-        ;(info[k]||[]).forEach(id => {
-          if (seen.has(id)) return
-          const ex = EX[id]
-          if (!ex || seenNames.has(ex.name)) return
-          seen.add(id); seenNames.add(ex.name); ids.push(id)
-        })
+        if (!SIGNAL_MAP[sig]) return
+        // resolved signal → manutenção leve do próximo tier, evitando mês anterior
+        if ((prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
+          const maint = resolvedMaintenanceExercises(sig, getSignalTier(sig), monthIdx)
+          ;(maint[k]||[]).forEach(addEx)
+          return
+        }
+        const tier = getSignalTier(sig)
+        signalExercisesForMonth(sig, tier, k).forEach(addEx)
       })
+      // prioriza o sinal crítico nas sessões
       if (criticalSignal) {
-        const critInfo = SIGNAL_MAP[criticalSignal]
-        if (critInfo && critInfo[k]) critInfo[k].forEach(id => {
-          if (seen.has(id)) return
-          const ex = EX[id]
-          if (!ex || seenNames.has(ex.name)) return
-          seen.add(id); seenNames.add(ex.name); ids.push(id)
-        })
+        signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), k).forEach(addEx)
       }
       if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
       return ids
     })
     localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
+    localStorage.setItem('csd_sessoes_m' + currentMonthIdx(), JSON.stringify(sessoes))
     saveSessionsToSupabase()
   }
 
@@ -2475,13 +2655,15 @@ function handleSessionComplete() {
   if (!allDone) return false
   if (currentSessionIdx === 2) {
     completedWeeks = Math.min(4, completedWeeks + 1)
+    const monthDone = completedWeeks === 4
     localStorage.setItem('csd_completedWeeks', completedWeeks.toString())
+    if (monthDone && currentPlanMonth < 2) localStorage.setItem('csd_pendingReav', '1')
     const c = getSessionChecks()
     c['sess_0'] = {}
     c['sess_1'] = {}
     c['sess_2'] = {}
     localStorage.setItem('csd_sessionChecks', JSON.stringify(c))
-    return 'clear'
+    return monthDone ? 'monthdone' : 'clear'
   }
   return 'animate'
 }
@@ -2513,6 +2695,12 @@ async function toggleExCheck(exId, el) {
   if (result === 'clear') {
     setTimeout(() => showDoneAnimation(true), 400)
     setTimeout(goToDashboard, 600)
+    return
+  }
+
+  if (result === 'monthdone') {
+    setTimeout(() => showDoneAnimation(true), 400)
+    setTimeout(() => showMonthAdvancePrompt(), 900)
     return
   }
 
@@ -2550,6 +2738,28 @@ function showDoneAnimation(weekComplete) {
   setTimeout(() => ov.remove(), 3000)
 }
 
+// Mensagem ao completar as 4 semanas: pede refazer a avaliação
+// para liberar os exercícios do próximo mês (nunca avança sozinho).
+function showMonthAdvancePrompt() {
+  const m = PLAN_MONTHS[Math.min(2, currentPlanMonth + 1)] || PLAN_MONTHS[0]
+  const lastMonth = currentPlanMonth >= 2
+  const ov = document.createElement('div')
+  ov.className = 'ex-done-overlay'
+  ov.style.background = 'rgba(0,0,0,.6)'
+  ov.innerHTML = `
+    <div class="ex-done-icon">🎉</div>
+    <div class="ex-done-title">${lastMonth ? 'Você concluiu todos os meses!' : 'Você completou um mês!'}</div>
+    <div class="ex-done-sub">${lastMonth
+      ? 'Parabéns! Você finalizou todo o plano. Continue com os hábitos e refaça a avaliação ao completar cada mês para monitorar sua evolução.'
+      : 'Para receber os exercícios do próximo mês (' + m.label + '), refaça o check-up agora. O novo plano será liberado conforme sua evolução.'}</div>
+    <div style="display:flex;gap:10px;margin-top:18px;width:100%">
+      <button class="btn-outline" style="flex:1" onclick="goToDashboard()">Depois</button>
+      <button class="btn-primary" style="flex:1" onclick="startReavaliacao()">Refazer avaliação</button>
+    </div>`
+  ov.onclick = e => { if (e.target === ov) ov.remove() }
+  document.body.appendChild(ov)
+}
+
 function showSessionFromPlan(sessIdx) {
   const saved = localStorage.getItem('csd_sessoes')
   if (!saved) return
@@ -2568,8 +2778,7 @@ function showSessionFromPlan(sessIdx) {
   // 2. Prioritize: critical signal exercises first, then rest (dedup by name)
   let critIds = []
   if (criticalSignal) {
-    const ci = SIGNAL_MAP[criticalSignal]
-    if (ci && ci[sessionKey]) critIds = ci[sessionKey]
+    critIds = signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey)
   }
   let finalIds = []
   const finalNames = new Set()
@@ -2611,7 +2820,7 @@ function showSessionFromPlan(sessIdx) {
   finalIds.forEach(id => {
     if (seen.has(id)) return
     seen.add(id)
-    const isCrit = criticalSignal && (SIGNAL_MAP[criticalSignal]?.[sessionKey]||[]).includes(id)
+    const isCrit = criticalSignal && signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey).includes(id)
     const isEsp = specificSet.has(id)
     const rendered = renderExCard(id, n, isEsp, isCrit)
     if (rendered) { html += rendered; n++ }
@@ -2699,7 +2908,6 @@ function showExerciseDetail(id) {
   const detailText = getDetail(ex)
   if (detailText) detailHtml += `<div class="ex-detail-detail">${detailText}</div>`
   if (ex.why) detailHtml += `<div class="ex-detail-why">${ex.why}</div>`
-  if (ex.adv_only) detailHtml += `<div style="margin-top:8px;font-size:11px;color:var(--orange);font-weight:600">🔒 Avançado — apenas após dominar nível intermediário</div>`
   detailHtml += `<button class="btn-primary" style="margin-top:16px" onclick="checkFromDetail('${id}')">${isDone ? '✓ Concluído' : 'Marcar como concluído'}</button>`
   document.getElementById('ex-detail-body').innerHTML = detailHtml
   document.getElementById('ex-detail').classList.add('open')
@@ -2896,36 +3104,13 @@ function getCurrentWeek() {
 }
 
 // ══ REAVALIAÇÃO ══
-function checkReavaliacao() {
-  const last = localStorage.getItem('csd_lastCheckup')
-  if (!last) return false
-  const days = Math.floor((Date.now() - parseInt(last)) / 86400000)
-  return days >= 30
-}
-
-function showReavaliacao() {
-  const last = localStorage.getItem('csd_lastCheckup')
-  const savedScores = localStorage.getItem('csd_lastScores')
-  const comp = document.getElementById('reav-compare')
-  let html = '<div class="reav-box"><div class="reav-box-label">Índice anterior</div><div class="reav-box-score antes">?/100</div></div>'
-  html += '<div class="reav-box"><div class="reav-box-label">Novo índice</div><div class="reav-box-score depois">?</div></div>'
-  if (savedScores) {
-    try {
-      const old = JSON.parse(savedScores)
-      html = `<div class="reav-box"><div class="reav-box-label">${new Date(parseInt(last)).toLocaleDateString()}</div><div class="reav-box-score antes">${old.overall}/100</div></div>
-      <div class="reav-box"><div class="reav-box-label">Hoje</div><div class="reav-box-score depois">?</div></div>`
-    } catch(e) {}
-  }
-  comp.innerHTML = html
-  showScreen('s-reavaliacao')
-}
-
 function startReavaliacao() {
   // Save current scores for comparison
   if (Object.keys(signalCounts).length > 0) {
     const { overall } = calculateIndex()
     localStorage.setItem('csd_lastScores',JSON.stringify({overall,scores:calculateIndex().scores,date:Date.now()}))
   }
+  capturePrevSignals()
   localStorage.removeItem('csd_completedWeeks')
   completedWeeks = 0
   showScreen('s-welcome')
