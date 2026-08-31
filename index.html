@@ -1984,12 +1984,15 @@ async function loadUserData() {
     localStorage.setItem('csd_planMonth', s.plan_month.toString())
     currentPlanMonth = Math.min(2, parseInt(s.plan_month) || 0)
     if (s.session_exercises) localStorage.setItem('csd_sessionExercises', JSON.stringify(s.session_exercises))
-    if (s.completed_weeks != null) {
-      localStorage.setItem('csd_completedWeeks', s.completed_weeks.toString())
-      completedWeeks = s.completed_weeks
-    }
+    // Preserva o MAIOR valor de semanas entre o local e o servidor (não perde progresso
+    // de quem concluiu na versão antiga que não persistia completed_weeks no banco)
+    const localWeeks = parseInt(localStorage.getItem('csd_completedWeeks') || '0') || 0
+    const serverWeeks = (typeof s.completed_weeks === 'number') ? s.completed_weeks : (parseInt(s.completed_weeks) || 0)
+    const weeks = Math.max(localWeeks, serverWeeks)
+    localStorage.setItem('csd_completedWeeks', weeks.toString())
+    completedWeeks = weeks
     // Deriva a pendência de reavaliação a partir das semanas concluídas
-    if (s.completed_weeks >= 4 && currentPlanMonth < 2) {
+    if (weeks >= 4 && currentPlanMonth < 2) {
       localStorage.setItem('csd_pendingReav', '1')
     }
     // Sincroniza tiers de progressão e sinais anteriores vindos do Supabase
