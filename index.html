@@ -1383,7 +1383,7 @@ function renderDashboard() {
             <div class="db-plan-btn"><button class="btn-primary" style="width:100%" onclick="showPlan()">▶ Continuar Treinos</button></div>
           </div>`
         : (prev
-          ? `<div class="db-plan-expand"><div class="db-plan-btn"><button class="btn-glass" style="width:100%" onclick="goToPlanMonth(${i})">👁 Ver treinos do ${pm.label} →</button></div></div>`
+          ? `<div class="db-plan-expand"><div class="db-plan-btn"><button class="btn-glass" style="width:100%" onclick="goToPlanMonth(${i})">Ver treinos do ${pm.label} →</button></div></div>`
           : '')}
     </div>`
   }).join('')
@@ -1617,7 +1617,10 @@ const srObserver = new IntersectionObserver((entries) => {
   })
 }, { threshold: 0.15 })
 function goToSession(idx) {
-  if (!document.getElementById('session-plan')) showPlan()
+  viewPlanMonth = currentPlanMonth
+  currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
+  renderPlanMonths()
+  renderPlanView()
   showScreen('s-protocol')
   setTimeout(() => showSessionFromPlan(idx), 100)
 }
@@ -2529,10 +2532,12 @@ const PLAN_MONTHS = [
 ]
 
 let currentPlanMonth = parseInt(localStorage.getItem('csd_planMonth') || '0')
+let viewPlanMonth = currentPlanMonth
 let completedWeeks = parseInt(localStorage.getItem('csd_completedWeeks') || '0')
 let currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
 
 function showPlan() {
+  viewPlanMonth = currentPlanMonth
   currentPlanWeek = completedWeeks < 4 ? completedWeeks : 3
   renderPlanMonths()
   renderPlanView()
@@ -2549,18 +2554,18 @@ function renderPlanMonths() {
   const c = document.getElementById('plan-months')
   c.innerHTML = PLAN_MONTHS.map((m,i) => {
     const locked = i > currentPlanMonth
-    return `<div class="plan-month-btn${locked?' locked':''}${i===currentPlanMonth?' active':''}" onclick="switchPlanMonth(${i})">${m.label}</div>`
+    return `<div class="plan-month-btn${locked?' locked':''}${i===viewPlanMonth?' active':''}" onclick="switchPlanMonth(${i})">${m.label}</div>`
   }).join('')
 }
 
 function switchPlanMonth(idx) {
   if (idx > currentPlanMonth) return
-  currentPlanMonth = idx; currentPlanWeek = 0
-  const m = PLAN_MONTHS[currentPlanMonth]
+  viewPlanMonth = idx; currentPlanWeek = 0
+  const m = PLAN_MONTHS[viewPlanMonth]
   document.getElementById('plan-badge').textContent = m.label.toLowerCase()
   document.querySelectorAll('.plan-month-btn').forEach((b,i) => b.classList.toggle('active',i===idx))
   // re-gera sessões para o mês selecionado (diferente tier)
-  const cacheKey = 'csd_sessoes_m' + currentMonthIdx()
+  const cacheKey = 'csd_sessoes_m' + viewPlanMonth
   const cached = localStorage.getItem(cacheKey)
   if (cached) localStorage.setItem('csd_sessoes', cached)
   else localStorage.removeItem('csd_sessoes')
@@ -2568,14 +2573,15 @@ function switchPlanMonth(idx) {
 }
 
 function renderPlanView() {
-  const m = PLAN_MONTHS[currentPlanMonth]
+  const m = PLAN_MONTHS[viewPlanMonth]
+  document.getElementById('plan-badge').textContent = m.label.toLowerCase()
   const view = document.getElementById('plan-view')
 
   let sessoes = null
-  // Prioriza o cache do MÊS ATUAL (csd_sessoes_mN). Se existir e for válido, usa e o
+  // Prioriza o cache do MÊS VISUALIZADO (csd_sessoes_mN). Se existir e for válido, usa e o
   // torna o cache genérico csd_sessoes. Isso evita que exercícios de outro mês
   // (ex.: csd_sessoes do M1 restaurado do banco) apareçam no M2.
-  const monthIdx = currentMonthIdx()
+  const monthIdx = viewPlanMonth
   const monthCache = localStorage.getItem('csd_sessoes_m' + monthIdx)
   const isValidSessoes = (arr) => Array.isArray(arr) && arr.length >= 3 &&
     (arr[0].length > 0 || arr[1].length > 0 || arr[2].length > 0)
