@@ -1363,6 +1363,31 @@ function renderDashboard() {
       <button class="btn-primary" style="width:100%">▶ Começar</button>
     </div>`
 
+  const monthsCards = PLAN_MONTHS.map((pm,i) => {
+    const act = i === currentPlanMonth
+    const unlocked = i <= currentPlanMonth
+    const prev = i < currentPlanMonth
+    const border = act ? 'border-color:rgba(232,80,10,.3)' : (prev ? 'border-color:rgba(74,222,128,.25)' : '')
+    return `<div class="db-plan-month${act?' active':''}${unlocked?' unlocked':''}"${border ? ' style="'+border+'"' : ''}>
+      <div class="db-plan-header"${unlocked ? ` onclick="togglePlanMonth(${i})"` : ''}>
+        <div class="db-plan-header-left"><span class="db-plan-month-num">${pm.label}</span><div><div class="db-plan-month-title">${pm.title}</div><div class="db-plan-month-sub">${pm.goal}</div></div></div>
+        ${unlocked
+          ? (act ? '<span style="font-size:12px;color:var(--orange)">▾</span>' : '<span class="db-plan-lock" style="color:var(--green)">✓</span>')
+          : '<span class="db-plan-lock">🔒</span>'}
+      </div>
+      ${act
+        ? `<div class="db-plan-expand">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Foco deste mês:</div>
+            <ul class="db-plan-list">${whyItems}</ul>
+            ${whyText ? `<div class="db-plan-why">${whyText}</div>` : ''}
+            <div class="db-plan-btn"><button class="btn-primary" style="width:100%" onclick="showPlan()">▶ Continuar Treinos</button></div>
+          </div>`
+        : (prev
+          ? `<div class="db-plan-expand"><div class="db-plan-btn"><button class="btn-glass" style="width:100%" onclick="goToPlanMonth(${i})">👁 Ver treinos do ${pm.label} →</button></div></div>`
+          : '')}
+    </div>`
+  }).join('')
+
   content.innerHTML = `
     ${nextCard}
 
@@ -1394,30 +1419,7 @@ function renderDashboard() {
       <div class="section-label" style="margin-bottom:8px">Seu Plano de Recuperação</div>
     </div>
     <div class="db-plan-months sr" data-delay="400">
-      <div class="db-plan-month active" style="border-color:rgba(232,80,10,.3)">
-        <div class="db-plan-header" onclick="togglePlanMonth(0)">
-          <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 01</span><div><div class="db-plan-month-title">${m.title}</div><div class="db-plan-month-sub">${m.goal}</div></div></div>
-          <span style="font-size:12px;color:var(--orange)">▾</span>
-        </div>
-        <div class="db-plan-expand">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Foco deste mês:</div>
-          <ul class="db-plan-list">${whyItems}</ul>
-          ${whyText ? `<div class="db-plan-why">${whyText}</div>` : ''}
-          <div class="db-plan-btn"><button class="btn-primary" style="width:100%" onclick="showPlan()">▶ Continuar Treinos</button></div>
-        </div>
-      </div>
-      <div class="db-plan-month${currentPlanMonth < 1 ? '' : ' unlocked'}">
-        <div class="db-plan-header">
-          <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 02</span><div><div class="db-plan-month-title">${PLAN_MONTHS[1].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[1].goal}</div></div></div>
-          ${currentPlanMonth < 1 ? '<span class="db-plan-lock">🔒</span>' : '<span class="db-plan-lock" style="color:var(--green)">✓</span>'}
-        </div>
-      </div>
-      <div class="db-plan-month${currentPlanMonth < 2 ? '' : ' unlocked'}">
-        <div class="db-plan-header">
-          <div class="db-plan-header-left"><span class="db-plan-month-num">Mês 03</span><div><div class="db-plan-month-title">${PLAN_MONTHS[2].title}</div><div class="db-plan-month-sub">${PLAN_MONTHS[2].goal}</div></div></div>
-          ${currentPlanMonth < 2 ? '<span class="db-plan-lock">🔒</span>' : '<span class="db-plan-lock" style="color:var(--green)">✓</span>'}
-        </div>
-      </div>
+      ${monthsCards}
     </div>
 
     <div class="db-last-eval sr" data-delay="450">Última avaliação: ${lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'}</div>
@@ -2535,6 +2537,12 @@ function showPlan() {
   renderPlanMonths()
   renderPlanView()
   showScreen('s-protocol')
+}
+
+function goToPlanMonth(idx) {
+  if (idx > currentPlanMonth) return
+  showPlan()
+  setTimeout(() => switchPlanMonth(idx), 60)
 }
 
 function renderPlanMonths() {
