@@ -1979,7 +1979,12 @@ async function loadUserData() {
 
   if (sessions && sessions.length > 0) {
     const s = sessions[0]
-    localStorage.setItem('csd_sessoes', JSON.stringify(s.exercicios))
+    // Restaura csd_sessoes do banco apenas como fallback (não sobrescreve um cache local válido,
+    // que pode pertencer a outro mês / estar mais atualizado)
+    const curr = localStorage.getItem('csd_sessoes')
+    if (!curr || curr === '[]' || curr === 'null' || curr === 'undefined') {
+      localStorage.setItem('csd_sessoes', JSON.stringify(s.exercicios || []))
+    }
     localStorage.setItem('csd_sessionChecks', JSON.stringify(s.checks || {}))
     localStorage.setItem('csd_planMonth', s.plan_month.toString())
     currentPlanMonth = Math.min(2, parseInt(s.plan_month) || 0)
@@ -2558,15 +2563,30 @@ function renderPlanView() {
   const m = PLAN_MONTHS[currentPlanMonth]
   const view = document.getElementById('plan-view')
 
-  let sessoes
-  const saved = localStorage.getItem('csd_sessoes')
-  if (saved) {
-    try { sessoes = JSON.parse(saved) } catch(e) { sessoes = null }
+  let sessoes = null
+  // Prioriza o cache do MÊS ATUAL (csd_sessoes_mN). Se existir e for válido, usa e o
+  // torna o cache genérico csd_sessoes. Isso evita que exercícios de outro mês
+  // (ex.: csd_sessoes do M1 restaurado do banco) apareçam no M2.
+  const monthIdx = currentMonthIdx()
+  const monthCache = localStorage.getItem('csd_sessoes_m' + monthIdx)
+  const isValidSessoes = (arr) => Array.isArray(arr) && arr.length >= 3 &&
+    (arr[0].length > 0 || arr[1].length > 0 || arr[2].length > 0)
+  if (monthCache) {
+    try {
+      const v = JSON.parse(monthCache)
+      if (isValidSessoes(v)) { sessoes = v; localStorage.setItem('csd_sessoes', monthCache) }
+    } catch(e) { sessoes = null }
   }
 
-  if (!sessoes || !Array.isArray(sessoes) || sessoes.length < 3 || (sessoes[0].length === 0 && sessoes[1].length === 0 && sessoes[2].length === 0)) {
+  if (!isValidSessoes(sessoes)) {
+    const saved = localStorage.getItem('csd_sessoes')
+    if (saved) {
+      try { const v = JSON.parse(saved); if (isValidSessoes(v)) sessoes = v } catch(e) { sessoes = null }
+    }
+  }
+
+  if (!isValidSessoes(sessoes)) {
     const sigs = Object.keys(signalCounts)
-    const monthIdx = currentMonthIdx()
     const sessKeys = ['a','b','c']
     sessoes = sessKeys.map(k => {
       const ids = []
@@ -2597,7 +2617,7 @@ function renderPlanView() {
       return ids
     })
     localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
-    localStorage.setItem('csd_sessoes_m' + currentMonthIdx(), JSON.stringify(sessoes))
+    localStorage.setItem('csd_sessoes_m' + monthIdx, JSON.stringify(sessoes))
     saveSessionsToSupabase()
   }
 
