@@ -1647,7 +1647,7 @@ const TAG_COLORS = {
   flex:'color:var(--flex);border-color:var(--flex)'
 }
 
-function renderExCard(exId, num, isEspecifico, isCritico, isExtra) {
+function renderExCard(exId, num, isEspecifico, isCritico, isExtra, readonly) {
   const ex = EX[exId]
   if (!ex) return ''
   const detail = getDetail(ex)
@@ -1655,8 +1655,11 @@ function renderExCard(exId, num, isEspecifico, isCritico, isExtra) {
   const cardClass = isCritico ? 'ex-card critico' : isEspecifico ? 'ex-card especifico' : 'ex-card geral'
   const tagCrit = isCritico ? '<span class="ex-tag critico">★ Crítico</span>' : ''
   const tagExtra = isExtra ? '<span class="ex-tag" style="background:rgba(232,80,10,.15);color:var(--orange)">📌 Extra</span>' : ''
+  const checkHtml = readonly
+    ? '<div class="ex-check done" style="cursor:default">✓</div>'
+    : `<div class="ex-check" onclick="event.stopPropagation();toggleExCheck('${exId}',this.parentElement)"></div>`
   return `<div class="${cardClass} fade-in" data-exid="${exId}">
-    <div class="ex-check" onclick="event.stopPropagation();toggleExCheck('${exId}',this.parentElement)"></div>
+    ${checkHtml}
     <div class="ex-body">
       <div class="ex-name">${ex.name}</div>
       <div class="ex-detail">${detail}</div>
@@ -2600,6 +2603,7 @@ function renderPlanView() {
   }
 
   if (!isValidSessoes(sessoes)) {
+    const viewingPast = viewPlanMonth < currentPlanMonth
     const sigs = Object.keys(signalCounts)
     const sessKeys = ['a','b','c']
     sessoes = sessKeys.map(k => {
@@ -2620,12 +2624,14 @@ function renderPlanView() {
           ;(maint[k]||[]).forEach(addEx)
           return
         }
-        const tier = getSignalTier(sig)
-        signalExercisesForMonth(sig, tier, k).forEach(addEx)
+        // mês passado: gera com o mês visualizado; mês atual: progressão por tier do sinal
+        const sigMonth = viewingPast ? monthIdx : getSignalTier(sig)
+        signalExercisesForMonth(sig, sigMonth, k).forEach(addEx)
       })
       // prioriza o sinal crítico nas sessões
       if (criticalSignal) {
-        signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), k).forEach(addEx)
+        const critMonth = viewingPast ? monthIdx : getSignalTier(criticalSignal)
+        signalExercisesForMonth(criticalSignal, critMonth, k).forEach(addEx)
       }
       if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
       return ids
@@ -2645,11 +2651,12 @@ function renderPlanView() {
 }
 
 function renderPlanWeek(idx, label) {
-  const isOpen = idx === currentPlanWeek
-  const isDone = idx < completedWeeks
-  const isCurrent = idx === completedWeeks
+  const viewingPast = viewPlanMonth < currentPlanMonth
+  const isOpen = viewingPast ? false : idx === currentPlanWeek
+  const isDone = viewingPast || idx < completedWeeks
+  const isCurrent = !viewingPast && idx === completedWeeks
   const statusIcon = isDone ? ' <span style="color:var(--glut);font-size:12px">✓ Concluída</span>' : isCurrent ? ' <span style="color:var(--orange);font-size:11px;font-weight:600">● Atual</span>' : ''
-  return `<div class="plan-week-card${isDone ? ' week-done' : ''}">
+  return `<div class="plan-week-card${isDone ? ' week-done' : ''}${isOpen ? ' week-open' : ''}">
     <div class="plan-week-header" onclick="togglePlanWeek(${idx})">
       <div class="plan-week-name">${label}${statusIcon}</div>
       <div class="plan-week-toggle" style="transform:rotate(${isOpen?180:0}deg)">▾</div>
@@ -2662,20 +2669,30 @@ function renderPlanWeek(idx, label) {
   </div>`
 }
 
-function togglePlanWeek(idx) {
-  if (currentPlanWeek === idx) { currentPlanWeek = -1 } else { currentPlanWeek = idx }
-  renderPlanWeeks()
-}
-
 function renderPlanWeeks() {
+  const viewingPast = viewPlanMonth < currentPlanMonth
   const weeks = document.querySelectorAll('.plan-week-card')
   weeks.forEach((w,i) => {
     const body = w.querySelector('.plan-week-body')
     const toggle = w.querySelector('.plan-week-toggle')
-    const isOpen = i === currentPlanWeek
+    const isOpen = viewingPast ? w.classList.contains('week-open') : i === currentPlanWeek
     body.classList.toggle('open',isOpen)
     if (toggle) toggle.style.transform = `rotate(${isOpen?180:0}deg)`
   })
+}
+
+function togglePlanWeek(idx) {
+  const viewingPast = viewPlanMonth < currentPlanMonth
+  if (viewingPast) {
+    const card = document.querySelectorAll('.plan-week-card')[idx]
+    if (card) {
+      card.classList.toggle('week-open')
+      renderPlanWeeks()
+    }
+    return
+  }
+  if (currentPlanWeek === idx) { currentPlanWeek = -1 } else { currentPlanWeek = idx }
+  renderPlanWeeks()
 }
 
 let currentSessionIdx = 0
@@ -2801,6 +2818,7 @@ function showSessionFromPlan(sessIdx) {
   const saved = localStorage.getItem('csd_sessoes')
   if (!saved) return
   currentSessionIdx = sessIdx
+  const viewingPast = viewPlanMonth < currentPlanMonth
   const sessoes = JSON.parse(saved)
   const si = sessIdx
   const sessionKey = ['a','b','c'][si]
@@ -2808,6 +2826,27 @@ function showSessionFromPlan(sessIdx) {
   document.getElementById('sess-label').textContent = `Treino ${['A','B','C'][si]}`
   const badge = document.getElementById('sess-badge')
   badge.textContent = info.focus; badge.style.background = info.color
+
+  const wrap = document.getElementById('sessao-exercises')
+
+  if (viewingPast) {
+    // Mês anterior (histórico): mostra fielmente os exercícios daquele mês (cache),
+    // todos marcados como feitos e sem permitir alterar o progresso atual.
+    const ids = [...new Set(sessoes[si] || [])].filter(id => EX[id])
+    let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
+    html += ['Treino A','Treino B','Treino C'].map((d,i) =>
+      `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
+    ).join('')
+    html += `</div>`
+    ids.forEach((id, n) => { const rendered = renderExCard(id, n+1, true, false, false, true); if (rendered) html += rendered })
+    wrap.innerHTML = html
+    wrap.onclick = e => {
+      const card = e.target.closest('[data-exid]')
+      if (card) showExerciseDetail(card.dataset.exid)
+    }
+    showScreen('s-session-detail')
+    return
+  }
 
   // 1. Specific exercises from decision engine
   let specific = [...new Set(sessoes[si] || [])]
@@ -2862,7 +2901,6 @@ function showSessionFromPlan(sessIdx) {
     const rendered = renderExCard(id, n, isEsp, isCrit)
     if (rendered) { html += rendered; n++ }
   })
-  const wrap = document.getElementById('sessao-exercises')
   wrap.innerHTML = html
 
   const sessionExerciseIds = Array.from(wrap.querySelectorAll('.ex-card')).map(c => c.dataset.exid)
