@@ -2585,17 +2585,18 @@ function renderPlanView() {
   // torna o cache genérico csd_sessoes. Isso evita que exercícios de outro mês
   // (ex.: csd_sessoes do M1 restaurado do banco) apareçam no M2.
   const monthIdx = viewPlanMonth
-  const monthCache = localStorage.getItem('csd_sessoes_m' + monthIdx)
+  const viewingPast = viewPlanMonth < currentPlanMonth
+  const monthCache = viewingPast ? null : localStorage.getItem('csd_sessoes_m' + monthIdx)
   const isValidSessoes = (arr) => Array.isArray(arr) && arr.length >= 3 &&
     (arr[0].length > 0 || arr[1].length > 0 || arr[2].length > 0)
-  if (monthCache) {
+  if (monthCache && !viewingPast) {
     try {
       const v = JSON.parse(monthCache)
       if (isValidSessoes(v)) { sessoes = v; localStorage.setItem('csd_sessoes', monthCache) }
     } catch(e) { sessoes = null }
   }
 
-  if (!isValidSessoes(sessoes)) {
+  if (!viewingPast && !isValidSessoes(sessoes)) {
     const saved = localStorage.getItem('csd_sessoes')
     if (saved) {
       try { const v = JSON.parse(saved); if (isValidSessoes(v)) sessoes = v } catch(e) { sessoes = null }
@@ -2603,8 +2604,7 @@ function renderPlanView() {
   }
 
   if (!isValidSessoes(sessoes)) {
-    const viewingPast = viewPlanMonth < currentPlanMonth
-    const sigs = Object.keys(signalCounts)
+    const sigs = Object.keys(viewingPast ? (Object.keys(prevSignalCounts).length ? prevSignalCounts : signalCounts) : signalCounts)
     const sessKeys = ['a','b','c']
     sessoes = sessKeys.map(k => {
       const ids = []
@@ -2616,22 +2616,24 @@ function renderPlanView() {
         if (!ex || seenNames.has(ex.name)) return
         seen.add(id); seenNames.add(ex.name); ids.push(id)
       }
-      sigs.forEach(sig => {
+      ;(viewingPast ? sigs : sigs).forEach(sig => {
         if (!SIGNAL_MAP[sig]) return
+        if (viewingPast) {
+          // histórico: somente exercícios do mês visualizado, sem manutenção/tier atual
+          signalExercisesForMonth(sig, monthIdx, k).forEach(addEx)
+          return
+        }
         // resolved signal → manutenção leve do próximo tier, evitando mês anterior
         if ((prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
           const maint = resolvedMaintenanceExercises(sig, getSignalTier(sig), monthIdx)
           ;(maint[k]||[]).forEach(addEx)
           return
         }
-        // mês passado: gera com o mês visualizado; mês atual: progressão por tier do sinal
-        const sigMonth = viewingPast ? monthIdx : getSignalTier(sig)
-        signalExercisesForMonth(sig, sigMonth, k).forEach(addEx)
+        // mês atual: progressão por tier do sinal
+        signalExercisesForMonth(sig, getSignalTier(sig), k).forEach(addEx)
       })
-      // prioriza o sinal crítico nas sessões
-      if (criticalSignal) {
-        const critMonth = viewingPast ? monthIdx : getSignalTier(criticalSignal)
-        signalExercisesForMonth(criticalSignal, critMonth, k).forEach(addEx)
+      if (!viewingPast && criticalSignal) {
+        signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), k).forEach(addEx)
       }
       if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
       return ids
