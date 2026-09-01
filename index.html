@@ -2832,15 +2832,28 @@ function showSessionFromPlan(sessIdx) {
   const wrap = document.getElementById('sessao-exercises')
 
   if (viewingPast) {
-    // Mês anterior (histórico): mostra fielmente os exercícios daquele mês (cache),
-    // todos marcados como feitos e sem permitir alterar o progresso atual.
-    const ids = [...new Set(sessoes[si] || [])].filter(id => EX[id])
+    // Mês anterior (histórico): mostra somente os exercícios daquele mês,
+    // gerados a partir do mês visualizado (nunca do mês atual), todos marcados
+    // como feitos e sem permitir alterar o progresso atual.
+    const histSigs = Object.keys(prevSignalCounts && Object.keys(prevSignalCounts).length ? prevSignalCounts : signalCounts)
+    const historyIds = []
+    const histSeen = new Set()
+    const histNames = new Set()
+    histSigs.forEach(sig => {
+      if (!SIGNAL_MAP[sig]) return
+      signalExercisesForMonth(sig, viewPlanMonth, sessionKey).forEach(id => {
+        if (id && EX[id] && !histSeen.has(id) && !histNames.has(EX[id].name)) {
+          histSeen.add(id); histNames.add(EX[id].name); historyIds.push(id)
+        }
+      })
+    })
+    if (historyIds.length === 0) historyIds.push('e_prop_fechado','e_agach_ponta')
     let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
     html += ['Treino A','Treino B','Treino C'].map((d,i) =>
       `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
     ).join('')
     html += `</div>`
-    ids.forEach((id, n) => { const rendered = renderExCard(id, n+1, true, false, false, true); if (rendered) html += rendered })
+    historyIds.forEach((id, n) => { const rendered = renderExCard(id, n+1, true, false, false, true); if (rendered) html += rendered })
     wrap.innerHTML = html
     wrap.onclick = e => {
       const card = e.target.closest('[data-exid]')
