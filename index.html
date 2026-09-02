@@ -2624,6 +2624,30 @@ function renderPlanView() {
         ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
       })
     }
+    // Decisão GLOBAL por família _assist (ex.: cossack vs cossack_assist) para o mês:
+    // se o exercício pleno estiver disponível no mês e não foi usado no M1, usamos o
+    // pleno e BLOQUEAMOS o assist em todos os treinos (quem faz o pleno não precisa
+    // da facilitação). Só mantemos o assist quando o pleno não estiver em uso.
+    const chosenFam = {}
+    const blockedFam = {}
+    if (monthIdx > 0 && !viewingPast) {
+      sigs.forEach(sig => {
+        if (!SIGNAL_MAP[sig]) return
+        const pool = ['a','b','c']
+          .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+          .filter((id,ix,self) => self.indexOf(id) === ix)
+        pool.forEach(id => {
+          if (!/_assist$/.test(id)) return
+          const pleno = id.replace(/_assist$/,'')
+          if (pool.includes(pleno) && EX[pleno] && !usedBefore.has(pleno)) {
+            chosenFam[pleno] = pleno
+            ;(blockedFam[pleno] = blockedFam[pleno] || new Set()).add(id)
+          } else {
+            chosenFam[pleno] = chosenFam[pleno] || id
+          }
+        })
+      })
+    }
     sessoes = sessKeys.map(k => {
       const ids = []
       const seen = new Set()
@@ -2634,6 +2658,9 @@ function renderPlanView() {
         const ex = EX[id]
         if (!ex || seenNames.has(ex.name)) return
         const fk = id.replace(/_assist$/,'')
+        // variante bloqueada globalmente no mês (ex.: assist quando o pleno foi escolhido)
+        if (blockedFam[fk] && blockedFam[fk].has(id)) return
+        if (chosenFam[fk] && chosenFam[fk] !== id && EX[chosenFam[fk]]) return
         if (seenFam.has(fk) && EX[fk] && fk !== id) return
         seen.add(id); seenNames.add(ex.name); seenFam.add(fk); ids.push(id)
       }
@@ -2936,6 +2963,30 @@ function showSessionFromPlan(sessIdx) {
       ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
     })
   }
+  // Decisão GLOBAL por família _assist no mês (mesma regra do renderPlanView):
+  // se o pleno está disponível e não foi usado no M1, usamos o pleno e bloqueamos
+  // o assist em todos os treinos; só mantemos o assist se o pleno não estiver em uso.
+  const chosenFam = {}
+  const blockedFam = {}
+  if (!viewingPast && viewPlanMonth > 0) {
+    relevantSigs.forEach(sig => {
+      if (!SIGNAL_MAP[sig]) return
+      const pool = ['a','b','c']
+        .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+        .filter((id,ix,self) => self.indexOf(id) === ix)
+      pool.forEach(id => {
+        if (!/_assist$/.test(id)) return
+        const pleno = id.replace(/_assist$/,'')
+        if (pool.includes(pleno) && EX[pleno] && !usedBefore.has(pleno)) {
+          chosenFam[pleno] = pleno
+          ;(blockedFam[pleno] = blockedFam[pleno] || new Set()).add(id)
+        } else {
+          chosenFam[pleno] = chosenFam[pleno] || id
+        }
+      })
+    })
+  }
+  const famKey = (id) => id.replace(/_assist$/,'')
   const sigExercises = {}
   relevantSigs.forEach(sig => {
     const list = []
@@ -2971,8 +3022,15 @@ function showSessionFromPlan(sessIdx) {
         if (id && EX[id] && !list.includes(id)) list.push(id)
       })
     }
-    // mantém só os que têm vídeo/referência válida e não duplicados por nome
-    sigExercises[sig] = list
+    // mantém só os que têm vídeo/referência válida e não duplicados por nome,
+    // descartando a variante _assist globalmente rejeitada no mês (se o pleno
+    // foi escolhido, o assist não entra de jeito nenhum — inclusive no Passo A)
+    sigExercises[sig] = list.filter(id => {
+      const fk = famKey(id)
+      if (blockedFam[fk] && blockedFam[fk].has(id)) return false
+      if (chosenFam[fk] && chosenFam[fk] !== id && EX[chosenFam[fk]]) return false
+      return true
+    })
   })
 
   // finalIds já inclui critical (prioridade 1) e específicos. Reconstruímos a lista
@@ -2981,13 +3039,14 @@ function showSessionFromPlan(sessIdx) {
   const kept = []
   const keptNames = new Set()
   const keptFam = new Set()
-  const famKey = (id) => id.replace(/_assist$/,'')
   const pushIfNew = (id) => {
     const ex = EX[id]
     if (!id || !ex || kept.includes(id) || keptNames.has(ex.name)) return
-    // variações de um mesmo exercício (ex.: cossack vs cossack_assist) não podem
-    // coexistir no mesmo treino — são o mesmo movimento, só que assistido
+    // variante bloqueada globalmente no mês (ex.: assist quando o pleno foi escolhido)
     const fk = famKey(id)
+    if (blockedFam[fk] && blockedFam[fk].has(id)) return
+    if (chosenFam[fk] && chosenFam[fk] !== id && EX[chosenFam[fk]]) return
+    // variações de um mesmo exercício não podem coexistir no MESMO treino
     if (keptFam.has(fk) && EX[fk] && fk !== id) return
     kept.push(id); keptNames.add(ex.name); keptFam.add(fk)
   }
