@@ -129,6 +129,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .av-status.risk{background:rgba(239,68,68,.14);color:var(--red)}
 .av-status.mid{background:rgba(251,146,60,.14);color:var(--amber)}
 .av-status.ok{background:rgba(74,222,128,.14);color:var(--green)}
+.av-tests-block,.av-scores-block{margin-top:10px}
+.av-tests-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.av-scores-block{padding-top:10px;border-top:1px solid var(--border);margin-top:10px}
+.av-test{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--surface2)}
+.av-test-name{font-size:12px;font-weight:700;margin-bottom:4px}
+.av-test-opt{font-size:12px;color:var(--muted);padding:2px 0;display:flex;align-items:center;gap:4px}
+.av-test-opt.ok{color:var(--green)}
 .av-chart-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
 .av-chart-box h4{font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .av-chart-box .hint{font-size:10px;color:var(--muted);font-weight:400}
@@ -147,19 +154,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .ex-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
 .ex-row .n{color:var(--muted)}
 .ex-row .v{font-weight:500}
-
-/* CALENDARIO */
-.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.cal-head button{background:none;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12px}
-.cal-head button:hover{border-color:var(--orange)}
-.cal-head .m{font-size:14px;font-weight:700}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-dow{text-align:center;font-size:9px;color:var(--muted);padding:4px 0;font-weight:600;text-transform:uppercase}
-.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;border-radius:6px;background:var(--surface2);color:var(--muted);position:relative}
-.cal-day.today{border:1px solid var(--orange)}
-.cal-day.other{opacity:.3}
-.cal-day.has{background:rgba(74,222,128,.15);color:var(--text);font-weight:600}
-.cal-day .cdot{position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--green)}
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.plan-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.plan-card h5{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.plan-ex{font-size:12px;padding:5px 0;border-bottom:1px dashed var(--border);display:flex;align-items:center;gap:6px}
+.plan-ex:last-child{border-bottom:none}
+.plan-ex .pip{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0}
+.plan-empty{font-size:11px;color:var(--muted);padding:8px 0}
+.plan-badge{display:inline-flex;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;margin-bottom:8px}
+.plan-badge.m{background:rgba(232,80,10,.15);color:var(--orange)}
 
 /* OBSERVACOES */
 .obs-form{display:flex;gap:8px;margin-bottom:14px}
@@ -452,7 +455,7 @@ function openProfile(userId) {
       <div class="modal-hemail">${s.email}${s.phone ? ' · '+s.phone : ''}</div>
     </div>
     <div class="modal-hscore">${s.overall||'—'}<small>/100</small></div>`
-  $('modal-tabs').innerHTML = ['timeline','avaliacoes','exercicios','calendario','observacoes'].map(t =>
+  $('modal-tabs').innerHTML = ['timeline','avaliacoes','exercicios','observacoes'].map(t =>
     `<div class="tab${t===activeTab?' active':''}" onclick="switchTab('${t}')">${tabLabel(t)}</div>`
   ).join('')
   renderProfileTab()
@@ -465,7 +468,7 @@ function closeModal() { destroyChart(); $('modal').classList.remove('open'); cur
 $('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal() })
 
 function tabLabel(t) {
-  return {timeline:'Timeline',avaliacoes:'Avaliações',exercicios:'Exercícios',calendario:'Calendário',observacoes:'Observações'}[t]||t
+  return {timeline:'Timeline',avaliacoes:'Avaliações',exercicios:'Exercícios',observacoes:'Observações'}[t]||t
 }
 
 function switchTab(t) {
@@ -482,7 +485,6 @@ function renderProfileTab() {
   if (activeTab === 'timeline') renderTimeline(s, body)
   else if (activeTab === 'avaliacoes') renderAvaliacoes(s, body)
   else if (activeTab === 'exercicios') renderExercicios(s, body)
-  else if (activeTab === 'calendario') renderCalendario(s, body)
   else if (activeTab === 'observacoes') renderObservacoes(s, body)
   renderAIBox(s)
 }
@@ -541,6 +543,30 @@ const SIGNAL_LABELS = {
   flexores:{ n:'Flexores', d:'Encurtamento de flexores de quadril' }
 }
 const SIGNAL_ORDER2 = ['tornozelo','quadril_mob','gluteo','propriocepcao','panturrilha','quadril_forca','flexores']
+const TESTE_INFO = {
+  agachamento:{ title:'Agachamento completo', opts:{ calc:'Calcanhares saíram do chão', fundo:'Não consegui descer completamente', ok:'Consegui sem dificuldade' } },
+  pelvica:{ title:'Elevação pélvica', opts:{ nao_mant:'Não consegui manter a posição', caimbra:'Câimbra nos isquiotibiais', ok:'Consegui manter sem dificuldade' } },
+  equilibrio:{ title:'Equilíbrio unilateral', opts:{ aberto_fail:'Não manteve com olhos abertos', fechado_fail:'Oscilou com olhos fechados', ok:'Fácil nos dois' } },
+  panturrilha:{ title:'Elevação de panturrilha', opts:{ nao_rep:'Dif. completar 10 reps', dor_torn:'Dor ou limitação no tornozelo', ok:'Completou 10 reps' } },
+  stepdown:{ title:'Step-down test', opts:{ controle:'Dif. controlar a descida', valgo:'Joelho caiu p/ dentro (valgo)', ok:'Descida controlada' } },
+  noventa:{ title:'Rotação de quadril 90/90', opts:{ nao_enc:'Joelhos não encostaram no chão', assim:'Diferença entre os lados', ok:'Encostou nos dois lados' } },
+  thomas:{ title:'Teste de Thomas', opts:{ levanta:'Perna levantou do chão', dor:'Dor ou desconforto', ok:'Perna no chão, sem dor' } }
+}
+const EX_NAME = {
+  g_volta_mundo:'Volta ao mundo', g_cocoras:'Cócoras', g_prancha:'Prancha Frontal', g_panturrilha:'Elevação de Panturrilha Unilateral', g_equilibrio:'Equilíbrio Unilateral', g_stepdown:'Step-Down', g_terra:'Levantamento Terra 1 perna',
+  e_cocoras:'Cócoras', e_meio_ajoel:'Meio Ajoelhado', e_pe_fechado:'1 pé c/ olhos fechados', e_agach_ponta:'Agachamento ponta do pé', e_saltos_quad:'Saltos no quadrado', e_joelho_parede:'Joelho na Parede',
+  e_volta_mundo:'Volta ao mundo', e_noventa:'90/90', e_iliopsoas:'Alongamento do Iliopsoas',
+  e_elev_pelv:'Elevação Pélvica', e_coice:'Coice 4 Apoios', e_bulg:'Afundo Búlgaro',
+  e_prop_fechado:'1 pé c/ olhos fechados', e_prop_ponta:'Agachamento ponta do pé', e_prop_step:'Step-Down',
+  e_plant:'Plantiflexão', e_step_esp:'Step-Down', e_skatista:'Agachamento Skatista',
+  e_iliopsoas_esp:'Alongamento do Iliopsoas', e_agach_salto:'Agachamento com Salto', e_prancha_lat:'Prancha Lateral Dinâmica', e_escalador:'Escalador',
+  e_relogio_pe:'Relógio com o Pé', e_salto_lat_cong:'Salto Lateral e Congela', e_caminhada_ponta:'Caminhada na Ponta dos Pés', e_iso_pant_1pe:'Isometria Panturrilha 1 Perna', e_plant_6kg:'Plantiflexão c/ Peso Extra (6kg)', e_caminhada_ponta_6kg:'Caminhada na Ponta c/ Peso (6kg)',
+  e_cossack_assist:'Cossack Assistido', e_cossack:'Cossack', e_shin_box:'90/90 levanta',
+  e_aviaozinho:'Aviãozinho', e_elev_lat_degrau:'Elevação Lateral do Quadril', e_desliz_isoquit:'Deslizamento de Isquiotibiais', e_copen_isom:'Copenhagen Isometria', e_desliz_unilat:'Deslizamento Unilateral', e_copen_mov:'Copenhagen c/ Movimento', e_prancha_lat_abd:'Prancha Lateral c/ Abdução',
+  e_step_lateral:'Step-Down Lateral', e_sentar_levantar_1pe:'Sentar e Levantar na Cadeira', e_salto_cong:'Salto e Congela', e_aterrissagem_unilat:'Aterrissagem Unilateral',
+  e_deadbug:'Dead Bug', e_urso_estatico:'Urso Estático', e_toque_ombro_urso:'Toque de Ombros no Urso', e_pressao_anti_rot:'Anti-Rotação c/ Elástico', e_bird_dog:'Bird Dog'
+}
+function exName(id) { return EX_NAME[id] || id || '—' }
 const avColors = {
   tornozelo:'#38bdf8', quadril_mob:'#a78bfa', gluteo:'#f472b6', propriocepcao:'#fbbf24',
   panturrilha:'#34d399', quadril_forca:'#fb923c', flexores:'#60a5fa'
@@ -575,6 +601,21 @@ function renderAvaliacoes(s, body) {
 
   // Cards por check-up, legíveis
   const cardsHtml = checks.slice().reverse().map((c,i) => {
+    // O que o aluno marcou em cada teste
+    let testsHtml = ''
+    const ans = c.answers && typeof c.answers==='object' ? c.answers : {}
+    const testIds = Object.keys(TESTE_INFO)
+    testIds.forEach(tid=>{
+      const marked = Array.isArray(ans[tid]) ? ans[tid] : []
+      const ti = TESTE_INFO[tid]
+      if (!ti) return
+      const opts = marked.map(oid=>ti.opts[oid]).filter(Boolean)
+      if (!opts.length) return
+      testsHtml += `<div class="av-test">
+        <div class="av-test-name">${ti.title}</div>
+        ${opts.map(o=>`<div class="av-test-opt${o===(ti.opts.ok)?' ok':''}">${o===(ti.opts.ok)?'✅ ':'⚠️ '}${o}</div>`).join('')}
+      </div>`
+    })
     let rows = ''
     if (c.scores && typeof c.scores==='object') {
       SIGNAL_ORDER2.forEach(sig=>{
@@ -596,7 +637,10 @@ function renderAvaliacoes(s, body) {
           <span class="av-score">${nScore(c)}</span>
         </span>
       </div>
-      <div class="av-inner">${rows}</div>
+      <div class="av-inner">
+        ${testsHtml ? `<div class="av-tests-block"><div class="av-tests-title">O que marcou em cada teste</div>${testsHtml}</div>` : ''}
+        ${rows ? `<div class="av-scores-block"><div class="av-tests-title">Scores por sinal</div>${rows}</div>` : ''}
+      </div>
     </div>`
   }).join('')
 
@@ -628,27 +672,30 @@ function renderExercicios(s, body) {
   const done = logs.filter(l=>l.checked)
   const total = done.length
   const last7 = done.filter(l=>daysSince(l.done_at)<=7).length
-  // Heatmap last 7 days
-  let heatHtml = '<div class="ex-heat-label">Últimos 7 dias</div><div class="ex-heat">'
-  for (let i=6; i>=0; i--) {
-    const d = new Date(); d.setDate(d.getDate()-i)
-    const dayStr = d.toISOString().slice(0,10)
-    const dayLabel = d.toLocaleDateString('pt-BR',{weekday:'short'}).slice(0,3)
-    const count = done.filter(l=>l.done_at?.startsWith(dayStr)).length
-    heatHtml += `<div class="ex-heat-cell${count>0?' done':''}" title="${dayStr}: ${count}">${dayLabel}</div>`
+  // Plano vigente: exercicios = [Treino A, B, C]; plan_month
+  const sess = s.latestSession || {}
+  const plan = Array.isArray(sess.exercicios) ? sess.exercicios : (Array.isArray(s.sessions?.[0]?.exercicios) ? s.sessions[0].exercicios : null)
+  const pmonth = sess.plan_month ?? s.sessions?.[0]?.plan_month ?? null
+  const dias = ['Treino A','Treino B','Treino C']
+  let planHtml = ''
+  if (plan && plan.length) {
+    planHtml = `<div class="plan-badge m">Mês ${(pmonth ?? '—')}</div>
+      <div class="plan-grid">${plan.map((ids,i)=>
+        `<div class="plan-card"><h5>${dias[i]||('Treino '+(i+1))}</h5>
+          ${Array.isArray(ids) && ids.length ? ids.map(id=>`<div class="plan-ex"><span class="pip"></span>${exName(id)}</div>`).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+        </div>`).join('')}
+      </div>`
+  } else {
+    planHtml = '<div class="empty" style="padding:20px">Nenhum plano de exercícios registrado</div>'
   }
-  heatHtml += '</div>'
-  // Stats
-  const ds = daysSince(s.last_activity)
-  const incompleto = logs.filter(l=>!l.checked).length
-  // Group by date
+  // Group by date (exercícios feitos)
   const groups = {}
   done.forEach(l => { const k=l.done_at?.slice(0,10); if(k) { if(!groups[k]) groups[k]=[]; groups[k].push(l) } })
   let listHtml = ''
-  Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).slice(0,30).forEach(([date, items]) => {
+  Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).slice(0,20).forEach(([date, items]) => {
     listHtml += `<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px">${fmt(date)} (${items.length})</div>`
     items.forEach(l => {
-      listHtml += `<div class="ex-row"><span class="n">${l.exercise_id}</span><span class="v">${l.session_id||''} ${new Date(l.done_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`
+      listHtml += `<div class="ex-row"><span class="n">${exName(l.exercise_id)}</span><span class="v">${l.session_id||''} ${new Date(l.done_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`
     })
     listHtml += '</div>'
   })
@@ -657,34 +704,10 @@ function renderExercicios(s, body) {
     <div class="stat"><div class="stat-val">${last7}</div><div class="stat-label">Últ. 7d</div></div>
     <div class="stat"><div class="stat-val">${s.streak}</div><div class="stat-label">Streak</div></div>
   </div>
-  ${heatHtml}
+  <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px">📋 Plano vigente — treinos A/B/C</div>
+  ${planHtml}
+  <div style="font-size:11px;font-weight:700;color:var(--text);margin:14px 0 6px">✅ Exercícios feitos</div>
   ${listHtml || '<div class="empty">Nenhum exercício registrado</div>'}`
-}
-
-// ── CALENDÁRIO ──
-let calMonth = new Date().getMonth(), calYear = new Date().getFullYear()
-
-function renderCalendario(s, body) {
-  const doneDays = new Set((s.logs||[]).filter(l=>l.checked).map(l=>l.done_at?.slice(0,10)).filter(Boolean))
-  const firstDay = new Date(calYear, calMonth, 1).getDay()
-  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate()
-  const today = new Date().toISOString().slice(0,10)
-  const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-  let html = `<div class="cal-head">
-    <button onclick="calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCalendario(allStudents.find(x=>x.id==='${s.id}'),$('modal-body'))">←</button>
-    <div class="m">${monthNames[calMonth]} ${calYear}</div>
-    <button onclick="calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCalendario(allStudents.find(x=>x.id==='${s.id}'),$('modal-body'))">→</button>
-  </div><div class="cal-grid">`
-  ;['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => { html += `<div class="cal-dow">${d}</div>` })
-  for (let i=0; i<firstDay; i++) html += '<div></div>'
-  for (let d=1; d<=daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-    const isToday = dateStr === today
-    const has = doneDays.has(dateStr)
-    html += `<div class="cal-day${isToday?' today':''}${has?' has':''}" title="${dateStr}${has?' ✅':''}">${d}${has?' <span class="cdot"></span>':''}</div>`
-  }
-  html += '</div>'
-  body.innerHTML = html
 }
 
 // ── OBSERVAÇÕES ──
