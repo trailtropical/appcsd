@@ -2876,38 +2876,64 @@ function showSessionFromPlan(sessIdx) {
   // 1. Specific exercises from decision engine
   let specific = [...new Set(sessoes[si] || [])]
 
-  // 2. Prioritize: critical signal exercises first, then rest (dedup by name)
+  // 2. Critical signal exercises (prioridade 1)
   let critIds = []
   if (criticalSignal) {
     critIds = signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey)
   }
-  let finalIds = []
-  const finalNames = new Set()
-  const addIfNew = (id) => {
-    if (finalIds.includes(id)) return
-    const ex = EX[id]
-    if (!ex || finalNames.has(ex.name)) return
-    finalIds.push(id); finalNames.add(ex.name)
-  }
-  critIds.forEach(addIfNew)
-  specific.forEach(addIfNew)
 
-  // 3. Cap at MAX (5), but keep critical ones
-  const MAX = 5, MIN = 4
+  // 3. Garantir 5–6 exercícios com COBERTURA de todos os achados relevantes.
+  //    Primeiro agrupamos o que cada sinal relevante traz para esta sessão,
+  //    garantindo pelo menos 1 exercício por achado, depois completamos até 5–6.
+  const MAX = 6, MIN = 5
   const specificSet = new Set(specific)
-  if (finalIds.length > MAX) finalIds = finalIds.slice(0, MAX)
+  const relevantSigs = SIGNAL_ORDER.filter(sig =>
+    signalCounts[sig] > 0 || prevSignalCounts[sig] > 0 || (getSignalTier(sig)||0) > 0
+  )
+  const hasFresh = Object.keys(signalCounts).length > 0
+  const sigExercises = {}
+  relevantSigs.forEach(sig => {
+    const list = []
+    if (!SIGNAL_MAP[sig]) return list
+    if (hasFresh && (prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
+      const maint = resolvedMaintenanceExercises(sig, getSignalTier(sig), viewPlanMonth)
+      ;(maint[sessionKey]||[]).forEach(id => { if (id && EX[id]) list.push(id) })
+    } else {
+      signalExercisesForMonth(sig, getSignalTier(sig), sessionKey).forEach(id => { if (id && EX[id]) list.push(id) })
+    }
+    // mantém só os que têm vídeo/referência válida e não duplicados por nome
+    sigExercises[sig] = list
+  })
 
-  // 4. Fill with general exercises if under MIN
+  // finalIds já inclui critical (prioridade 1) e específicos. Reconstruímos a lista
+  // final garantindo cobertura: primeiro 1 exercício de cada sinal relevante,
+  // depois os demais exercícios (estourando a ordem), depois crítico por último preenchimento.
+  const kept = []
+  const keptNames = new Set()
+  const pushIfNew = (id) => {
+    const ex = EX[id]
+    if (!id || !ex || kept.includes(id) || keptNames.has(ex.name)) return
+    kept.push(id); keptNames.add(ex.name)
+  }
+  // Passo A: 1 exercício de cada sinal relevante (garante cobertura)
+  relevantSigs.forEach(sig => { if (sigExercises[sig] && sigExercises[sig][0]) pushIfNew(sigExercises[sig][0]) })
+  // Passo B: crítico (garante prioridade 1)
+  critIds.forEach(pushIfNew)
+  // Passo C: specific (exercícios do plano) na ordem
+  specific.forEach(pushIfNew)
+  // Passo D: excedentes de cada sinal (progressão)
+  relevantSigs.forEach(sig => { (sigExercises[sig]||[]).forEach(pushIfNew) })
+
+  // Passo E: garante 5–6 no total, se ainda faltar (sem cortar cobertura)
+  // primeiro corta para 6 caso já tenha passado
+  let finalIds = kept.slice(0, MAX)
   if (finalIds.length < MIN) {
     const pool = GERAL_ORDEM.flatMap(b => b.ids).filter(id => {
-      if (finalIds.includes(id)) return false
       const ex = EX[id]
-      return ex && !finalNames.has(ex.name)
+      return !finalIds.includes(id) && ex && !keptNames.has(ex.name)
     })
-    pool.slice(0, MIN - finalIds.length).forEach(id => {
-      const ex = EX[id]
-      if (ex && !finalNames.has(ex.name)) { finalIds.push(id); finalNames.add(ex.name) }
-    })
+    pool.slice(0, MIN - finalIds.length).forEach(pushIfNew)
+    finalIds = kept.slice(0, MAX)
   }
 
   // 5. Render as flat list
