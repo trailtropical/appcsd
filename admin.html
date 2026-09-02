@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CSD Admin — Painel</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0F0F0E;--surface:#1A1A18;--surface2:#222220;--border:rgba(255,255,255,.06);--text:#F0F0EE;--muted:#8A8A87;--orange:#E8500A;--green:#4ADE80;--red:#EF4444;--amber:#FB923C}
@@ -124,6 +125,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .av-cat .v{font-weight:600}
 .av-bar{height:4px;background:var(--border);border-radius:2px;margin:2px 0 6px;overflow:hidden}
 .av-fill{height:100%;border-radius:2px}
+.av-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;flex-shrink:0}
+.av-status.risk{background:rgba(239,68,68,.14);color:var(--red)}
+.av-status.mid{background:rgba(251,146,60,.14);color:var(--amber)}
+.av-status.ok{background:rgba(74,222,128,.14);color:var(--green)}
+.av-chart-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+.av-chart-box h4{font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.av-chart-box .hint{font-size:10px;color:var(--muted);font-weight:400}
+.av-chart-wrap{position:relative;height:240px}
+.av-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.av-legend .lg{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}
+.av-legend .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+#avChart{cursor:crosshair}
 
 /* EXERCICIOS - calendar heatmap */
 .ex-heat{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:8px 0 16px}
@@ -445,7 +458,9 @@ function openProfile(userId) {
   renderProfileTab()
   renderExtras(s)
 }
-function closeModal() { $('modal').classList.remove('open'); currentStudentId=null }
+function destroyChart() { if (avChart) { avChart.destroy(); avChart = null } }
+
+function closeModal() { destroyChart(); $('modal').classList.remove('open'); currentStudentId=null }
 
 $('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal() })
 
@@ -456,6 +471,7 @@ function tabLabel(t) {
 function switchTab(t) {
   activeTab = t
   $('modal-tabs').querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.textContent.trim()===tabLabel(t)))
+  destroyChart()
   renderProfileTab()
 }
 
@@ -515,24 +531,95 @@ function renderTimeline(s, body) {
 }
 
 // ── AVALIAÇÕES ──
+const SIGNAL_LABELS = {
+  tornozelo:{ n:'Tornozelo', d:'Restrição de tornozelo' },
+  quadril_mob:{ n:'Mobilidade quadril', d:'Restrição de mobilidade de quadril' },
+  gluteo:{ n:'Glúteo', d:'Fraqueza de glúteo' },
+  propriocepcao:{ n:'Propriocepção', d:'Déficit de propriocepção' },
+  panturrilha:{ n:'Panturrilha', d:'Fraqueza de panturrilha' },
+  quadril_forca:{ n:'Controle quadril', d:'Déficit de controle motor de quadril' },
+  flexores:{ n:'Flexores', d:'Encurtamento de flexores de quadril' }
+}
+const SIGNAL_ORDER2 = ['tornozelo','quadril_mob','gluteo','propriocepcao','panturrilha','quadril_forca','flexores']
+const avColors = {
+  tornozelo:'#38bdf8', quadril_mob:'#a78bfa', gluteo:'#f472b6', propriocepcao:'#fbbf24',
+  panturrilha:'#34d399', quadril_forca:'#fb923c', flexores:'#60a5fa'
+}
+let avChart = null
+function nScore(c) {
+  if (!c) return 0
+  if (typeof c.overall==='number') return Math.round(c.overall)
+  if (c.scores && typeof c.scores==='object') { const v=Object.values(c.scores).filter(x=>typeof x==='number'); return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0 }
+  return 0
+}
+function avStatus(v) { return v>=70?{c:'ok',t:'OK'}:v>=40?{c:'mid',t:'Moderado'}:{c:'risk',t:'Risco alto'} }
 function renderAvaliacoes(s, body) {
-  const checks = s.checkups||[]
+  const checks = (s.checkups||[]).slice().sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))
   if (!checks.length) { body.innerHTML = '<div class="empty">Nenhum check-up realizado</div>'; return }
-  body.innerHTML = checks.map((c,i) => {
-    let scoresHtml = ''
+
+  // Gráfico de evolução (uma linha por sinal, no tempo)
+  const chartId = 'av_'+s.id.replace(/[^a-zA-Z0-9]/g,'')
+  const labels = checks.map(c=>fmtShort(c.created_at))
+  const datasets = SIGNAL_ORDER2.map(sig=>{
+    const data = checks.map(c => (c.scores&&typeof c.scores==='object'&&typeof c.scores[sig]==='number' && c.scores[sig]>0) ? c.scores[sig] : null)
+    if (data.every(v=>v===null)) return null
+    return { label:(SIGNAL_LABELS[sig]||{n:sig}).n, data, borderColor:avColors[sig], backgroundColor:avColors[sig], tension:.3, spanGaps:true, pointRadius:3, borderWidth:2 }
+  }).filter(Boolean)
+
+  const chartHtml = `<div class="av-chart-box">
+    <h4>📈 Evolução dos sinais <span class="hint">(0 = ruim · 100 = bom)</span></h4>
+    ${datasets.length ? `<div class="av-chart-wrap"><canvas id="${chartId}"></canvas></div>
+      <div class="av-legend">${datasets.map(d=>`<span class="lg"><span class="sw" style="background:${d.borderColor}"></span>${d.label}</span>`).join('')}</div>`
+    : '<div class="empty" style="padding:20px">Sem dados numéricos por sinal para plotar</div>'}
+  </div>`
+
+  // Cards por check-up, legíveis
+  const cardsHtml = checks.slice().reverse().map((c,i) => {
+    let rows = ''
     if (c.scores && typeof c.scores==='object') {
-      scoresHtml = Object.entries(c.scores).map(([k,v])=>{
-        const col = v>=70 ? 'var(--green)' : v>=40 ? 'var(--amber)' : 'var(--red)'
-        return `<div class="av-cat"><span class="l">${k}</span><span class="v">${v}</span></div><div class="av-bar"><div class="av-fill" style="width:${v}%;background:${col}"></div></div>`
-      }).join('')
+      SIGNAL_ORDER2.forEach(sig=>{
+        const v = c.scores[sig]
+        if (typeof v!=='number' || v<=0) return
+        const st = avStatus(v)
+        const lbl = SIGNAL_LABELS[sig]||{n:sig,d:sig}
+        rows += `<div class="av-cat"><span class="l">${lbl.n}<div style="font-size:9px;color:var(--muted)">${lbl.d}</div></span><span class="v">${v}</span></div>
+          <div class="av-bar"><div class="av-fill" style="width:${Math.min(100,v)}%;background:${avColors[sig]||'var(--orange)'}"></div></div>`
+      })
+      if (!rows) rows = '<div class="empty" style="padding:10px">Sem scores numéricos neste check-up</div>'
     }
-    const ov = c.overall||(c.scores?(vals=>{const v=Object.values(vals).filter(x=>typeof x==='number'); return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0})(c.scores):0)
+    const st = avStatus(nScore(c))
     return `<div class="av-item" onclick="this.querySelector('.av-inner').classList.toggle('open')">
-      <div class="av-top"><span class="av-date">${fmt(c.created_at)}</span><span class="av-score">${ov}</span></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">Nível: ${c.nivel||'—'}</div>
-      <div class="av-inner">${scoresHtml}</div>
+      <div class="av-top">
+        <span class="av-date">${fmt(c.created_at)} <span style="color:var(--muted);font-weight:400">· Nível ${c.nivel||'—'}</span></span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span class="av-status ${st.c}">${st.t}</span>
+          <span class="av-score">${nScore(c)}</span>
+        </span>
+      </div>
+      <div class="av-inner">${rows}</div>
     </div>`
   }).join('')
+
+  body.innerHTML = chartHtml + cardsHtml
+
+  if (datasets.length && typeof Chart !== 'undefined') {
+    if (avChart) avChart.destroy()
+    const ctx = document.getElementById(chartId)
+    if (ctx) {
+      avChart = new Chart(ctx, {
+        type:'line',
+        data:{ labels, datasets },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            y:{ min:0, max:100, ticks:{ stepSize:20, color:'#8A8A87', font:{ size:10 } }, grid:{ color:'rgba(255,255,255,.05)' } },
+            x:{ ticks:{ color:'#8A8A87', font:{ size:10 } }, grid:{ display:false } }
+          }
+        }
+      })
+    }
+  }
 }
 
 // ── EXERCÍCIOS ──
