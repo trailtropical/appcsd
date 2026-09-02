@@ -2614,6 +2614,16 @@ function renderPlanView() {
         )
     )
     const sessKeys = ['a','b','c']
+    // Exercícios já vistos no mês anterior, para o mês atual não repetir
+    const prevMonthIdx = monthIdx - 1
+    const usedBefore = new Set()
+    if (!viewingPast && monthIdx > 0) {
+      sigs.forEach(sig => {
+        const info = SIGNAL_MAP[sig]; if (!info || !info.months) return
+        const em = info.months[Math.max(0, Math.min(2, prevMonthIdx))]
+        ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
+      })
+    }
     sessoes = sessKeys.map(k => {
       const ids = []
       const seen = new Set()
@@ -2639,8 +2649,23 @@ function renderPlanView() {
           return
         }
         // progressão normal pelo tier persistido (funciona mesmo sem avaliação nova,
-        // pois depende de signalTiers carregados do banco, não de signalCounts)
-        signalExercisesForMonth(sig, getSignalTier(sig), k).forEach(addEx)
+        // pois depende de signalTiers carregados do banco, não de signalCounts).
+        // No M2+ vetamos exercícios já vistos no M1 (evita repetir cócoras/agach.
+        // de ponta/etc.), usando só NOVOS; só recorre a um do M1 se o sinal não
+        // tiver nenhuma alternativa (para não perder a cobertura do achado).
+        if (monthIdx > 0 && !viewingPast) {
+          const spotList = signalExercisesForMonth(sig, getSignalTier(sig), k)
+          const outros = ['a','b','c'].filter(kk => kk !== k)
+            .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+            .filter((id,idx,self) => self.indexOf(id) === idx)
+          const novos = spotList.filter(id => !usedBefore.has(id))
+            .concat(outros.filter(id => !usedBefore.has(id)))
+          const candidatos = novos.length ? novos : spotList
+          const unique = []
+          candidatos.forEach(id => { if (!seen.has(id)) addEx(id) })
+        } else {
+          signalExercisesForMonth(sig, getSignalTier(sig), k).forEach(addEx)
+        }
       })
       if (!viewingPast && criticalSignal) {
         signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), k).forEach(addEx)
@@ -2891,6 +2916,18 @@ function showSessionFromPlan(sessIdx) {
     signalCounts[sig] > 0 || prevSignalCounts[sig] > 0 || (getSignalTier(sig)||0) > 0
   )
   const hasFresh = Object.keys(signalCounts).length > 0
+  // Exercícios já usados no mês anterior (M1), para o M2+ não repetir: coletamos
+  // os exercícios do nível anterior de cada sinal relevante. Só considera se estamos
+  // em um mês avançado e não visualizando histórico.
+  const prevMonthIdx = viewPlanMonth - 1
+  const usedBefore = new Set()
+  if (!viewingPast && viewPlanMonth > 0) {
+    relevantSigs.forEach(sig => {
+      const info = SIGNAL_MAP[sig]; if (!info || !info.months) return
+      const em = info.months[Math.max(0, Math.min(2, prevMonthIdx))]
+      ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
+    })
+  }
   const sigExercises = {}
   relevantSigs.forEach(sig => {
     const list = []
@@ -2898,8 +2935,33 @@ function showSessionFromPlan(sessIdx) {
     if (hasFresh && (prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
       const maint = resolvedMaintenanceExercises(sig, getSignalTier(sig), viewPlanMonth)
       ;(maint[sessionKey]||[]).forEach(id => { if (id && EX[id]) list.push(id) })
+    } else if (!viewingPast && viewPlanMonth > 0) {
+      // No M2+ queremos exercícios NOVOS (não usados no M1), mas mantendo
+      // variabilidade entre os treinos A/B/C. Começamos pelo exercício do spot
+      // atual da sessão; se ele repete algo já visto no M1 e existir um substituto
+      // novo no sinal, promovemos os novos para a frente (deixando repetidos por
+      // último). Só usamos exercício do M1 se não houver alternativa.
+      const info = SIGNAL_MAP[sig]
+      const spotList = signalExercisesForMonth(sig, getSignalTier(sig), sessionKey)
+        .filter(id => EX[id])
+      const outros = ['a','b','c']
+        .filter(kk => kk !== sessionKey)
+        .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+        .filter((id,idx,self) => self.indexOf(id) === idx && EX[id])
+      const novos = outros.filter(id => !usedBefore.has(id))
+        .filter(id => !spotList.includes(id))
+      const spotNovos = spotList.filter(id => !usedBefore.has(id))
+      // ordem: novos do spot > novos de outros spots > spot (repetido) > outros (repetido)
+      ;[].concat(
+        spotNovos,
+        novos,
+        spotList.filter(id => usedBefore.has(id)),
+        outros.filter(id => usedBefore.has(id))
+      ).forEach(id => { if (!list.includes(id)) list.push(id) })
     } else {
-      signalExercisesForMonth(sig, getSignalTier(sig), sessionKey).forEach(id => { if (id && EX[id]) list.push(id) })
+      signalExercisesForMonth(sig, getSignalTier(sig), sessionKey).forEach(id => {
+        if (id && EX[id] && !list.includes(id)) list.push(id)
+      })
     }
     // mantém só os que têm vídeo/referência válida e não duplicados por nome
     sigExercises[sig] = list
@@ -2921,8 +2983,18 @@ function showSessionFromPlan(sessIdx) {
   critIds.forEach(pushIfNew)
   // Passo C: specific (exercícios do plano) na ordem
   specific.forEach(pushIfNew)
-  // Passo D: excedentes de cada sinal (progressão)
-  relevantSigs.forEach(sig => { (sigExercises[sig]||[]).forEach(pushIfNew) })
+  // Passo D: excedentes de cada sinal (progressão). No M2+, não traz exercícios já
+  // vistos no M1 como excedente (senão agach. de ponta/cócoras voltam). Só recorre
+  // a um exercício do M1 se o sinal tiver nenhuma alternativa nova (manter cobertura).
+  const skipUsed = !viewingPast && viewPlanMonth > 0
+  relevantSigs.forEach(sig => {
+    const list = sigExercises[sig] || []
+    const hasNovo = skipUsed && list.some(id => !usedBefore.has(id))
+    list.forEach(id => {
+      if (skipUsed && usedBefore.has(id) && hasNovo) return
+      pushIfNew(id)
+    })
+  })
 
   // Passo E: garante 5–6 no total, se ainda faltar (sem cortar cobertura)
   // primeiro corta para 6 caso já tenha passado
