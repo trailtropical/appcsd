@@ -2654,15 +2654,20 @@ function renderPlanView() {
         // de ponta/etc.), usando só NOVOS; só recorre a um do M1 se o sinal não
         // tiver nenhuma alternativa (para não perder a cobertura do achado).
         if (monthIdx > 0 && !viewingPast) {
+          // Usamos o exercício do spot DESTE treino (k) quando ele é novo.
+          // Só buscamos em outros spots se o spot atual só tiver exercício
+          // repetido do M1. Isso mantém variabilidade entre A/B/C.
           const spotList = signalExercisesForMonth(sig, getSignalTier(sig), k)
-          const outros = ['a','b','c'].filter(kk => kk !== k)
-            .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
-            .filter((id,idx,self) => self.indexOf(id) === idx)
-          const novos = spotList.filter(id => !usedBefore.has(id))
-            .concat(outros.filter(id => !usedBefore.has(id)))
-          const candidatos = novos.length ? novos : spotList
-          const unique = []
-          candidatos.forEach(id => { if (!seen.has(id)) addEx(id) })
+          const spotNovo = spotList.filter(id => !usedBefore.has(id))
+          if (spotNovo.length) {
+            spotNovo.forEach(addEx)
+          } else {
+            const outros = ['a','b','c'].filter(kk => kk !== k)
+              .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+              .filter((id,idx,self) => self.indexOf(id) === idx)
+            const outrosNovos = outros.filter(id => !usedBefore.has(id))
+            ;(outrosNovos.length ? outrosNovos : spotList).forEach(addEx)
+          }
         } else {
           signalExercisesForMonth(sig, getSignalTier(sig), k).forEach(addEx)
         }
