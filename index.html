@@ -2605,7 +2605,14 @@ function renderPlanView() {
     const hasFreshSignals = viewingPast
       ? (Object.keys(prevSignalCounts).length > 0)
       : (Object.keys(signalCounts).length > 0)
-    const sigs = SIGNAL_ORDER
+    // Só consideramos sinais com alguma relevância: que estejam ativos,
+    // que já foram trabalhados em meses anteriores, ou cujo tier subiu (progressão).
+    const sigs = (viewingPast
+      ? SIGNAL_ORDER.filter(sig => (prevSignalCounts[sig]||0) > 0)
+      : SIGNAL_ORDER.filter(sig =>
+          (prevSignalCounts[sig]||0) > 0 || (signalCounts[sig]||0) > 0 || (getSignalTier(sig)||0) > 0
+        )
+    )
     const sessKeys = ['a','b','c']
     sessoes = sessKeys.map(k => {
       const ids = []
