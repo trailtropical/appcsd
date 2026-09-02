@@ -2596,12 +2596,9 @@ function renderPlanView() {
     } catch(e) { sessoes = null }
   }
 
-  if (!viewingPast && !isValidSessoes(sessoes)) {
-    const saved = localStorage.getItem('csd_sessoes')
-    if (saved) {
-      try { const v = JSON.parse(saved); if (isValidSessoes(v)) sessoes = v } catch(e) { sessoes = null }
-    }
-  }
+  // Para o mês atual, SEM um cache mensal próprio, não confiamos no csd_sessoes
+  // genérico (que pode conter exercícios de outro mês restaurados do banco).
+  // Deixamos sessoes = null e regeneramos a seguir a partir dos tiers atuais.
 
   if (!isValidSessoes(sessoes)) {
     const sigs = Object.keys(viewingPast ? (Object.keys(prevSignalCounts).length ? prevSignalCounts : signalCounts) : signalCounts)
