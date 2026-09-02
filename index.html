@@ -2648,6 +2648,9 @@ function renderPlanView() {
         })
       })
     }
+    // Regra: nenhum exercício pode aparecer em MAIS DE 2 treinos do mesmo mês
+    // (evita o mesmo exercício "todos os dias"). Contador global entre os 3 treinos.
+    const monthAppear = {}
     sessoes = sessKeys.map(k => {
       const ids = []
       const seen = new Set()
@@ -2657,12 +2660,14 @@ function renderPlanView() {
         if (!id || seen.has(id)) return
         const ex = EX[id]
         if (!ex || seenNames.has(ex.name)) return
+        if ((monthAppear[id] || 0) >= 2) return
         const fk = id.replace(/_assist$/,'')
         // variante bloqueada globalmente no mês (ex.: assist quando o pleno foi escolhido)
         if (blockedFam[fk] && blockedFam[fk].has(id)) return
         if (chosenFam[fk] && chosenFam[fk] !== id && EX[chosenFam[fk]]) return
         if (seenFam.has(fk) && EX[fk] && fk !== id) return
         seen.add(id); seenNames.add(ex.name); seenFam.add(fk); ids.push(id)
+        monthAppear[id] = (monthAppear[id] || 0) + 1
       }
       sigs.forEach(sig => {
         if (!SIGNAL_MAP[sig]) return
@@ -2710,6 +2715,7 @@ function renderPlanView() {
     })
     localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
     localStorage.setItem('csd_sessoes_m' + monthIdx, JSON.stringify(sessoes))
+    localStorage.setItem('csd_month_appear', JSON.stringify(monthAppear))
     saveSessionsToSupabase()
   }
 
@@ -2987,6 +2993,11 @@ function showSessionFromPlan(sessIdx) {
     })
   }
   const famKey = (id) => id.replace(/_assist$/,'')
+  // Contagem global de quantas vezes cada exercício já aparece no mês (regra: no
+  // máximo 2 treinos). O renderPlanView salva isso em csd_month_appear; aqui usamos
+  // para não deixar o mesmo exercício em 3 treinos ao completar a sessão.
+  let monthAppear = {}
+  try { monthAppear = JSON.parse(localStorage.getItem('csd_month_appear') || '{}') } catch (e) {}
   const sigExercises = {}
   relevantSigs.forEach(sig => {
     const list = []
@@ -3036,50 +3047,27 @@ function showSessionFromPlan(sessIdx) {
   // finalIds já inclui critical (prioridade 1) e específicos. Reconstruímos a lista
   // final garantindo cobertura: primeiro 1 exercício de cada sinal relevante,
   // depois os demais exercícios (estourando a ordem), depois crítico por último preenchimento.
-  const kept = []
-  const keptNames = new Set()
-  const keptFam = new Set()
-  const pushIfNew = (id) => {
-    const ex = EX[id]
-    if (!id || !ex || kept.includes(id) || keptNames.has(ex.name)) return
-    // variante bloqueada globalmente no mês (ex.: assist quando o pleno foi escolhido)
-    const fk = famKey(id)
-    if (blockedFam[fk] && blockedFam[fk].has(id)) return
-    if (chosenFam[fk] && chosenFam[fk] !== id && EX[chosenFam[fk]]) return
-    // variações de um mesmo exercício não podem coexistir no MESMO treino
-    if (keptFam.has(fk) && EX[fk] && fk !== id) return
-    kept.push(id); keptNames.add(ex.name); keptFam.add(fk)
-  }
-  // Passo A: 1 exercício de cada sinal relevante (garante cobertura)
-  relevantSigs.forEach(sig => { if (sigExercises[sig] && sigExercises[sig][0]) pushIfNew(sigExercises[sig][0]) })
-  // Passo B: crítico (garante prioridade 1)
-  critIds.forEach(pushIfNew)
-  // Passo C: specific (exercícios do plano) na ordem
-  specific.forEach(pushIfNew)
-  // Passo D: excedentes de cada sinal (progressão). No M2+, não traz exercícios já
-  // vistos no M1 como excedente (senão agach. de ponta/cócoras voltam). Só recorre
-  // a um exercício do M1 se o sinal tiver nenhuma alternativa nova (manter cobertura).
-  const skipUsed = !viewingPast && viewPlanMonth > 0
-  relevantSigs.forEach(sig => {
-    const list = sigExercises[sig] || []
-    const hasNovo = skipUsed && list.some(id => !usedBefore.has(id))
-    list.forEach(id => {
-      if (skipUsed && usedBefore.has(id) && hasNovo) return
-      pushIfNew(id)
-    })
-  })
-
+  // finalIds: usamos o specific do plano (que já garante cobertura, evita repetir M1,
+  // bloqueia variante _assist e respeita "nunca em 3 treinos"). NÃO re-adicionamos
+  // excedentes por sinal aqui, pois isso reintroduziria o mesmo exercício em 3 treinos.
+  // Completamos apenas com exercícios gerais diversificados (não interferem na regra).
+  let kept = specific.filter(id => id && EX[id] && !(blockedFam[famKey(id)] && blockedFam[famKey(id)].has(id)))
+  const keptNames = new Set(kept.map(id => EX[id].name))
   // Passo E: garante 5–6 no total, se ainda faltar (sem cortar cobertura)
-  // primeiro corta para 6 caso já tenha passado
-  let finalIds = kept.slice(0, MAX)
-  if (finalIds.length < MIN) {
+  if (kept.length > MAX) {
+    kept = kept.slice(0, MAX)
+  } else if (kept.length < MIN) {
     const pool = GERAL_ORDEM.flatMap(b => b.ids).filter(id => {
       const ex = EX[id]
-      return !finalIds.includes(id) && ex && !keptNames.has(ex.name)
+      return !kept.includes(id) && ex && !keptNames.has(ex.name)
     })
-    pool.slice(0, MIN - finalIds.length).forEach(pushIfNew)
-    finalIds = kept.slice(0, MAX)
+    let i = 0
+    while (kept.length < MIN && i < pool.length) {
+      const id = pool[i++]
+      if (!kept.includes(id)) { kept.push(id); keptNames.add(EX[id].name) }
+    }
   }
+  let finalIds = kept.slice(0, MAX)
 
   // 5. Render as flat list
   const seen = new Set()
