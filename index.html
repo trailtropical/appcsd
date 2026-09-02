@@ -2628,11 +2628,14 @@ function renderPlanView() {
       const ids = []
       const seen = new Set()
       const seenNames = new Set()
+      const seenFam = new Set()
       const addEx = (id) => {
         if (!id || seen.has(id)) return
         const ex = EX[id]
         if (!ex || seenNames.has(ex.name)) return
-        seen.add(id); seenNames.add(ex.name); ids.push(id)
+        const fk = id.replace(/_assist$/,'')
+        if (seenFam.has(fk) && EX[fk] && fk !== id) return
+        seen.add(id); seenNames.add(ex.name); seenFam.add(fk); ids.push(id)
       }
       sigs.forEach(sig => {
         if (!SIGNAL_MAP[sig]) return
@@ -2977,10 +2980,16 @@ function showSessionFromPlan(sessIdx) {
   // depois os demais exercícios (estourando a ordem), depois crítico por último preenchimento.
   const kept = []
   const keptNames = new Set()
+  const keptFam = new Set()
+  const famKey = (id) => id.replace(/_assist$/,'')
   const pushIfNew = (id) => {
     const ex = EX[id]
     if (!id || !ex || kept.includes(id) || keptNames.has(ex.name)) return
-    kept.push(id); keptNames.add(ex.name)
+    // variações de um mesmo exercício (ex.: cossack vs cossack_assist) não podem
+    // coexistir no mesmo treino — são o mesmo movimento, só que assistido
+    const fk = famKey(id)
+    if (keptFam.has(fk) && EX[fk] && fk !== id) return
+    kept.push(id); keptNames.add(ex.name); keptFam.add(fk)
   }
   // Passo A: 1 exercício de cada sinal relevante (garante cobertura)
   relevantSigs.forEach(sig => { if (sigExercises[sig] && sigExercises[sig][0]) pushIfNew(sigExercises[sig][0]) })
