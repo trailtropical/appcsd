@@ -167,9 +167,25 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;min-width:0}
 .plan-card:hover{border-color:rgba(232,80,10,.3)}
 .plan-card h5{font-size:12px;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);padding-bottom:6px}
-.plan-ex{font-size:12px;padding:5px 0;border-bottom:1px dashed var(--border);display:flex;align-items:center;gap:6px;min-width:0}
+.plan-ex{font-size:12px;padding:5px;border-bottom:1px dashed var(--border);display:flex;align-items:center;gap:6px;min-width:0;border-radius:6px;position:relative}
 .plan-ex:last-child{border-bottom:none}
+.plan-ex:hover{background:var(--surface2)}
 .plan-ex .pip{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0}
+.plan-ex .plan-ex-rm{display:none;margin-left:auto;flex-shrink:0;cursor:pointer;background:rgba(239,68,68,.12);color:var(--red);border:none;border-radius:6px;width:18px;height:18px;font-size:12px;line-height:1;align-items:center;justify-content:center}
+.plan-ex:hover .plan-ex-rm{display:flex}
+.plan-ex .plan-ex-rm:hover{background:rgba(239,68,68,.25)}
+.plan-ex-wrap:has(.plan-ex-picker){padding-top:2px}
+.plan-ex-picker{margin:6px 0 2px;border:1px solid var(--border);border-radius:8px;padding:6px;background:var(--surface2)}
+.plan-ex-picker input{width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:var(--surface);color:var(--text)}
+.plan-ex-picker .picker-hint{font-size:9px;color:var(--muted);margin:4px 2px 2px}
+.plan-ex-picker .picker-list{max-height:140px;overflow-y:auto;margin-top:4px}
+.plan-ex-picker .picker-item{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:11px}
+.plan-ex-picker .picker-item:hover{background:rgba(232,80,10,.1)}
+.plan-ex-picker .picker-item .tag{font-size:9px;color:var(--muted);margin-left:auto}
+.plan-ex-picker .picker-actions{display:flex;gap:6px;margin-top:4px}
+.plan-ex-add{margin:8px 0 2px;display:flex;align-items:center;gap:6px;width:100%;cursor:pointer;background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--muted);font-family:inherit;justify-content:center}
+.plan-ex-add:hover{color:var(--orange);border-color:rgba(232,80,10,.4)}
+.plan-badge.m{display:inline-block;font-size:10px;font-weight:700;color:var(--orange);border:1px solid rgba(232,80,10,.35);border-radius:8px;padding:2px 8px;margin-bottom:6px}
 .plan-ex-name{font-weight:600;flex-shrink:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .plan-ex-reason{font-size:10px;color:var(--muted);font-weight:500;flex-shrink:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .plan-ex-reason::before{content:'— ';color:var(--muted)}
@@ -800,11 +816,15 @@ function renderExercicios(s, body) {
   if (plan && plan.length) {
     const visited = [0,1,2].filter(i => Array.isArray(sessEx['sess_'+i]) && sessEx['sess_'+i].length)
     const visitedNote = visited.length ? `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Os treinos ${visited.map(i=>dias[i]).join(', ')} mostram o que a aluna viu no app${visited.length<3?` — ${[0,1,2].filter(i=>!visited.includes(i)).map(i=>dias[i]).join(' e ')} ainda não foram abertos por ela (mostra o plano previsto)`:''}.</div>` : `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Ela ainda não abriu nenhum treino no app — mostrando o plano previsto.</div>`
+    // ids já presentes como extra (para saber se o botão × remove de verdade ou abre o seletor)
+    const extraIds = new Set((s.extras||[]).filter(e=>e.active).map(e=>e.exercise_id))
+    const uid = s.id
     planHtml = `<div class="plan-badge m">Mês ${(pmonth ?? '—')}</div>
       ${visitedNote}
       <div class="plan-grid">${plan.map((ids,i)=>
-        `<div class="plan-card"><h5>${dias[i]||('Treino '+(i+1))}</h5>
-          ${Array.isArray(ids) && ids.length ? ids.map(id=>{const r=exReason(id, flagged); return `<div class="plan-ex"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado correspondente</span>'}</div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+        `<div class="plan-card" data-treino="${i}" data-user="${uid}"><h5>${dias[i]||('Treino '+(i+1))}</h5>
+          ${Array.isArray(ids) && ids.length ? ids.map(id=>{const r=exReason(id, flagged); const isExtra=extraIds.has(id); return `<div class="plan-ex"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado correspondente</span>'}<button class="plan-ex-rm" title="${isExtra?'Remover exercício extra':'Fora do plano base — clique para gerenciar'}" onclick="onRemEx('${uid}','${i}','${id}',${isExtra})">×</button></div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+          <button class="plan-ex-add" onclick="openExPicker('${uid}','${i}')">+ Adicionar exercício</button>
         </div>`).join('')}
       </div>`
   } else {
@@ -894,6 +914,70 @@ function renderExtraList(s) {
       <button class="del" onclick="delExtra('${e.id}','${s.id}')">✕</button>
     </div>
   </div>`).join('')
+}
+// Catálogo para o seletor inline (deriva de EX_NAME: inclui exercícios e blocos gerais)
+function catalogExercises() {
+  return Object.entries(EX_NAME).map(([id,name]) => ({ id, name }))
+}
+function exAlreadyExtra(userId, id) {
+  const s = allStudents.find(x => x.id === userId)
+  return (s && s.extras || []).some(e => e.exercise_id === id && e.active)
+}
+// Abre o seletor inline dentro do card do treino (module: treinoIdx). Se fechar com o × de um extra, remove.
+function openExPicker(userId, treinoIdx) {
+  const card = document.querySelector(`.plan-card[data-treino="${treinoIdx}"]`)
+  if (!card) return
+  const ex = document.createElement('div')
+  ex.className = 'plan-ex-picker'
+  ex.innerHTML = `<input type="text" placeholder="Digite o nome do exercício..." data-picker-autofocus><div class="picker-hint">Exercícios adicionados aqui aparecem para o aluno como "📌 Exercícios extras".</div><div class="picker-list"></div><div class="picker-actions"><button class="btn btn-s" onclick="closeExPicker(this)">Cancelar</button></div>`
+  card.appendChild(ex)
+  const inp = ex.querySelector('input')
+  renderPickerList(ex, inp.value)
+  inp.addEventListener('input', () => renderPickerList(ex, inp.value))
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const first = ex.querySelector('.picker-item'); if (first) first.querySelector('.pickit')?.click() } })
+  inp.focus()
+}
+function closeExPicker(btnEl) {
+  const picker = btnEl?.closest('.plan-ex-picker')
+  picker?.remove()
+}
+function renderPickerList(picker, q) {
+  const listEl = picker.querySelector('.picker-list')
+  const ql = (q||'').trim().toLowerCase()
+  let items = catalogExercises()
+  if (ql) items = items.filter(it => it.name.toLowerCase().includes(ql) || it.id.toLowerCase().includes(ql))
+  if (!items.length) { listEl.innerHTML = '<div class="picker-hint">Nenhum exercício encontrado.</div>'; return }
+  listEl.innerHTML = items.slice(0, 40).map(it => `<div class="picker-item"><span class="name">${it.name}</span><span class="tag">${it.id}</span><button class="pickit" onclick="commitExtra(this,'${it.id}')">+</button></div>`).join('')
+}
+// Confirma a adição do exercício (como extra, active) e re-renderiza a aba
+async function commitExtra(btnEl, exId) {
+  const picker = btnEl.closest('.plan-ex-picker')
+  const card = picker?.closest('.plan-card')
+  const userId = card ? getCurUserIdFromCard(card) : null
+  picker?.remove()
+  if (!userId) return
+  const s = allStudents.find(x => x.id === userId)
+  if (!s) return
+  if (exAlreadyExtra(userId, exId)) { alert('Este exercício já é um extra ativo deste aluno.'); return }
+  const { error } = await sb.from('protocol_extras').insert({ user_id: userId, exercise_id: exId, added_by: currentUser?.id })
+  if (error) { alert('Erro: '+error.message); return }
+  const { data } = await sb.from('protocol_extras').select('*').eq('user_id', userId)
+  if (data) s.extras = data
+  renderExtraList(s)
+}
+function getCurUserIdFromCard(card) {
+  return card ? card.getAttribute('data-user') : null
+}
+// Ao clicar no × de um exercício do plano
+function onRemEx(userId, treinoIdx, exId, isExtra) {
+  if (isExtra) {
+    const s = allStudents.find(x => x.id === userId)
+    const e = (s?.extras||[]).find(x => x.exercise_id === exId && x.active)
+    if (e) delExtra(e.id, userId)
+    return
+  }
+  const msg = 'Este exercício faz parte do plano montado por sinais (o app o gera automaticamente).\n\nPara bloqueá-lo para a aluna é preciso um ajuste no app. Por ora, você pode adicionar outro exercício no lugar como EXERCÍCIO EXTRA (aparece para ela na seção "📌 Exercícios extras").'
+  if (confirm(msg)) openExPicker(userId, treinoIdx)
 }
 async function addExtra(userId) {
   const inp = $('extra-search'); const val = inp?.value.trim().toLowerCase()
