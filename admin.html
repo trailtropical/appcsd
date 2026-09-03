@@ -177,6 +177,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .plan-ex.blocked{opacity:.6;background:rgba(239,68,68,.05)}
 .plan-ex.blocked .plan-ex-name{text-decoration:line-through;text-decoration-color:rgba(239,68,68,.6)}
 .plan-ex-block-tag{font-size:9px;font-weight:700;color:var(--red);background:rgba(239,68,68,.12);padding:1px 6px;border-radius:6px;flex-shrink:0;white-space:nowrap}
+.plan-ex.manual{background:rgba(232,80,10,.04)}
+.plan-ex.manual .pip{background:rgba(232,80,10,.55)}
+.plan-ex-manual-tag{font-size:9px;font-weight:600;color:var(--orange);background:rgba(232,80,10,.1);border:1px solid rgba(232,80,10,.25);padding:1px 6px;border-radius:6px;flex-shrink:0;white-space:nowrap;letter-spacing:.03em}
 .plan-ex-wrap:has(.plan-ex-picker){padding-top:2px}
 .plan-ex-picker{margin:6px 0 2px;border:1px solid var(--border);border-radius:8px;padding:6px;background:var(--surface2)}
 .plan-ex-picker input{width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:var(--surface);color:var(--text)}
@@ -512,7 +515,6 @@ function openProfile(userId) {
     `<div class="tab${t===activeTab?' active':''}" onclick="switchTab('${t}')">${tabLabel(t)}</div>`
   ).join('')
   renderProfileTab()
-  renderExtras(s)
 }
 function destroyChart() { if (avChart) { avChart.destroy(); avChart = null } }
 
@@ -790,6 +792,11 @@ function renderAvaliacoes(s, body) {
 }
 
 // ── EXERCÍCIOS ──
+// Um extra que já consta no plano prescrito não precisa ser duplicado (o app também o filtra)
+function extraIdsByPrescrito(exId, plan) {
+  return (plan||[]).some(treino => Array.isArray(treino) && treino.includes(exId))
+}
+
 function renderExercicios(s, body) {
   const logs = s.logs||[]
   const done = logs.filter(l=>l.checked)
@@ -823,13 +830,14 @@ function renderExercicios(s, body) {
     const visitedNote = visited.length ? `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Os treinos ${visited.map(i=>dias[i]).join(', ')} mostram o que a aluna viu no app${visited.length<3?` — ${[0,1,2].filter(i=>!visited.includes(i)).map(i=>dias[i]).join(' e ')} ainda não foram abertos por ela (mostra o plano previsto)`:''}.</div>` : `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Ela ainda não abriu nenhum treino no app — mostrando o plano previsto.</div>`
     // ids já presentes como extra (para saber se o botão × remove de verdade ou abre o seletor)
     const extraIds = new Set((s.extras||[]).filter(e=>e.active).map(e=>e.exercise_id))
+    const allExtras = (s.extras||[]).filter(e=>e.active && !extraIdsByPrescrito(e.exercise_id, plan))
     const blockedIds = new Set((s.blocks||[]).filter(b=>b.active).map(b=>b.exercise_id))
     const uid = s.id
     planHtml = `<div class="plan-badge m">Mês ${(pmonth ?? '—')}</div>
       ${visitedNote}
       <div class="plan-grid">${plan.map((ids,i)=>
         `<div class="plan-card" data-treino="${i}" data-user="${uid}"><h5>${dias[i]||('Treino '+(i+1))}</h5>
-          ${Array.isArray(ids) && ids.length ? ids.map(id=>{const r=exReason(id, flagged); const isExtra=extraIds.has(id); const isBlocked=blockedIds.has(id); return `<div class="plan-ex${isBlocked?' blocked':''}"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${isBlocked?'<span class="plan-ex-block-tag">bloqueado</span>':(r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado</span>')}<button class="plan-ex-rm" title="${isBlocked?'Desbloquear este exercício':(isExtra?'Remover exercício extra':'Bloquear este exercício no app')}" data-treino-i="${i}" onclick="onRemEx('${uid}','${i}','${id}',${isExtra},${isBlocked})">${isBlocked?'✓':'×'}</button></div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+          ${(Array.isArray(ids)&&ids.length)||allExtras.length ? [...(Array.isArray(ids)?ids:[]), ...allExtras.map(e=>e.exercise_id)].map((id,idx)=>{const isManual = idx >= (Array.isArray(ids)?ids.length:0); const r=exReason(id, flagged); const isExtra=extraIds.has(id); const isBlocked=blockedIds.has(id); return `<div class="plan-ex${isBlocked?' blocked':''}${isManual?' manual':''}"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${isManual?'<span class="plan-ex-manual-tag">manual</span>':(isBlocked?'<span class="plan-ex-block-tag">bloqueado</span>':(r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado</span>'))}<button class="plan-ex-rm" title="${isBlocked?'Desbloquear este exercício':(isExtra?'Remover exercício extra':'Bloquear este exercício no app')}" data-treino-i="${i}" onclick="onRemEx('${uid}','${i}','${id}',${isExtra},${isBlocked})">${isBlocked?'✓':'×'}</button></div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
           <button class="plan-ex-add" onclick="openExPicker('${uid}','${i}')">+ Adicionar exercício</button>
         </div>`).join('')}
       </div>`
@@ -969,7 +977,7 @@ async function commitExtra(btnEl, exId) {
   if (error) { alert('Erro: '+error.message); return }
   const { data } = await sb.from('protocol_extras').select('*').eq('user_id', userId)
   if (data) s.extras = data
-  renderExtraList(s)
+  renderProfileTab()
 }
 function getCurUserIdFromCard(card) {
   return card ? card.getAttribute('data-user') : null
@@ -1012,7 +1020,7 @@ async function addExtra(userId) {
   const s = allStudents.find(x => x.id === userId)
   const { data } = await sb.from('protocol_extras').select('*').eq('user_id', userId)
   if (data) s.extras = data
-  renderExtraList(s)
+  renderProfileTab()
 }
 async function toggleExtra(extId, userId) {
   const s = allStudents.find(x => x.id === userId)
@@ -1020,14 +1028,14 @@ async function toggleExtra(extId, userId) {
   if (!e) return
   await sb.from('protocol_extras').update({ active: !e.active }).eq('id', extId)
   e.active = !e.active
-  renderExtraList(s)
+  renderProfileTab()
 }
 async function delExtra(extId, userId) {
   if (!confirm('Remover este extra?')) return
   await sb.from('protocol_extras').delete().eq('id', extId)
   const s = allStudents.find(x => x.id === userId)
   s.extras = s.extras.filter(e => e.id != extId)
-  renderExtraList(s)
+  renderProfileTab()
 }
 
 // ── REFRESH ──
