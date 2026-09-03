@@ -3082,14 +3082,15 @@ function showSessionFromPlan(sessIdx) {
     finalIds = finalIds.filter(id => !window._blocks.has(id))
   }
 
-  // 5. Carrega os exercícios extras (adicionados manualmente pelo admin) e os integra
-  //    na mesma lista — com um asterisco leve, sem seção separada.
+  // 5. Carrega os exercícios extras (adicionados manualmente pelo admin) para ESTE treino
+  //    (session_idx = sessIdx; 0=A,1=B,2=C) e os integra na lista com asterisco leve.
   let extraIds = []
   ;(async () => {
     if (window._sbClient && currentUser) {
       try {
         const { data: extras } = await window._sbClient.from('protocol_extras')
-          .select('exercise_id').eq('user_id', currentUser.id).eq('active', true)
+          .select('exercise_id,session_idx').eq('user_id', currentUser.id).eq('active', true)
+          .eq('session_idx', sessIdx)
         extraIds = (extras||[]).map(e => e.exercise_id).filter(id => EX[id] && !finalIds.includes(id))
       } catch(e) { console.warn('[CSD] extras error:', e) }
     }

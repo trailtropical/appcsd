@@ -830,16 +830,19 @@ function renderExercicios(s, body) {
     const visitedNote = visited.length ? `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Os treinos ${visited.map(i=>dias[i]).join(', ')} mostram o que a aluna viu no app${visited.length<3?` — ${[0,1,2].filter(i=>!visited.includes(i)).map(i=>dias[i]).join(' e ')} ainda não foram abertos por ela (mostra o plano previsto)`:''}.</div>` : `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Ela ainda não abriu nenhum treino no app — mostrando o plano previsto.</div>`
     // ids já presentes como extra (para saber se o botão × remove de verdade ou abre o seletor)
     const extraIds = new Set((s.extras||[]).filter(e=>e.active).map(e=>e.exercise_id))
-    const allExtras = (s.extras||[]).filter(e=>e.active && !extraIdsByPrescrito(e.exercise_id, plan))
     const blockedIds = new Set((s.blocks||[]).filter(b=>b.active).map(b=>b.exercise_id))
     const uid = s.id
+    // extras de um treino específico (session_idx). Migração antiga: session_idx null → 0.
+    const extrasOfT = t => (s.extras||[]).filter(e => e.active && (e.session_idx==null ? 0 : e.session_idx) === t && !extraIdsByPrescrito(e.exercise_id, plan))
     planHtml = `<div class="plan-badge m">Mês ${(pmonth ?? '—')}</div>
       ${visitedNote}
-      <div class="plan-grid">${plan.map((ids,i)=>
-        `<div class="plan-card" data-treino="${i}" data-user="${uid}"><h5>${dias[i]||('Treino '+(i+1))}</h5>
-          ${(Array.isArray(ids)&&ids.length)||allExtras.length ? [...(Array.isArray(ids)?ids:[]), ...allExtras.map(e=>e.exercise_id)].map((id,idx)=>{const isManual = idx >= (Array.isArray(ids)?ids.length:0); const r=exReason(id, flagged); const isExtra=extraIds.has(id); const isBlocked=blockedIds.has(id); return `<div class="plan-ex${isBlocked?' blocked':''}${isManual?' manual':''}"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${isManual?'<span class="plan-ex-manual-tag">manual</span>':(isBlocked?'<span class="plan-ex-block-tag">bloqueado</span>':(r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado</span>'))}<button class="plan-ex-rm" title="${isBlocked?'Desbloquear este exercício':(isExtra?'Remover exercício extra':'Bloquear este exercício no app')}" data-treino-i="${i}" onclick="onRemEx('${uid}','${i}','${id}',${isExtra},${isBlocked})">${isBlocked?'✓':'×'}</button></div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+      <div class="plan-grid">${plan.map((ids,i)=> {
+        const exT = extrasOfT(i)
+        return `<div class="plan-card" data-treino="${i}" data-user="${uid}"><h5>${dias[i]||('Treino '+(i+1))}</h5>
+          ${(Array.isArray(ids)&&ids.length)||exT.length ? [...(Array.isArray(ids)?ids:[]), ...exT.map(e=>e.exercise_id)].map((id,idx)=>{const isManual = idx >= (Array.isArray(ids)?ids.length:0); const r=exReason(id, flagged); const isExtra=extraIds.has(id); const isBlocked=blockedIds.has(id); return `<div class="plan-ex${isBlocked?' blocked':''}${isManual?' manual':''}"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${isManual?'<span class="plan-ex-manual-tag">manual</span>':(isBlocked?'<span class="plan-ex-block-tag">bloqueado</span>':(r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado</span>'))}<button class="plan-ex-rm" title="${isBlocked?'Desbloquear este exercício':(isExtra?'Remover exercício extra':'Bloquear este exercício no app')}" data-treino-i="${i}" onclick="onRemEx('${uid}','${i}','${id}',${isExtra},${isBlocked})">${isBlocked?'✓':'×'}</button></div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
           <button class="plan-ex-add" onclick="openExPicker('${uid}','${i}')">+ Adicionar exercício</button>
-        </div>`).join('')}
+        </div>`
+      }).join('')}
       </div>`
   } else {
     planHtml = '<div class="empty" style="padding:20px">Nenhum plano de exercícios registrado</div>'
@@ -943,7 +946,7 @@ function openExPicker(userId, treinoIdx) {
   if (!card) return
   const ex = document.createElement('div')
   ex.className = 'plan-ex-picker'
-  ex.innerHTML = `<input type="text" placeholder="Digite o nome do exercício..." data-picker-autofocus><div class="picker-hint">Exercícios adicionados aqui aparecem para o aluno como "📌 Exercícios extras".</div><div class="picker-list"></div><div class="picker-actions"><button class="btn btn-s" onclick="closeExPicker(this)">Cancelar</button></div>`
+  ex.innerHTML = `<input type="text" placeholder="Digite o nome do exercício..." data-picker-autofocus><div class="picker-hint">O exercício será adicionado apenas a este treino (aparece com a marca "manual" no app).</div><div class="picker-list"></div><div class="picker-actions"><button class="btn btn-s" onclick="closeExPicker(this)">Cancelar</button></div>`
   card.appendChild(ex)
   const inp = ex.querySelector('input')
   renderPickerList(ex, inp.value)
@@ -963,17 +966,20 @@ function renderPickerList(picker, q) {
   if (!items.length) { listEl.innerHTML = '<div class="picker-hint">Nenhum exercício encontrado.</div>'; return }
   listEl.innerHTML = items.slice(0, 40).map(it => `<div class="picker-item"><span class="name">${it.name}</span><span class="tag">${it.id}</span><button class="pickit" onclick="commitExtra(this,'${it.id}')">+</button></div>`).join('')
 }
-// Confirma a adição do exercício (como extra, active) e re-renderiza a aba
+// Confirma a adição do exercício (como extra, active) no treino em questão e re-renderiza a aba
 async function commitExtra(btnEl, exId) {
   const picker = btnEl.closest('.plan-ex-picker')
   const card = picker?.closest('.plan-card')
   const userId = card ? getCurUserIdFromCard(card) : null
+  const treinoIdx = card ? parseInt(card.getAttribute('data-treino'), 10) : null
   picker?.remove()
   if (!userId) return
   const s = allStudents.find(x => x.id === userId)
   if (!s) return
-  if (exAlreadyExtra(userId, exId)) { alert('Este exercício já é um extra ativo deste aluno.'); return }
-  const { error } = await sb.from('protocol_extras').insert({ user_id: userId, exercise_id: exId, added_by: currentUser?.id })
+  if ((s.extras||[]).some(e => e.exercise_id === exId && e.active && (e.session_idx == treinoIdx))) {
+    alert('Este exercício já é um extra ativo neste treino.'); return
+  }
+  const { error } = await sb.from('protocol_extras').insert({ user_id: userId, exercise_id: exId, added_by: currentUser?.id, session_idx: treinoIdx })
   if (error) { alert('Erro: '+error.message); return }
   const { data } = await sb.from('protocol_extras').select('*').eq('user_id', userId)
   if (data) s.extras = data
