@@ -166,7 +166,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .session-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:4px}
 .session-header-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
 .session-header-sub{font-size:12px;color:var(--muted)}
-.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;gap:12px;align-items:flex-start}
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;gap:12px;align-items:flex-start;position:relative}
 .ex-card.especifico{border-color:rgba(232,80,10,.3);background:rgba(232,80,10,.05)}
 .ex-card.critico{border-color:var(--torn);background:rgba(239,68,68,.06)}
 .ex-card.geral .ex-num{background:var(--surface2);color:var(--muted);border:1px solid var(--border2)}
@@ -404,6 +404,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .ex-card.checked{background:rgba(74,222,128,.06)!important;border-color:rgba(74,222,128,.3)!important}
 .ex-card.checked .ex-name{text-decoration:line-through;color:var(--muted)}
 .ex-card.checked .ex-detail,.ex-card.checked .ex-why,.ex-card.checked .ex-tags{opacity:.4}
+.ex-extra-ast{position:absolute;top:6px;right:12px;font-size:16px;line-height:1;color:var(--orange);opacity:.55;font-weight:700;pointer-events:none;user-select:none}
 @keyframes checkPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
 .ex-done-overlay{position:fixed;inset:0;background:rgba(15,15,14,.9);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:fadeIn .3s ease}
 .ex-done-icon{font-size:64px;animation:doneBounce .6s ease}
@@ -1654,12 +1655,12 @@ function renderExCard(exId, num, isEspecifico, isCritico, isExtra, readonly) {
   const tagStyle = TAG_COLORS[ex.tc] || ''
   const cardClass = isCritico ? 'ex-card critico' : isEspecifico ? 'ex-card especifico' : 'ex-card geral'
   const tagCrit = isCritico ? '<span class="ex-tag critico">★ Crítico</span>' : ''
-  const tagExtra = isExtra ? '<span class="ex-tag" style="background:rgba(232,80,10,.15);color:var(--orange)">📌 Extra</span>' : ''
+  const tagExtra = isExtra ? '<span class="ex-extra-ast" title="Adicionado manualmente">*</span>' : ''
   const checkHtml = readonly
     ? '<div class="ex-check done" style="cursor:default">✓</div>'
     : `<div class="ex-check" onclick="event.stopPropagation();toggleExCheck('${exId}',this.parentElement)"></div>`
-  return `<div class="${cardClass} fade-in" data-exid="${exId}">
-    ${checkHtml}
+  return `<div class="${cardClass} fade-in${isExtra?' ex-extra':''}" data-exid="${exId}">
+    ${checkHtml}${tagExtra}
     <div class="ex-body">
       <div class="ex-name">${ex.name}</div>
       <div class="ex-detail">${detail}</div>
@@ -3081,29 +3082,45 @@ function showSessionFromPlan(sessIdx) {
     finalIds = finalIds.filter(id => !window._blocks.has(id))
   }
 
-  // 5. Render as flat list
-  const seen = new Set()
-  let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
-  html += ['Treino A','Treino B','Treino C'].map((d,i) =>
-    `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
-  ).join('')
-  html += `</div>`
-  let n = 1
-  finalIds.forEach(id => {
-    if (seen.has(id)) return
-    seen.add(id)
-    const isCrit = criticalSignal && signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey).includes(id)
-    const isEsp = specificSet.has(id)
-    const rendered = renderExCard(id, n, isEsp, isCrit)
-    if (rendered) { html += rendered; n++ }
-  })
-  wrap.innerHTML = html
+  // 5. Carrega os exercícios extras (adicionados manualmente pelo admin) e os integra
+  //    na mesma lista — com um asterisco leve, sem seção separada.
+  let extraIds = []
+  ;(async () => {
+    if (window._sbClient && currentUser) {
+      try {
+        const { data: extras } = await window._sbClient.from('protocol_extras')
+          .select('exercise_id').eq('user_id', currentUser.id).eq('active', true)
+        extraIds = (extras||[]).map(e => e.exercise_id).filter(id => EX[id] && !finalIds.includes(id))
+      } catch(e) { console.warn('[CSD] extras error:', e) }
+    }
+    // 6. Render as flat list (prescritos + extras juntos, extras com asterisco)
+    const seen = new Set()
+    let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
+    html += ['Treino A','Treino B','Treino C'].map((d,i) =>
+      `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
+    ).join('')
+    html += `</div>`
+    const all = finalIds.concat(extraIds)
+    let n = 1
+    all.forEach(id => {
+      if (seen.has(id)) return
+      seen.add(id)
+      const isCrit = criticalSignal && signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey).includes(id)
+      const isEsp = specificSet.has(id)
+      const isExtra = extraIds.includes(id)
+      const rendered = renderExCard(id, n, isEsp, isCrit, isExtra)
+      if (rendered) { html += rendered; n++ }
+    })
+    html += (all.length === 0) ? '<div class="empty">Nenhum exercício neste treino</div>' : ''
+    wrap.innerHTML = html
+    afterRenderSession(wrap, sessIdx)
+  })()
+  showScreen('s-session-detail')
+}
 
-  const sessionExerciseIds = Array.from(wrap.querySelectorAll('.ex-card')).map(c => c.dataset.exid)
-  const allSessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
-  allSessionExercises[`sess_${sessIdx}`] = sessionExerciseIds
-  localStorage.setItem('csd_sessionExercises', JSON.stringify(allSessionExercises))
-
+// Pós-render da sessão: aplica checks gravados e o clique para abrir o detalhe do exercício.
+// Chamado depois que o wrap é preenchido com prescritos + extras integrados.
+function afterRenderSession(wrap, sessIdx) {
   const checks = getSessionChecks()[`sess_${sessIdx}`] || {}
   wrap.querySelectorAll('.ex-card').forEach(card => {
     const id = card.dataset.exid
@@ -3120,36 +3137,15 @@ function showSessionFromPlan(sessIdx) {
       }
     }
   })
-
   wrap.onclick = e => {
     const card = e.target.closest('[data-exid]')
     if (card && !e.target.closest('.ex-check')) showExerciseDetail(card.dataset.exid)
   }
-
-  // ══ Protocol extras: load from Supabase ══
-  ;(async () => {
-    if (!window._sbClient || !currentUser) return
-    try {
-      const { data: extras } = await window._sbClient.from('protocol_extras')
-        .select('exercise_id').eq('user_id', currentUser.id).eq('active', true)
-      if (extras && extras.length > 0) {
-        const extraIds = extras.map(e => e.exercise_id).filter(id => !finalIds.includes(id))
-        if (extraIds.length > 0) {
-          let extraHtml = `<div style="margin-top:16px;padding-top:16px;border-top:2px dashed var(--border2)"><div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📌 Exercícios extras</div>`
-          extraIds.forEach(id => {
-            const ex = EX[id]
-            if (!ex) return
-            extraHtml += renderExCard(id, n, false, false, true)
-            n++
-          })
-          extraHtml += `</div>`
-          wrap.insertAdjacentHTML('beforeend', extraHtml)
-        }
-      }
-    } catch(e) { console.warn('[CSD] extras error:', e) }
-  })()
-
-  showScreen('s-session-detail')
+  // Grava a lista exibida (prescritos + extras) para refletir no dashboard
+  const sessionExerciseIds = Array.from(wrap.querySelectorAll('.ex-card')).map(c => c.dataset.exid)
+  const allSessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
+  allSessionExercises[`sess_${sessIdx}`] = sessionExerciseIds
+  localStorage.setItem('csd_sessionExercises', JSON.stringify(allSessionExercises))
 }
 
 function showExerciseDetail(id) {
