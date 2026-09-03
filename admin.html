@@ -623,11 +623,40 @@ const REASONS = (() => {
   })
   return m
 })()
+// exercício → conjunto de chaves de sinal às quais serve (para cruzar com os achados do aluno)
+const REASONS_SIG = (() => {
+  const m = {}
+  Object.keys(SIGNAL_POOL).forEach(sig => {
+    SIGNAL_POOL[sig].forEach(spot => {
+      Object.values(spot).forEach(ids => ids.forEach(id => { (m[id] = m[id] || []); if (!m[id].includes(sig)) m[id].push(sig) }))
+    })
+  })
+  ;['e_saltos_quad','e_joelho_parede'].forEach(id => { if (!(m[id]||[]).includes('tornozelo')) (m[id]=m[id]||[]).push('tornozelo') })
+  return m
+})()
+// testes → sinais marcados quando aquela opção foi selecionada (espelha TESTS do app)
+const TEST_SIGNALS = {
+  agachamento:{ calc:['tornozelo'], fundo:['tornozelo','quadril_mob'] },
+  pelvica:{ nao_mant:['gluteo'], caimbra:['gluteo'] },
+  equilibrio:{ aberto_fail:['propriocepcao'], fechado_fail:['propriocepcao'] },
+  panturrilha:{ nao_rep:['panturrilha'], dor_torn:['tornozelo'] },
+  stepdown:{ controle:['quadril_forca'], valgo:['quadril_forca'] },
+  noventa:{ nao_enc:['quadril_mob'], assim:['quadril_mob'] },
+  thomas:{ levanta:['flexores'], dor:['flexores'] }
+}
+// Sinais que a aluna marcou na avaliação mais recente (do answers do checkup)
+function flaggedSignals(s) {
+  const fa = new Set()
+  const ans = (s.latestCheckup && s.latestCheckup.answers && typeof s.latestCheckup.answers==='object') ? s.latestCheckup.answers : {}
+  Object.keys(TEST_SIGNALS).forEach(tid => {
+    const marked = Array.isArray(ans[tid]) ? ans[tid] : []
+    marked.forEach(oid => { (TEST_SIGNALS[tid][oid]||[]).forEach(sig => fa.add(sig)) })
+  })
+  return fa
+}
 // Gerais: motivo fixo por bloco
 const REASON_GERAL = { g_volta_mundo:'Mobilidade geral', g_cocoras:'Mobilidade geral', g_prancha:'Ativação muscular', g_panturrilha:'Ativação muscular', g_terra:'Ativação muscular', g_equilibrio:'Mobilidade geral', g_stepdown:'Ativação muscular' }
-// Exercícios que não constam no SIGNAL_POOL padrão, mas pertencem a um sinal (via tag no EX)
-;(['e_saltos_quad','e_joelho_parede'].forEach(id => { if (!(REASONS[id]||[]).length) REASONS[id]=['Restrição de tornozelo'] }))
-function exReason(id){ return REASONS[id] ? REASONS[id].join(' · ') : (REASON_GERAL[id]||null) }
+function exReason(id, flagged){ return flagged ? (REASONS_SIG[id]||[]).filter(sig=>flagged.has(sig)).map(sig=>SIGNAL_LABEL[sig]).join(' · ') || null : (REASONS[id] ? REASONS[id].join(' · ') : (REASON_GERAL[id]||null)) }
 
 const avColors = {
   tornozelo:'#38bdf8', quadril_mob:'#a78bfa', gluteo:'#f472b6', propriocepcao:'#fbbf24',
@@ -742,6 +771,8 @@ function renderExercicios(s, body) {
   const sessEx = (sess.session_exercises && typeof sess.session_exercises==='object') ? sess.session_exercises : (s.sessions?.[0]?.session_exercises && typeof s.sessions[0].session_exercises==='object' ? s.sessions[0].session_exercises : {})
   const pmonth = sess.plan_month ?? s.sessions?.[0]?.plan_month ?? null
   const dias = ['Treino A','Treino B','Treino C']
+  // Sinais que a aluna marcou na avaliação mais recente (filtra o motivo por achado real)
+  const flagged = flaggedSignals(s)
   // Para cada treino: se o aluno abriu no app (sess_X existe), mostra exatamente o que viu;
   // senão, mostra o plano cru limitado a 6 (mesma regra de MAX do app = showSessionFromPlan).
   const MAX = 6
@@ -762,7 +793,7 @@ function renderExercicios(s, body) {
       ${visitedNote}
       <div class="plan-grid">${plan.map((ids,i)=>
         `<div class="plan-card"><h5>${dias[i]||('Treino '+(i+1))}</h5>
-          ${Array.isArray(ids) && ids.length ? ids.map(id=>`<div class="plan-ex"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span><span class="plan-ex-reason">${exReason(id)||''}</span></div>`).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+          ${Array.isArray(ids) && ids.length ? ids.map(id=>`<div class="plan-ex"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span><span class="plan-ex-reason">${exReason(id, flagged)||''}</span></div>`).join('') : '<div class="plan-empty">Sem exercícios</div>'}
         </div>`).join('')}
       </div>`
   } else {
