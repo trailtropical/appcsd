@@ -160,6 +160,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .plan-ex{font-size:12px;padding:5px 0;border-bottom:1px dashed var(--border);display:flex;align-items:center;gap:6px}
 .plan-ex:last-child{border-bottom:none}
 .plan-ex .pip{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0}
+.plan-ex-name{font-weight:600;white-space:nowrap;flex-shrink:0}
+.plan-ex-reason{font-size:10px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-ex-reason::before{content:'— ';color:var(--muted)}
 .plan-empty{font-size:11px;color:var(--muted);padding:8px 0}
 .plan-badge{display:inline-flex;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;margin-bottom:8px}
 .plan-badge.m{background:rgba(232,80,10,.15);color:var(--orange)}
@@ -567,6 +570,65 @@ const EX_NAME = {
   e_deadbug:'Dead Bug', e_urso_estatico:'Urso Estático', e_toque_ombro_urso:'Toque de Ombros no Urso', e_pressao_anti_rot:'Anti-Rotação c/ Elástico', e_bird_dog:'Bird Dog'
 }
 function exName(id) { return EX_NAME[id] || id || '—' }
+
+// Mapa exercício → sinal(is) que o sugeriram, espelhando o SIGNAL_MAP do app.
+// Ex.: e_noventa → 'Restrição de mobilidade de quadril'. Derivação por varredura.
+const SIGNAL_LABEL = {
+  tornozelo:'Restrição de tornozelo',
+  quadril_mob:'Restrição de mobilidade de quadril',
+  gluteo:'Fraqueza de glúteo',
+  propriocepcao:'Déficit de propriocepção',
+  panturrilha:'Fraqueza de panturrilha',
+  quadril_forca:'Déficit de controle motor de quadril',
+  flexores:'Encurtamento de flexores de quadril'
+}
+// Estrutura idêntica ao SIGNAL_MAP do index.html: sig → months[] → {a,b,c:[ids]}
+const SIGNAL_POOL = {
+  tornozelo:[
+    {a:['e_cocoras','e_meio_ajoel','e_joelho_parede'],b:['e_pe_fechado','e_agach_ponta'],c:['e_cocoras','e_meio_ajoel','e_agach_ponta']},
+    {a:['e_relogio_pe'],b:['e_cocoras','e_agach_ponta'],c:['e_relogio_pe','e_meio_ajoel']},
+    {a:['e_salto_lat_cong'],b:['e_relogio_pe','e_salto_lat_cong'],c:['e_salto_lat_cong','e_agach_ponta']}],
+  quadril_mob:[
+    {a:['e_volta_mundo','e_noventa'],b:['e_iliopsoas'],c:['e_volta_mundo','e_noventa']},
+    {a:['e_cossack_assist'],b:['e_volta_mundo','e_cossack_assist'],c:['e_cossack_assist','e_noventa']},
+    {a:['e_cossack','e_shin_box'],b:['e_cossack','e_noventa'],c:['e_shin_box','e_cossack_assist']}],
+  gluteo:[
+    {a:['e_elev_pelv'],b:['e_coice','e_bulg'],c:['e_elev_pelv','e_coice']},
+    {a:['e_bulg','e_aviaozinho'],b:['e_elev_lat_degrau','e_desliz_isoquit'],c:['e_aviaozinho','e_copen_isom']},
+    {a:['e_desliz_unilat','e_prancha_lat_abd'],b:['e_copen_mov','e_bulg'],c:['e_copen_mov','e_prancha_lat_abd']}],
+  propriocepcao:[
+    {a:['e_prop_fechado'],b:['e_prop_ponta','e_prop_step'],c:['e_prop_fechado','e_prop_ponta']},
+    {a:['e_aviaozinho'],b:['e_prop_fechado','e_aviaozinho'],c:['e_aviaozinho','e_prop_ponta']},
+    {a:['e_salto_lat_cong'],b:['e_prop_step','e_salto_lat_cong'],c:['e_salto_lat_cong','e_aviaozinho']}],
+  panturrilha:[
+    {a:['e_plant'],b:['e_plant'],c:['e_plant']},
+    {a:['e_caminhada_ponta'],b:['e_iso_pant_1pe'],c:['e_caminhada_ponta','e_iso_pant_1pe']},
+    {a:['e_plant_6kg'],b:['e_caminhada_ponta_6kg'],c:['e_plant_6kg','e_caminhada_ponta_6kg','e_iso_pant_1pe']}],
+  quadril_forca:[
+    {a:['e_step_esp'],b:['e_skatista','e_step_esp'],c:['e_skatista','e_agach_salto']},
+    {a:['e_step_lateral'],b:['e_sentar_levantar_1pe','e_salto_cong'],c:['e_step_lateral','e_copen_isom']},
+    {a:['e_aterrissagem_unilat'],b:['e_salto_cong','e_aterrissagem_unilat'],c:['e_aterrissagem_unilat','e_copen_mov']}],
+  flexores:[
+    {a:['e_iliopsoas_esp'],b:['e_prancha_lat','e_escalador'],c:['e_iliopsoas_esp','e_escalador']},
+    {a:['e_deadbug','e_bird_dog'],b:['e_urso_estatico','e_deadbug'],c:['e_deadbug','e_escalador']},
+    {a:['e_pressao_anti_rot','e_prancha_lat_abd'],b:['e_toque_ombro_urso','e_prancha_lat'],c:['e_pressao_anti_rot','e_toque_ombro_urso']}]
+}
+// exercício → set de labels de sinal
+const REASONS = (() => {
+  const m = {}
+  Object.keys(SIGNAL_POOL).forEach(sig => {
+    SIGNAL_POOL[sig].forEach(spot => {
+      Object.values(spot).forEach(ids => ids.forEach(id => { (m[id] = m[id] || []); if (!m[id].includes(SIGNAL_LABEL[sig])) m[id].push(SIGNAL_LABEL[sig]) }))
+    })
+  })
+  return m
+})()
+// Gerais: motivo fixo por bloco
+const REASON_GERAL = { g_volta_mundo:'Mobilidade geral', g_cocoras:'Mobilidade geral', g_prancha:'Ativação muscular', g_panturrilha:'Ativação muscular', g_terra:'Ativação muscular', g_equilibrio:'Mobilidade geral', g_stepdown:'Ativação muscular' }
+// Exercícios que não constam no SIGNAL_POOL padrão, mas pertencem a um sinal (via tag no EX)
+;(['e_saltos_quad','e_joelho_parede'].forEach(id => { if (!(REASONS[id]||[]).length) REASONS[id]=['Restrição de tornozelo'] }))
+function exReason(id){ return REASONS[id] ? REASONS[id].join(' · ') : (REASON_GERAL[id]||null) }
+
 const avColors = {
   tornozelo:'#38bdf8', quadril_mob:'#a78bfa', gluteo:'#f472b6', propriocepcao:'#fbbf24',
   panturrilha:'#34d399', quadril_forca:'#fb923c', flexores:'#60a5fa'
@@ -700,7 +762,7 @@ function renderExercicios(s, body) {
       ${visitedNote}
       <div class="plan-grid">${plan.map((ids,i)=>
         `<div class="plan-card"><h5>${dias[i]||('Treino '+(i+1))}</h5>
-          ${Array.isArray(ids) && ids.length ? ids.map(id=>`<div class="plan-ex"><span class="pip"></span>${exName(id)}</div>`).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+          ${Array.isArray(ids) && ids.length ? ids.map(id=>`<div class="plan-ex"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span><span class="plan-ex-reason">${exReason(id)||''}</span></div>`).join('') : '<div class="plan-empty">Sem exercícios</div>'}
         </div>`).join('')}
       </div>`
   } else {
