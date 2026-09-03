@@ -2025,6 +2025,14 @@ async function loadUserData() {
     }
   }
 
+  // Carregar bloqueios de exercício (Fase 2): lista de e_* que o app deve OCULTAR
+  window._blocks = new Set()
+  try {
+    const { data: blocks } = await window._sbClient.from('protocol_blocks')
+      .select('exercise_id').eq('user_id', currentUser.id).eq('active', true)
+    if (blocks && blocks.length) window._blocks = new Set(blocks.map(b => b.exercise_id))
+  } catch (e) { console.warn('[CSD] blocks error:', e) }
+
   // Carregar profile (nome)
   const { data: profile } = await window._sbClient.from('profiles')
     .select('nome')
@@ -3068,6 +3076,10 @@ function showSessionFromPlan(sessIdx) {
     }
   }
   let finalIds = kept.slice(0, MAX)
+  // Fase 2: remove exercícios bloqueados pelo admin (protocol_blocks)
+  if (window._blocks && window._blocks.size) {
+    finalIds = finalIds.filter(id => !window._blocks.has(id))
+  }
 
   // 5. Render as flat list
   const seen = new Set()

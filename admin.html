@@ -174,6 +174,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .plan-ex .plan-ex-rm{display:none;margin-left:auto;flex-shrink:0;cursor:pointer;background:rgba(239,68,68,.12);color:var(--red);border:none;border-radius:6px;width:18px;height:18px;font-size:12px;line-height:1;align-items:center;justify-content:center}
 .plan-ex:hover .plan-ex-rm{display:flex}
 .plan-ex .plan-ex-rm:hover{background:rgba(239,68,68,.25)}
+.plan-ex.blocked{opacity:.6;background:rgba(239,68,68,.05)}
+.plan-ex.blocked .plan-ex-name{text-decoration:line-through;text-decoration-color:rgba(239,68,68,.6)}
+.plan-ex-block-tag{font-size:9px;font-weight:700;color:var(--red);background:rgba(239,68,68,.12);padding:1px 6px;border-radius:6px;flex-shrink:0;white-space:nowrap}
 .plan-ex-wrap:has(.plan-ex-picker){padding-top:2px}
 .plan-ex-picker{margin:6px 0 2px;border:1px solid var(--border);border-radius:8px;padding:6px;background:var(--surface2)}
 .plan-ex-picker input{width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:var(--surface);color:var(--text)}
@@ -373,19 +376,21 @@ function clamp(v,mn,mx) { return Math.max(mn,Math.min(mx,v)) }
 async function loadDashboard() {
   $('dash-sub').textContent = 'Carregando dados...'
   try {
-    const [profiles, checkups, sessions, exlogs, extras, notes] = await Promise.all([
+    const [profiles, checkups, sessions, exlogs, extras, notes, blocks] = await Promise.all([
       sb.from('profiles').select('*'),
       sb.from('checkups').select('*'),
       sb.from('sessions').select('*'),
       sb.from('exercise_logs').select('*'),
       sb.from('protocol_extras').select('*'),
-      sb.from('student_notes').select('*')
+      sb.from('student_notes').select('*'),
+      sb.from('protocol_blocks').select('*')
     ])
     const students = (profiles.data||[]).filter(p => p.role !== 'admin').map(p => {
       const pCheckups = (checkups.data||[]).filter(c => c.user_id === p.id).sort((a,b) => new Date(b.created_at)-new Date(a.created_at))
       const pSessions = (sessions.data||[]).filter(s => s.user_id === p.id).sort((a,b) => new Date(b.created_at)-new Date(a.created_at))
       const pLogs = (exlogs.data||[]).filter(l => l.user_id === p.id).sort((a,b) => new Date(b.done_at)-new Date(a.done_at))
       const pExtras = (extras.data||[]).filter(e => e.user_id === p.id)
+      const pBlocks = (blocks.data||[]).filter(b => b.user_id === p.id)
       const pNotes = (notes.data||[]).filter(n => n.user_id === p.id)
       const latestCheckup = pCheckups[0]
       const latestSession = pSessions[0]
@@ -395,7 +400,7 @@ async function loadDashboard() {
       const lastAct = pLogs.length > 0 ? pLogs[0].done_at : (latestSession?.created_at || null)
       const streak = calcStreak(pLogs)
       const totalEx = pLogs.length
-      return { ...p, checkups:pCheckups, sessions:pSessions, logs:pLogs, extras:pExtras, notes:pNotes, latestCheckup, latestSession, scores, overall, nivel:latestCheckup?.nivel||'—', plan_month:latestSession?.plan_month??0, last_activity:lastAct, streak, total_ex:totalEx, pain:(p.dor_level||0) }
+      return { ...p, checkups:pCheckups, sessions:pSessions, logs:pLogs, extras:pExtras, blocks:pBlocks, notes:pNotes, latestCheckup, latestSession, scores, overall, nivel:latestCheckup?.nivel||'—', plan_month:latestSession?.plan_month??0, last_activity:lastAct, streak, total_ex:totalEx, pain:(p.dor_level||0) }
     })
     allStudents = students
     renderStats()
@@ -818,12 +823,13 @@ function renderExercicios(s, body) {
     const visitedNote = visited.length ? `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Os treinos ${visited.map(i=>dias[i]).join(', ')} mostram o que a aluna viu no app${visited.length<3?` — ${[0,1,2].filter(i=>!visited.includes(i)).map(i=>dias[i]).join(' e ')} ainda não foram abertos por ela (mostra o plano previsto)`:''}.</div>` : `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Ela ainda não abriu nenhum treino no app — mostrando o plano previsto.</div>`
     // ids já presentes como extra (para saber se o botão × remove de verdade ou abre o seletor)
     const extraIds = new Set((s.extras||[]).filter(e=>e.active).map(e=>e.exercise_id))
+    const blockedIds = new Set((s.blocks||[]).filter(b=>b.active).map(b=>b.exercise_id))
     const uid = s.id
     planHtml = `<div class="plan-badge m">Mês ${(pmonth ?? '—')}</div>
       ${visitedNote}
       <div class="plan-grid">${plan.map((ids,i)=>
         `<div class="plan-card" data-treino="${i}" data-user="${uid}"><h5>${dias[i]||('Treino '+(i+1))}</h5>
-          ${Array.isArray(ids) && ids.length ? ids.map(id=>{const r=exReason(id, flagged); const isExtra=extraIds.has(id); return `<div class="plan-ex"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado correspondente</span>'}<button class="plan-ex-rm" title="${isExtra?'Remover exercício extra':'Fora do plano base — clique para gerenciar'}" onclick="onRemEx('${uid}','${i}','${id}',${isExtra})">×</button></div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
+          ${Array.isArray(ids) && ids.length ? ids.map(id=>{const r=exReason(id, flagged); const isExtra=extraIds.has(id); const isBlocked=blockedIds.has(id); return `<div class="plan-ex${isBlocked?' blocked':''}"><span class="pip"></span><span class="plan-ex-name">${exName(id)}</span>${isBlocked?'<span class="plan-ex-block-tag">bloqueado</span>':(r?`<span class="plan-ex-reason">${r}</span>`:'<span class="plan-ex-none">sem achado</span>')}<button class="plan-ex-rm" title="${isBlocked?'Desbloquear este exercício':(isExtra?'Remover exercício extra':'Bloquear este exercício no app')}" data-treino-i="${i}" onclick="onRemEx('${uid}','${i}','${id}',${isExtra},${isBlocked})">${isBlocked?'✓':'×'}</button></div>`}).join('') : '<div class="plan-empty">Sem exercícios</div>'}
           <button class="plan-ex-add" onclick="openExPicker('${uid}','${i}')">+ Adicionar exercício</button>
         </div>`).join('')}
       </div>`
@@ -968,16 +974,34 @@ async function commitExtra(btnEl, exId) {
 function getCurUserIdFromCard(card) {
   return card ? card.getAttribute('data-user') : null
 }
-// Ao clicar no × de um exercício do plano
-function onRemEx(userId, treinoIdx, exId, isExtra) {
-  if (isExtra) {
-    const s = allStudents.find(x => x.id === userId)
+// Ao clicar no × de um exercício do plano: extra→remove, bloqueado→desbloqueia, base→bloqueia
+function onRemEx(userId, treinoIdx, exId, isExtra, isBlocked) {
+  const s = allStudents.find(x => x.id === userId)
+  if (isExtra && !isBlocked) {
     const e = (s?.extras||[]).find(x => x.exercise_id === exId && x.active)
     if (e) delExtra(e.id, userId)
     return
   }
-  const msg = 'Este exercício faz parte do plano montado por sinais (o app o gera automaticamente).\n\nPara bloqueá-lo para a aluna é preciso um ajuste no app. Por ora, você pode adicionar outro exercício no lugar como EXERCÍCIO EXTRA (aparece para ela na seção "📌 Exercícios extras").'
-  if (confirm(msg)) openExPicker(userId, treinoIdx)
+  if (isBlocked) {
+    if (confirm('Desbloquear este exercício para o aluno?')) toggleBlock(userId, exId)
+    return
+  }
+  if (confirm('Bloquear este exercício no app do aluno?\n(Ele deixará de aparecer nos treinos deste aluno, enquanto valer o bloqueio.)')) toggleBlock(userId, exId)
+}
+// (des)ativa o bloqueio de um exercício para o aluno; se não existe, cria
+async function toggleBlock(userId, exId) {
+  const s = allStudents.find(x => x.id === userId)
+  if (!s) return
+  const existing = (s.blocks||[]).find(b => b.exercise_id === exId)
+  if (existing) {
+    await sb.from('protocol_blocks').update({ active: !existing.active }).eq('id', existing.id)
+  } else {
+    const { error } = await sb.from('protocol_blocks').insert({ user_id: userId, exercise_id: exId, added_by: currentUser?.id })
+    if (error) { alert('Erro ao bloquear: '+error.message); return }
+  }
+  const { data } = await sb.from('protocol_blocks').select('*').eq('user_id', userId)
+  if (data) s.blocks = data
+  renderProfileTab()
 }
 async function addExtra(userId) {
   const inp = $('extra-search'); const val = inp?.value.trim().toLowerCase()
