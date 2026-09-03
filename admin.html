@@ -79,14 +79,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .modal-overlay{position:fixed;inset:0;background:rgba(15,15,14,.94);z-index:100;display:none;overflow-y:auto;padding:20px 12px}
 .modal-overlay.open{display:flex;justify-content:center;align-items:flex-start}
 .modal{width:100%;max-width:1080px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:0;margin:20px auto;overflow:hidden}
-.modal-header{display:flex;align-items:center;gap:14px;padding:20px 24px;border-bottom:1px solid var(--border);position:relative}
+.modal-header{display:flex;align-items:center;gap:16px;padding:20px 52px 20px 24px;border-bottom:1px solid var(--border);position:relative;flex-wrap:wrap}
 .modal-avatar{width:44px;height:44px;border-radius:50%;background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--muted);overflow:hidden}
 .modal-avatar img{width:100%;height:100%;object-fit:cover}
 .modal-hinfo{flex:1;min-width:0}
 .modal-hname{font-size:16px;font-weight:800}
 .modal-hemail{font-size:11px;color:var(--muted)}
-.modal-hscore{font-size:22px;font-weight:800;color:var(--orange);flex-shrink:0}
-.modal-hscore small{font-size:11px;color:var(--muted);font-weight:400}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.hdr-act{font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap}
+.hdr-act.ok{background:rgba(74,222,128,.14);color:var(--green)}
+.hdr-act.mid{background:rgba(251,146,60,.14);color:var(--amber)}
+.hdr-act.risk{background:rgba(239,68,68,.14);color:var(--red)}
+.hdr-meta{font-size:10px;color:var(--muted);white-space:nowrap}
+.hdr-focus{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);min-width:0}
+.hdr-focus-t{font-size:9px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.hdr-focus-list{display:flex;flex-wrap:wrap;gap:4px}
+.hdr-focus-chip{font-size:10px;font-weight:600;padding:3px 8px;border-radius:8px;background:rgba(251,146,60,.12);color:var(--amber)}
+.hdr-focus-ok .hdr-focus-t{color:var(--green)}
 .modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
 .modal-close:hover{color:var(--text)}
 
@@ -456,14 +465,28 @@ function openProfile(userId) {
   if (!s) return
   const $m = $('modal'); $m.classList.add('open')
   const photoHtml = s.photo_url ? `<img src="${s.photo_url}" alt="">` : initials(s.nome, s.email)
+  // Sinais marcados na última avaliação = "no que precisa trabalhar mais"
+  const flagged = flaggedSignals(s)
+  const foci = SIGNAL_ORDER2.filter(sig => flagged.has(sig)).map(sig => SIGNAL_LABELS[sig]?.d || SIGNAL_LABELS[sig]?.n || sig)
+  const fechasHtml = foci.length
+    ? `<div class="hdr-focus"><span class="hdr-focus-t">Pontos de atenção:</span><div class="hdr-focus-list">${foci.map(f=>`<span class="hdr-focus-chip">${f}</span>`).join('')}</div></div>`
+    : `<div class="hdr-focus hdr-focus-ok"><span class="hdr-focus-t">Sem achados na última avaliação</span></div>`
+  // Status de atividade
+  const ds = daysSince(s.last_activity)
+  const actCls = ds<=3?'ok':ds<=7?'mid':'risk'
+  const actTxt = ds===0?'Ativo hoje':(ds===1?`1 dia sem atividade`:`${ds} dias sem atividade`)
   $('modal-header').innerHTML = `
     <button class="modal-close" onclick="closeModal()">&times;</button>
     <div class="modal-avatar">${photoHtml}</div>
     <div class="modal-hinfo">
       <div class="modal-hname">${s.nome || 'Aluno'}</div>
       <div class="modal-hemail">${s.email}${s.phone ? ' · '+s.phone : ''}</div>
+      ${fechasHtml}
     </div>
-    <div class="modal-hscore">${s.overall||'—'}<small>/100</small></div>`
+    <div class="hdr-right">
+      <span class="hdr-act ${actCls}">${actTxt}</span>
+      <span class="hdr-meta">Nível ${s.nivel||'—'} · Streak ${s.streak} dias</span>
+    </div>`
   $('modal-tabs').innerHTML = ['timeline','avaliacoes','exercicios','observacoes'].map(t =>
     `<div class="tab${t===activeTab?' active':''}" onclick="switchTab('${t}')">${tabLabel(t)}</div>`
   ).join('')
@@ -495,27 +518,9 @@ function renderProfileTab() {
   else if (activeTab === 'avaliacoes') renderAvaliacoes(s, body)
   else if (activeTab === 'exercicios') renderExercicios(s, body)
   else if (activeTab === 'observacoes') renderObservacoes(s, body)
-  renderAIBox(s)
 }
 
-function renderAIBox(s) {
-  const body = $('modal-body')
-  const ds = daysSince(s.last_activity)
-  const painMsg = s.pain > 0 ? ` · Dor relatada: ${s.pain}/10` : ''
-  let alertMsgs = []
-  if (ds > 7) alertMsgs.push(`⚠️ ${ds} dias sem atividade`)
-  if (s.overall > 0 && s.overall < 40) alertMsgs.push('🔴 Score crítico (abaixo de 40)')
-  if (s.streak === 0 && s.total_ex > 0) alertMsgs.push('📉 Streak zerou — possível abandono')
-  if (s.checkups && s.checkups.length === 0) alertMsgs.push('🆕 Nunca fez check-up')
-  const html = `<div class="ai-box">
-    <div class="ai-title">🤖 Resumo automático</div>
-    <div class="ai-text">
-      ${s.nome||'Aluno'} — score geral ${s.overall||'—'}/100 · nível ${s.nivel||'—'} · streak ${s.streak} dias · ${ds===0?'hoje':ds+' dias sem'} ativo${painMsg}
-      ${alertMsgs.length ? '<br><br>'+alertMsgs.join('<br>') : ''}
-    </div>
-  </div>`
-  body.insertAdjacentHTML('afterbegin', html)
-}
+// os achados da última avaliação já são exibidos no cabeçalho (openProfile)
 
 // ── TIMELINE ──
 function renderTimeline(s, body) {
