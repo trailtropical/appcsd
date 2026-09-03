@@ -672,14 +672,32 @@ function renderExercicios(s, body) {
   const done = logs.filter(l=>l.checked)
   const total = done.length
   const last7 = done.filter(l=>daysSince(l.done_at)<=7).length
-  // Plano vigente: exercicios = [Treino A, B, C]; plan_month
+  // Plano vigente: exercicios = [Treino A, B, C]; session_exercises = map sess_X → o que o
+  // aluno REALMENTE viu no app (gravado quando ele abre o treino). Priorizamos esse, pois o
+  // objetivo é o dashboard espelhar exatamente o app.
   const sess = s.latestSession || {}
-  const plan = Array.isArray(sess.exercicios) ? sess.exercicios : (Array.isArray(s.sessions?.[0]?.exercicios) ? s.sessions[0].exercicios : null)
+  const planRaw = Array.isArray(sess.exercicios) ? sess.exercicios : (Array.isArray(s.sessions?.[0]?.exercicios) ? s.sessions[0].exercicios : null)
+  const sessEx = (sess.session_exercises && typeof sess.session_exercises==='object') ? sess.session_exercises : (s.sessions?.[0]?.session_exercises && typeof s.sessions[0].session_exercises==='object' ? s.sessions[0].session_exercises : {})
   const pmonth = sess.plan_month ?? s.sessions?.[0]?.plan_month ?? null
   const dias = ['Treino A','Treino B','Treino C']
+  // Para cada treino: se o aluno abriu no app (sess_X existe), mostra exatamente o que viu;
+  // senão, mostra o plano cru limitado a 6 (mesma regra de MAX do app = showSessionFromPlan).
+  const MAX = 6
+  let plan = null
+  if (planRaw && planRaw.length) {
+    plan = [0,1,2].map(i => {
+      const seen = sessEx['sess_'+i]
+      if (Array.isArray(seen) && seen.length) return seen.slice()
+      const raw = Array.isArray(planRaw[i]) ? planRaw[i] : []
+      return raw.slice(0, MAX)
+    })
+  }
   let planHtml = ''
   if (plan && plan.length) {
+    const visited = [0,1,2].filter(i => Array.isArray(sessEx['sess_'+i]) && sessEx['sess_'+i].length)
+    const visitedNote = visited.length ? `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Os treinos ${visited.map(i=>dias[i]).join(', ')} mostram o que a aluna viu no app${visited.length<3?` — ${[0,1,2].filter(i=>!visited.includes(i)).map(i=>dias[i]).join(' e ')} ainda não foram abertos por ela (mostra o plano previsto)`:''}.</div>` : `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Ela ainda não abriu nenhum treino no app — mostrando o plano previsto.</div>`
     planHtml = `<div class="plan-badge m">Mês ${(pmonth ?? '—')}</div>
+      ${visitedNote}
       <div class="plan-grid">${plan.map((ids,i)=>
         `<div class="plan-card"><h5>${dias[i]||('Treino '+(i+1))}</h5>
           ${Array.isArray(ids) && ids.length ? ids.map(id=>`<div class="plan-ex"><span class="pip"></span>${exName(id)}</div>`).join('') : '<div class="plan-empty">Sem exercícios</div>'}
