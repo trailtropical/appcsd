@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='22';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='23';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -2376,7 +2376,8 @@ function resolvedMaintenanceExercises(sig, resolvedTier, monthIdx) {
   const info = SIGNAL_MAP[sig]; if (!info || !info.months) return []
   const targetMonth = Math.min(2, resolvedTier + 1)
   const prevUsed = new Set()
-  ;(info.months[resolvedTier] || []).forEach(m => (m.a||[]).concat(m.b||[],m.c||[]).forEach(id => prevUsed.add(id)))
+  const prevMonthObj = info.months[resolvedTier]
+  ;['a','b','c'].forEach(k => ((prevMonthObj && prevMonthObj[k]) || []).forEach(id => prevUsed.add(id)))
   const pick = ['a','b','c'].map(k => {
     const list = (info.months[targetMonth] || {})[k] || []
     const cand = list.filter(id => EX[id] && !prevUsed.has(id))
