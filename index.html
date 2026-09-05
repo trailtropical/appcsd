@@ -3091,7 +3091,7 @@ function showSessionFromPlan(sessIdx) {
         const { data: extras } = await window._sbClient.from('protocol_extras')
           .select('exercise_id,session_idx').eq('user_id', currentUser.id).eq('active', true)
           .eq('session_idx', sessIdx)
-        extraIds = (extras||[]).map(e => e.exercise_id).filter(id => EX[id] && !finalIds.includes(id))
+        if (Array.isArray(extras)) extraIds = extras.map(e => e.exercise_id).filter(id => EX[id] && !finalIds.includes(id))
       } catch(e) { console.warn('[CSD] extras error:', e) }
     }
     // 6. Render as flat list (prescritos + extras juntos, extras com asterisco)
