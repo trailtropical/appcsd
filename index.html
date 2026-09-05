@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='21';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='22';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -874,6 +874,42 @@ try {
   }
 } catch(e) {
   console.error('[CSD] Erro ao init Supabase:', e)
+}
+
+// ══ DIAGNÓSTICO (temporário): mostra qualquer erro na tela ══
+window.__csdErr = ''
+window.addEventListener('error', function (e) {
+  var msg = (e && e.message) || 'erro'
+  var stack = (e && e.error && e.error.stack) ? String(e.error.stack) : ''
+  window.__csdErr += 'ERROR: ' + msg + '\n' + stack.substring(0, 900) + '\n---\n'
+  console.error('[CSD onerror]', msg, stack)
+  window.__showErr()
+})
+window.addEventListener('unhandledrejection', function (e) {
+  var r = (e && e.reason) || {}
+  var msg = (r && r.message) ? r.message : String(r)
+  var stack = (r && r.stack) ? String(r.stack) : ''
+  window.__csdErr += 'PROMISE: ' + msg + '\n' + stack.substring(0, 900) + '\n---\n'
+  console.error('[CSD unhandledrejection]', msg, stack)
+  window.__showErr()
+})
+window.__showErr = function () {
+  if (!document.getElementById('csd-debug-bar')) return
+  document.getElementById('csd-debug-bar').innerHTML =
+    '<pre style="font-size:10px;line-height:1.3;margin:0;white-space:pre-wrap;word-break:break-word">' + window.__csdErr + '</pre>'
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () { window.__mountErrBar() })
+} else {
+  window.__mountErrBar()
+}
+window.__mountErrBar = function () {
+  var b = document.createElement('div')
+  b.id = 'csd-debug-bar'
+  b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#400;color:#ffd7d7;padding:8px;font-family:monospace;max-height:40vh;overflow:auto;display:none'
+  b.innerHTML = '<div style="font-weight:700">[CSD DEBUG] Nenhum erro ainda. Pressione Ctrl+Shift+J (console) para ver erros.</div>'
+  document.body.appendChild(b)
+  setTimeout(function () { b.style.display = 'block' }, 1500)
 }
 
 // ══ TESTES ══
