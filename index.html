@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='24';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='25';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -479,9 +479,15 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 /* EXERCÍCIO DETALHE */
 .ex-detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;overflow-y:auto}
 .ex-detail-overlay.open{display:flex}
-.ex-detail-video{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:16px 20px 0;cursor:pointer;overflow:hidden}
+.ex-detail-video{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:16px 20px 0;cursor:pointer;overflow:hidden;position:relative}
 .ex-detail-video.has-video{height:auto;aspect-ratio:16/9}
 .ex-detail-video.has-video iframe{width:100%;height:100%;border:none}
+.ex-detail-video .video-fs-btn{position:absolute;top:10px;right:10px;z-index:9;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.ex-detail-video .video-fs-btn:active{transform:scale(.92)}
+.ex-detail-video.video-fs{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;margin:0;border:none;border-radius:0;aspect-ratio:auto;height:100vh;height:100dvh;width:100vw;background:#000;justify-content:center}
+.ex-detail-video.video-fs .video-fs-btn{top:14px;right:14px;width:42px;height:42px;font-size:19px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
+.ex-detail-video.video-fs>div{width:100%;height:100%;margin:0}
+.ex-detail-video.video-fs>div>div{padding:0!important;position:absolute;inset:0;height:100%;width:100%}
 .ex-detail-body{padding:16px 20px 40px}
 .ex-detail-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2;margin-bottom:4px}
 .ex-detail-detail{font-size:14px;color:var(--orange);font-weight:600;margin-bottom:12px}
@@ -1007,7 +1013,14 @@ const CONSEQUENCES = {
 const VTURB_BASE = 'https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/'
 function vturbEmbed(vid) {
   const embedUrl = `${VTURB_BASE}${vid}/v4/embed.html`
-  return `<div style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0"><iframe frameborder="0" allowfullscreen allow="fullscreen; autoplay; encrypted-media; picture-in-picture" src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="no-referrer-when-downgrade" title="Vídeo do exercício"></iframe></div></div>`
+  return `<div style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0;background:#000"><iframe frameborder="0" allowfullscreen allow="fullscreen; autoplay; encrypted-media; picture-in-picture" src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="origin" title="Vídeo do exercício"></iframe><button class="video-fs-btn" onclick="event.stopPropagation();toggleVideoFs(this)" type="button">⛶</button></div></div>`
+}
+function toggleVideoFs(btn) {
+  const wrap = btn.closest('.ex-detail-video, .video-placeholder')
+  if (!wrap) return
+  const isFs = wrap.classList.toggle('video-fs')
+  btn.textContent = isFs ? '✕' : '⛶'
+  document.body.style.overflow = isFs ? 'hidden' : ''
 }
 const EX = {
   // BLOCO GERAL
@@ -3188,6 +3201,7 @@ async function checkFromDetail(exId) {
 }
 function closeExDetail() {
   document.getElementById('ex-detail').classList.remove('open')
+  document.body.style.overflow = ''
   const videoWrap = document.querySelector('.ex-detail-video')
   videoWrap.innerHTML = '<div class="play-btn">▶</div><div class="video-label" id="ex-video-label">Vídeo em breve</div>'
   videoWrap.classList.remove('has-video')
