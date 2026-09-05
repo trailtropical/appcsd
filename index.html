@@ -3082,39 +3082,38 @@ function showSessionFromPlan(sessIdx) {
     finalIds = finalIds.filter(id => !window._blocks.has(id))
   }
 
-  // 5. Carrega os exercícios extras (adicionados manualmente pelo admin) para ESTE treino
-  //    (session_idx = sessIdx; 0=A,1=B,2=C) e os integra na lista com asterisco leve.
-  let extraIds = []
+  // 5. Render as flat list (síncrono — garante que a tela aparece imediatamente)
+  const seen = new Set()
+  let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
+  html += ['Treino A','Treino B','Treino C'].map((d,i) =>
+    `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
+  ).join('')
+  html += `</div>`
+  let n = 1
+  finalIds.forEach(id => {
+    if (seen.has(id)) return
+    seen.add(id)
+    const isCrit = criticalSignal && signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey).includes(id)
+    const isEsp = specificSet.has(id)
+    const rendered = renderExCard(id, n, isEsp, isCrit)
+    if (rendered) { html += rendered; n++ }
+  })
+  wrap.innerHTML = html
+  afterRenderSession(wrap, sessIdx)
+
+  // 6. Exercícios extras (async — adicionados pelo admin, integram na lista com asterisco)
   ;(async () => {
-    if (window._sbClient && currentUser) {
-      try {
-        const { data: extras } = await window._sbClient.from('protocol_extras')
-          .select('exercise_id,session_idx').eq('user_id', currentUser.id).eq('active', true)
-          .eq('session_idx', sessIdx)
-        if (Array.isArray(extras)) extraIds = extras.map(e => e.exercise_id).filter(id => EX[id] && !finalIds.includes(id))
-      } catch(e) { console.warn('[CSD] extras error:', e) }
-    }
-    // 6. Render as flat list (prescritos + extras juntos, extras com asterisco)
-    const seen = new Set()
-    let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
-    html += ['Treino A','Treino B','Treino C'].map((d,i) =>
-      `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
-    ).join('')
-    html += `</div>`
-    const all = finalIds.concat(extraIds)
-    let n = 1
-    all.forEach(id => {
-      if (seen.has(id)) return
-      seen.add(id)
-      const isCrit = criticalSignal && signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey).includes(id)
-      const isEsp = specificSet.has(id)
-      const isExtra = extraIds.includes(id)
-      const rendered = renderExCard(id, n, isEsp, isCrit, isExtra)
-      if (rendered) { html += rendered; n++ }
-    })
-    html += (all.length === 0) ? '<div class="empty">Nenhum exercício neste treino</div>' : ''
-    wrap.innerHTML = html
-    afterRenderSession(wrap, sessIdx)
+    if (!window._sbClient || !currentUser) return
+    try {
+      const { data: extras } = await window._sbClient.from('protocol_extras')
+        .select('exercise_id').eq('user_id', currentUser.id).eq('active', true)
+        .eq('session_idx', sessIdx)
+      if (!Array.isArray(extras) || !extras.length) return
+      const extraNew = extras.map(e => e.exercise_id).filter(id => EX[id] && !finalIds.includes(id))
+      if (!extraNew.length) return
+      const extraHtml = extraNew.map(id => renderExCard(id, n, false, false, true)).join('')
+      wrap.insertAdjacentHTML('beforeend', extraHtml)
+    } catch(e) { console.warn('[CSD] extras error:', e) }
   })()
   showScreen('s-session-detail')
 }
