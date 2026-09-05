@@ -1,7 +1,10 @@
-const CACHE_NAME = 'csd-v13'
+const CACHE_NAME = 'csd-v14'
 const ASSETS = [
   './manifest.json',
-  './logo-csd-quad.jpg'
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
+  './icon-180.png'
 ]
 
 self.addEventListener('install', e => {
