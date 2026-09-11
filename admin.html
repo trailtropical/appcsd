@@ -333,7 +333,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 const SB_URL = 'https://zjsadtpxdexlflfykqzy.supabase.co'
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqc2FkdHB4ZGV4bGZsZnlrcXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDM5NzYsImV4cCI6MjA5OTUxOTk3Nn0.IlssVUm27JoHsK1oPhO6e5yWL_nkPWgfI_4zBfeziic'
 let sb, currentUser, allStudents = [], filteredStudents = [], currentStudentId = null
-let activeTab = 'timeline'
+let activeTab = 'exercicios'
 
 function $(id) { return document.getElementById(id) }
 
@@ -511,7 +511,7 @@ function openProfile(userId) {
       <span class="hdr-act ${actCls}">${actTxt}</span>
       <span class="hdr-meta">Nível ${s.nivel||'—'} · Streak ${s.streak} dias</span>
     </div>`
-  $('modal-tabs').innerHTML = ['timeline','avaliacoes','exercicios','observacoes'].map(t =>
+  $('modal-tabs').innerHTML = ['exercicios','avaliacoes','timeline'].map(t =>
     `<div class="tab${t===activeTab?' active':''}" onclick="switchTab('${t}')">${tabLabel(t)}</div>`
   ).join('')
   renderProfileTab()
@@ -523,7 +523,7 @@ function closeModal() { destroyChart(); $('modal').classList.remove('open'); cur
 $('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal() })
 
 function tabLabel(t) {
-  return {timeline:'Timeline',avaliacoes:'Avaliações',exercicios:'Exercícios',observacoes:'Observações'}[t]||t
+  return {timeline:'Timeline',avaliacoes:'Avaliações',exercicios:'Exercícios'}[t]||t
 }
 
 function switchTab(t) {
@@ -540,7 +540,6 @@ function renderProfileTab() {
   if (activeTab === 'timeline') renderTimeline(s, body)
   else if (activeTab === 'avaliacoes') renderAvaliacoes(s, body)
   else if (activeTab === 'exercicios') renderExercicios(s, body)
-  else if (activeTab === 'observacoes') renderObservacoes(s, body)
 }
 
 // os achados da última avaliação já são exibidos no cabeçalho (openProfile)
@@ -605,6 +604,10 @@ const EX_NAME = {
 }
 function exName(id) { return EX_NAME[id] || id || '—' }
 
+// Gerais na mesma ordem do GERAL_ORDEM do app (usados para completar a lista até 5–6,
+// espelhando o preenchimento que o showSessionFromPlan faz no dispositivo do aluno)
+const GERAL_FILL = ['g_volta_mundo','g_cocoras','g_prancha','g_panturrilha','g_terra','g_equilibrio','g_stepdown']
+
 // Mapa exercício → sinal(is) que o sugeriram, espelhando o SIGNAL_MAP do app.
 // Ex.: e_noventa → 'Restrição de mobilidade de quadril'. Derivação por varredura.
 const SIGNAL_LABEL = {
@@ -647,6 +650,30 @@ const SIGNAL_POOL = {
     {a:['e_deadbug','e_bird_dog'],b:['e_urso_estatico','e_deadbug'],c:['e_deadbug','e_escalador']},
     {a:['e_pressao_anti_rot','e_prancha_lat_abd'],b:['e_toque_ombro_urso','e_prancha_lat'],c:['e_pressao_anti_rot','e_toque_ombro_urso']}]
 }
+
+// Reconstrói o plano do aluno a partir dos signal_tiers e do catálogo SIGNAL_POOL,
+// espelhando a lógica de signalExercisesForMonth + renderPlanView do app.
+// Retorna [[a_ids],[b_ids],[c_ids]] — exercício por treino.
+function rebuildPlanForStudent(s) {
+  const tiers = (() => { try {
+    const t = (s.latestSession && s.latestSession.signal_tiers) || (s.sessions?.[0]?.signal_tiers) || {}
+    return typeof t === 'string' ? JSON.parse(t) : t
+  } catch(e) { return {} } })()
+  const pool = [[],[],[]]
+  Object.keys(SIGNAL_POOL).forEach(sig => {
+    const tier = Math.max(0, Math.min(2, (tiers[sig] ?? 0)))
+    const months = SIGNAL_POOL[sig]
+    if (!months || !months[tier]) return
+    const spot = months[tier]
+    ;['a','b','c'].forEach((k,i) => {
+      ;(spot[k]||[]).forEach(id => {
+        if (EX_NAME[id] && !pool[i].includes(id)) pool[i].push(id)
+      })
+    })
+  })
+  return pool
+}
+
 // exercício → set de labels de sinal
 const REASONS = (() => {
   const m = {}
@@ -805,23 +832,37 @@ function renderExercicios(s, body) {
   // Plano vigente: exercicios = [Treino A, B, C]; session_exercises = map sess_X → o que o
   // aluno REALMENTE viu no app (gravado quando ele abre o treino). Priorizamos esse, pois o
   // objetivo é o dashboard espelhar exatamente o app.
+  // Plano reconstruído a partir dos signal_tiers + catálogo (fonte primária sempre atualizada).
+  // O campo exercicios no banco pode ficar desatualizado quando o aluno avança de mês,
+  // pois o saveSessionsToSupabase roda com csd_sessoes vazio antes da regeneração.
+  // Usamos SEMPRE o reconstruído — o exercicios do banco é redundante e pode conter
+  // dados do mês anterior, não importando se tem 2+ itens por treino.
+  const rebuilt = rebuildPlanForStudent(s)
   const sess = s.latestSession || {}
-  const planRaw = Array.isArray(sess.exercicios) ? sess.exercicios : (Array.isArray(s.sessions?.[0]?.exercicios) ? s.sessions[0].exercicios : null)
+  const planRaw = rebuilt
   const sessEx = (sess.session_exercises && typeof sess.session_exercises==='object') ? sess.session_exercises : (s.sessions?.[0]?.session_exercises && typeof s.sessions[0].session_exercises==='object' ? s.sessions[0].session_exercises : {})
   const pmonth = sess.plan_month ?? s.sessions?.[0]?.plan_month ?? null
   const dias = ['Treino A','Treino B','Treino C']
   // Sinais que a aluna marcou na avaliação mais recente (filtra o motivo por achado real)
   const flagged = flaggedSignals(s)
-  // Para cada treino: se o aluno abriu no app (sess_X existe), mostra exatamente o que viu;
-  // senão, mostra o plano cru limitado a 6 (mesma regra de MAX do app = showSessionFromPlan).
+  // Para cada treino: usa o plano reconstruído (sempre atualizado com os tiers atuais).
+  // O sessEx (session_exercises) pode conter dados do mês anterior e é ignorado aqui.
+  // Depois completa com exercícios gerais até 5–6 (MIN/MAX do app = showSessionFromPlan),
+  // para o dashboard espelhar a lista cheia que o aluno vê.
+  const MIN = 5
   const MAX = 6
   let plan = null
   if (planRaw && planRaw.length) {
     plan = [0,1,2].map(i => {
-      const seen = sessEx['sess_'+i]
-      if (Array.isArray(seen) && seen.length) return seen.slice()
-      const raw = Array.isArray(planRaw[i]) ? planRaw[i] : []
-      return raw.slice(0, MAX)
+      const base = Array.isArray(planRaw[i]) ? planRaw[i].slice() : []
+      const names = new Set(base.map(id => exName(id)))
+      const fillPool = GERAL_FILL.filter(id => !base.includes(id) && !names.has(exName(id)))
+      let fi = 0
+      while (base.length < MIN && fi < fillPool.length) {
+        const id = fillPool[fi++]
+        base.push(id); names.add(exName(id))
+      }
+      return base.slice(0, MAX)
     })
   }
   let planHtml = ''
@@ -834,7 +875,7 @@ function renderExercicios(s, body) {
     const uid = s.id
     // extras de um treino específico (session_idx). Migração antiga: session_idx null → 0.
     const extrasOfT = t => (s.extras||[]).filter(e => e.active && (e.session_idx==null ? 0 : e.session_idx) === t && !extraIdsByPrescrito(e.exercise_id, plan))
-    planHtml = `<div class="plan-badge m">Mês ${(pmonth ?? '—')}</div>
+    planHtml = `<div class="plan-badge m">Mês ${(pmonth!=null ? Number(pmonth)+1 : '—')}</div>
       ${visitedNote}
       <div class="plan-grid">${plan.map((ids,i)=> {
         const exT = extrasOfT(i)
@@ -867,45 +908,6 @@ function renderExercicios(s, body) {
   ${planHtml}
   <div style="font-size:11px;font-weight:700;color:var(--text);margin:14px 0 6px">✅ Exercícios feitos</div>
   ${listHtml || '<div class="empty">Nenhum exercício registrado</div>'}`
-}
-
-// ── OBSERVAÇÕES ──
-async function renderObservacoes(s, body) {
-  body.innerHTML = `<div class="obs-form">
-    <textarea id="obs-text" placeholder="Adicionar observação..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addObs('${s.id}')}"></textarea>
-    <button class="btn btn-s" onclick="addObs('${s.id}')">Enviar</button>
-  </div><div id="obs-list"></div>`
-  loadObs(s.id)
-}
-async function loadObs(userId) {
-  const s = allStudents.find(x => x.id === userId)
-  if (!s) return
-  const { data } = await sb.from('student_notes').select('*').eq('user_id', userId).order('created_at', { ascending: false })
-  if (data) s.notes = data
-  // Fetch profile names for created_by
-  const creatorIds = [...new Set((data||[]).map(n=>n.created_by).filter(Boolean))]
-  const creators = {}
-  if (creatorIds.length) {
-    const { data: cprof } = await sb.from('profiles').select('id,nome').in('id', creatorIds)
-    if (cprof) cprof.forEach(p => creators[p.id] = p.nome || 'Admin')
-  }
-  const list = $('obs-list')
-  if (!data || !data.length) { list.innerHTML = '<div class="empty">Nenhuma observação</div>'; return }
-  list.innerHTML = data.map(n => `<div class="obs-item">
-    <div class="obs-text">${escapeHtml(n.note)}</div>
-    <div class="obs-meta">${fmt(n.created_at)} · ${creators[n.created_by]||'Admin'}${n.created_by===currentUser?.id?` <button class="obs-del" onclick="delObs('${n.id}','${userId}')">Excluir</button>`:''}</div>
-  </div>`).join('')
-}
-function escapeHtml(s) { if(!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML }
-async function addObs(userId) {
-  const ta = $('obs-text'); if (!ta?.value.trim()) return
-  const { error } = await sb.from('student_notes').insert({ user_id: userId, note: ta.value.trim(), created_by: currentUser?.id })
-  if (!error) { ta.value=''; loadObs(userId) }
-}
-async function delObs(noteId, userId) {
-  if (!confirm('Excluir esta observação?')) return
-  await sb.from('student_notes').delete().eq('id', noteId)
-  loadObs(userId)
 }
 
 // ── EXTRAS ──

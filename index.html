@@ -3160,6 +3160,9 @@ function afterRenderSession(wrap, sessIdx) {
   const allSessionExercises = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
   allSessionExercises[`sess_${sessIdx}`] = sessionExerciseIds
   localStorage.setItem('csd_sessionExercises', JSON.stringify(allSessionExercises))
+  // Sincroniza com o Supabase para o dashboard do admin espelhar o que o aluno
+  // realmente viu no app (não altera a renderização local)
+  try { saveSessionsToSupabase() } catch (e) { console.warn('[CSD] sync sessao:', e) }
 }
 
 function showExerciseDetail(id) {
