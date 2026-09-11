@@ -651,27 +651,148 @@ const SIGNAL_POOL = {
     {a:['e_pressao_anti_rot','e_prancha_lat_abd'],b:['e_toque_ombro_urso','e_prancha_lat'],c:['e_pressao_anti_rot','e_toque_ombro_urso']}]
 }
 
-// Reconstrói o plano do aluno a partir dos signal_tiers e do catálogo SIGNAL_POOL,
-// espelhando a lógica de signalExercisesForMonth + renderPlanView do app.
-// Retorna [[a_ids],[b_ids],[c_ids]] — exercício por treino.
-function rebuildPlanForStudent(s) {
-  const tiers = (() => { try {
-    const t = (s.latestSession && s.latestSession.signal_tiers) || (s.sessions?.[0]?.signal_tiers) || {}
-    return typeof t === 'string' ? JSON.parse(t) : t
-  } catch(e) { return {} } })()
-  const pool = [[],[],[]]
-  Object.keys(SIGNAL_POOL).forEach(sig => {
-    const tier = Math.max(0, Math.min(2, (tiers[sig] ?? 0)))
-    const months = SIGNAL_POOL[sig]
-    if (!months || !months[tier]) return
-    const spot = months[tier]
-    ;['a','b','c'].forEach((k,i) => {
-      ;(spot[k]||[]).forEach(id => {
-        if (EX_NAME[id] && !pool[i].includes(id)) pool[i].push(id)
-      })
+// ── Replicação fiel do plano do app (renderPlanView + showSessionFromPlan) ──
+// O app SEMPRE regenera o mês atual a partir dos signal_tiers atuais (index.html
+// renderPlanView), portanto aqui reconstruímos EXATAMENTE a lista que o aluno vê:
+// progressão de mês (M2+ evita exercícios do M1), família _assist (pleno bloqueia
+// assist), máximo de 2 aparições por treino, sinal crítico, manutenção de sinais
+// resolvidos e preenchimento final com gerais até 5–6 (GERAL_ORDEM do app).
+
+const readSessionField = (s, k, fb) => { try {
+  const v = (s.latestSession && s.latestSession[k]) || (s.sessions?.[0] && s.sessions[0][k]) || fb
+  return (typeof v === 'string') ? JSON.parse(v) : v
+} catch(e) { return fb } }
+
+// signalCounts + criticalSignal — iguais ao getActiveSignals do app (index.html)
+function signalCountsForStudent(s) {
+  const counts = {}
+  const ans = (s.latestCheckup && s.latestCheckup.answers && typeof s.latestCheckup.answers==='object') ? s.latestCheckup.answers : {}
+  Object.keys(TEST_SIGNALS).forEach(tid => {
+    ;(Array.isArray(ans[tid])?ans[tid]:[]).forEach(oid => {
+      (TEST_SIGNALS[tid][oid]||[]).forEach(sig => { counts[sig] = (counts[sig]||0)+1 })
     })
   })
-  return pool
+  return counts
+}
+function criticalSignalFor(counts) {
+  let max = 0, crit = null
+  SIGNAL_ORDER2.forEach(sig => { if ((counts[sig]||0) > max) { max = counts[sig]; crit = sig } })
+  return crit
+}
+// Mesmo signalExercisesForMonth do app (index.html): dedup + exercício válido
+function sigExForMonth(sig, tier, k) {
+  const months = SIGNAL_POOL[sig]; if (!months || !months[tier]) return []
+  const list = months[tier][k] || []
+  return list.filter((id,i) => list.indexOf(id)===i && EX_NAME[id])
+}
+// Sinal resolvido → 1 exercício de manutenção do próximo tier por sessão
+function resolvedMaintenance(sig, resolvedTier) {
+  const months = SIGNAL_POOL[sig]; if (!months) return {a:[],b:[],c:[]}
+  const targetMonth = Math.min(2, resolvedTier + 1)
+  const prevUsed = new Set()
+  const prevObj = months[resolvedTier]
+  ;['a','b','c'].forEach(k => ((prevObj && prevObj[k]) || []).forEach(id => prevUsed.add(id)))
+  const pick = ['a','b','c'].map(k => {
+    const list = (months[targetMonth] || {})[k] || []
+    const cand = list.filter(id => EX_NAME[id] && !prevUsed.has(id))
+    return cand[0] || ''
+  })
+  return { a:[pick[0]], b:[pick[1]], c:[pick[2]] }
+}
+// Reconstrói o plano atual do aluno → [[a_ids],[b_ids],[c_ids]] finais (5–6, como o app renderiza)
+function rebuildPlanForStudent(s) {
+  const tiers = readSessionField(s, 'signal_tiers', {})
+  const signalCounts = signalCountsForStudent(s)
+  const prevSignalCounts = readSessionField(s, 'prev_signals', {})
+  const criticalSignal = criticalSignalFor(signalCounts)
+  const monthIdx = Math.max(0, Math.min(2, parseInt(s.latestSession?.plan_month ?? s.sessions?.[0]?.plan_month ?? 0) || 0))
+  const hasFreshSignals = Object.keys(signalCounts).length > 0
+  const sigs = SIGNAL_ORDER2.filter(sig =>
+    (prevSignalCounts[sig]||0) > 0 || (signalCounts[sig]||0) > 0 || (tiers[sig]||0) > 0
+  )
+  const usedBefore = new Set()
+  if (monthIdx > 0) {
+    sigs.forEach(sig => {
+      const mm = SIGNAL_POOL[sig]; if (!mm) return
+      const em = mm[Math.max(0, Math.min(2, monthIdx - 1))]
+      ;['a','b','c'].forEach(kk => ((em && em[kk]) || []).forEach(id => usedBefore.add(id)))
+    })
+  }
+  const chosenFam = {}, blockedFam = {}
+  if (monthIdx > 0) {
+    sigs.forEach(sig => {
+      const mm = SIGNAL_POOL[sig]; if (!mm) return
+      const pool = ['a','b','c'].flatMap(kk => sigExForMonth(sig, tiers[sig]||0, kk)).filter((id,ix,self)=>self.indexOf(id)===ix)
+      pool.forEach(id => {
+        if (!/_assist$/.test(id)) return
+        const pleno = id.replace(/_assist$/,'')
+        if (pool.includes(pleno) && EX_NAME[pleno] && !usedBefore.has(pleno)) {
+          chosenFam[pleno] = pleno
+          ;(blockedFam[pleno] = blockedFam[pleno] || new Set()).add(id)
+        } else {
+          chosenFam[pleno] = chosenFam[pleno] || id
+        }
+      })
+    })
+  }
+  const monthAppear = {}
+  const sessoes = ['a','b','c'].map(k => {
+    const ids = []; const seen = new Set(); const seenNames = new Set(); const seenFam = new Set()
+    const addEx = (id) => {
+      if (!id || seen.has(id)) return
+      const nm = EX_NAME[id]; if (!nm || seenNames.has(nm)) return
+      if ((monthAppear[id]||0) >= 2) return
+      const fk = id.replace(/_assist$/,'')
+      if (blockedFam[fk] && blockedFam[fk].has(id)) return
+      if (chosenFam[fk] && chosenFam[fk]!==id && EX_NAME[chosenFam[fk]]) return
+      if (seenFam.has(fk) && EX_NAME[fk] && fk!==id) return
+      seen.add(id); seenNames.add(nm); seenFam.add(fk); ids.push(id); monthAppear[id]=(monthAppear[id]||0)+1
+    }
+    sigs.forEach(sig => {
+      const mm = SIGNAL_POOL[sig]; if (!mm) return
+      const tier = tiers[sig]||0
+      if (hasFreshSignals && (prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
+        const maint = resolvedMaintenance(sig, tier)
+        ;(maint[k]||[]).forEach(addEx)
+        return
+      }
+      if (monthIdx > 0) {
+        const spotList = sigExForMonth(sig, tier, k)
+        const spotNovo = spotList.filter(id => !usedBefore.has(id))
+        if (spotNovo.length) {
+          spotNovo.forEach(addEx)
+        } else {
+          const outros = ['a','b','c'].filter(kk=>kk!==k).flatMap(kk => sigExForMonth(sig, tier, kk)).filter((id,ix,self)=>self.indexOf(id)===ix)
+          const outrosNovos = outros.filter(id => !usedBefore.has(id))
+          ;(outrosNovos.length ? outrosNovos : spotList).forEach(addEx)
+        }
+      } else {
+        sigExForMonth(sig, tier, k).forEach(addEx)
+      }
+    })
+    if (criticalSignal) sigExForMonth(criticalSignal, tiers[criticalSignal]||0, k).forEach(addEx)
+    if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
+    return ids
+  })
+  const MIN = 5, MAX = 6
+  return sessoes.map(specific => {
+    let kept = specific.filter(id => {
+      const fk = id.replace(/_assist$/,'')
+      return id && EX_NAME[id] && !((blockedFam[fk] || new Set()).has(id))
+    })
+    const keptNames = new Set(kept.map(id => EX_NAME[id]))
+    if (kept.length > MAX) {
+      kept = kept.slice(0, MAX)
+    } else if (kept.length < MIN) {
+      const pool = GERAL_FILL.filter(id => EX_NAME[id] && !kept.includes(id) && !keptNames.has(EX_NAME[id]))
+      let i = 0
+      while (kept.length < MIN && i < pool.length) {
+        const id = pool[i++]
+        if (!kept.includes(id)) { kept.push(id); keptNames.add(EX_NAME[id]) }
+      }
+    }
+    return kept.slice(0, MAX)
+  })
 }
 
 // exercício → set de labels de sinal
@@ -829,14 +950,12 @@ function renderExercicios(s, body) {
   const done = logs.filter(l=>l.checked)
   const total = done.length
   const last7 = done.filter(l=>daysSince(l.done_at)<=7).length
-  // Plano vigente: exercicios = [Treino A, B, C]; session_exercises = map sess_X → o que o
-  // aluno REALMENTE viu no app (gravado quando ele abre o treino). Priorizamos esse, pois o
-  // objetivo é o dashboard espelhar exatamente o app.
-  // Plano reconstruído a partir dos signal_tiers + catálogo (fonte primária sempre atualizada).
-  // O campo exercicios no banco pode ficar desatualizado quando o aluno avança de mês,
-  // pois o saveSessionsToSupabase roda com csd_sessoes vazio antes da regeneração.
-  // Usamos SEMPRE o reconstruído — o exercicios do banco é redundante e pode conter
-  // dados do mês anterior, não importando se tem 2+ itens por treino.
+  // Plano vigente: reconstruímos EXATAMENTE o que o app gera para o mês atual
+  // (renderPlanView + showSessionFromPlan): signal_tiers + prev_signals + respostas
+  // do check-up → exercícios por treino, já com os gerais até 5–6. O campo exercicios
+  // do banco pode ficar desatualizado em várias situações (avanço de mês com save
+  // vazio, visualização de mês passado, sessão ainda não aberta), por isso usamos
+  // sempre o reconstruído — que corresponde ao que o aluno VÊ ao abrir o app.
   const rebuilt = rebuildPlanForStudent(s)
   const sess = s.latestSession || {}
   const planRaw = rebuilt
@@ -845,30 +964,14 @@ function renderExercicios(s, body) {
   const dias = ['Treino A','Treino B','Treino C']
   // Sinais que a aluna marcou na avaliação mais recente (filtra o motivo por achado real)
   const flagged = flaggedSignals(s)
-  // Para cada treino: usa o plano reconstruído (sempre atualizado com os tiers atuais).
-  // O sessEx (session_exercises) pode conter dados do mês anterior e é ignorado aqui.
-  // Depois completa com exercícios gerais até 5–6 (MIN/MAX do app = showSessionFromPlan),
-  // para o dashboard espelhar a lista cheia que o aluno vê.
-  const MIN = 5
-  const MAX = 6
-  let plan = null
-  if (planRaw && planRaw.length) {
-    plan = [0,1,2].map(i => {
-      const base = Array.isArray(planRaw[i]) ? planRaw[i].slice() : []
-      const names = new Set(base.map(id => exName(id)))
-      const fillPool = GERAL_FILL.filter(id => !base.includes(id) && !names.has(exName(id)))
-      let fi = 0
-      while (base.length < MIN && fi < fillPool.length) {
-        const id = fillPool[fi++]
-        base.push(id); names.add(exName(id))
-      }
-      return base.slice(0, MAX)
-    })
-  }
+  // Para cada treino: usa o plano reconstruído fielmente ao app (já vem com gerais
+  // até 5–6, na mesma ordem GERAL_ORDEM). sessEx pode conter dados de mês anterior,
+  // por isso é ignorado na base (só usado para o aviso de "treino aberto no app").
+  const plan = (planRaw && planRaw.length && planRaw.some(t => Array.isArray(t) && t.length)) ? planRaw : null
   let planHtml = ''
   if (plan && plan.length) {
     const visited = [0,1,2].filter(i => Array.isArray(sessEx['sess_'+i]) && sessEx['sess_'+i].length)
-    const visitedNote = visited.length ? `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Os treinos ${visited.map(i=>dias[i]).join(', ')} mostram o que a aluna viu no app${visited.length<3?` — ${[0,1,2].filter(i=>!visited.includes(i)).map(i=>dias[i]).join(' e ')} ainda não foram abertos por ela (mostra o plano previsto)`:''}.</div>` : `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Ela ainda não abriu nenhum treino no app — mostrando o plano previsto.</div>`
+    const visitedNote = `<div style="font-size:10px;color:var(--muted);margin:-6px 0 8px">Lista reconstruída fielmente do que o app gera no mês atual (tiers + catálogo). ${visited.length?`Treinos já abertos por ela no app: ${visited.map(i=>dias[i]).join(', ')}.`:'Ela ainda não abriu nenhum treino no app.'}</div>`
     // ids já presentes como extra (para saber se o botão × remove de verdade ou abre o seletor)
     const extraIds = new Set((s.extras||[]).filter(e=>e.active).map(e=>e.exercise_id))
     const blockedIds = new Set((s.blocks||[]).filter(b=>b.active).map(b=>b.exercise_id))
