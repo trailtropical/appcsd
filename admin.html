@@ -163,6 +163,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .ex-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
 .ex-row .n{color:var(--muted)}
 .ex-row .v{font-weight:500}
+
+/* FREQUENCIA - grade semanal (Seg=Treino A, Qua=B, Sex=C) */
+.freq-wrap{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.freq-hdr{display:grid;grid-template-columns:76px 1fr 1fr 1fr;gap:6px}
+.freq-hdr span{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;text-align:center;align-self:center}
+.freq-hdr span:first-child{font-size:11px}
+.freq-row{display:grid;grid-template-columns:76px 1fr 1fr 1fr;gap:6px}
+.freq-wk{font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.freq-slot{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:8px;background:var(--surface);border:1px solid var(--border);text-align:center;min-width:0}
+.freq-slot .fd{font-size:9px;color:var(--muted);line-height:1.2}
+.freq-slot .fs{font-size:14px;font-weight:800;color:var(--muted);line-height:1}
+.freq-slot.fez{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.35)}
+.freq-slot.fez .fs{color:var(--green)}
+.freq-slot.parc{background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.35)}
+.freq-slot.parc .fs{color:var(--amber)}
+.freq-slot.nao{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3)}
+.freq-slot.nao .fs{color:var(--red)}
+.freq-slot.fut{opacity:.55}
+.freq-slot.today{border-color:rgba(232,80,10,.5)}
+.freq-legend{font-size:10px;color:var(--muted);margin-top:2px}
+.freq-sum{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}
 .plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
 .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;min-width:0}
 .plan-card:hover{border-color:rgba(232,80,10,.3)}
@@ -946,10 +967,6 @@ function extraIdsByPrescrito(exId, plan) {
 }
 
 function renderExercicios(s, body) {
-  const logs = s.logs||[]
-  const done = logs.filter(l=>l.checked)
-  const total = done.length
-  const last7 = done.filter(l=>daysSince(l.done_at)<=7).length
   // Plano vigente: reconstruímos EXATAMENTE o que o app gera para o mês atual
   // (renderPlanView + showSessionFromPlan): signal_tiers + prev_signals + respostas
   // do check-up → exercícios por treino, já com os gerais até 5–6. O campo exercicios
@@ -991,26 +1008,64 @@ function renderExercicios(s, body) {
   } else {
     planHtml = '<div class="empty" style="padding:20px">Nenhum plano de exercícios registrado</div>'
   }
-  // Group by date (exercícios feitos)
-  const groups = {}
-  done.forEach(l => { const k=l.done_at?.slice(0,10); if(k) { if(!groups[k]) groups[k]=[]; groups[k].push(l) } })
-  let listHtml = ''
-  Object.entries(groups).sort(([a],[b])=>b.localeCompare(a)).slice(0,20).forEach(([date, items]) => {
-    listHtml += `<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px">${fmt(date)} (${items.length})</div>`
-    items.forEach(l => {
-      listHtml += `<div class="ex-row"><span class="n">${exName(l.exercise_id)}</span><span class="v">${l.session_id||''} ${new Date(l.done_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`
-    })
-    listHtml += '</div>'
-  })
-  body.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
-    <div class="stat"><div class="stat-val">${total}</div><div class="stat-label">Total</div></div>
-    <div class="stat"><div class="stat-val">${last7}</div><div class="stat-label">Últ. 7d</div></div>
-    <div class="stat"><div class="stat-val">${s.streak}</div><div class="stat-label">Streak</div></div>
-  </div>
-  <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px">📋 Plano vigente — treinos A/B/C</div>
+  // ── Frequência mensal (grade semanal: Seg=Treino A · Qua=B · Sex=C) ──
+  const freqHtml = makeFreqGrid(s)
+  body.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px">📋 Plano vigente — treinos A/B/C</div>
   ${planHtml}
-  <div style="font-size:11px;font-weight:700;color:var(--text);margin:14px 0 6px">✅ Exercícios feitos</div>
-  ${listHtml || '<div class="empty">Nenhum exercício registrado</div>'}`
+  <div style="font-size:11px;font-weight:700;color:var(--text);margin:14px 0 6px">📅 Frequência de treinos</div>
+  ${freqHtml}`
+}
+
+// Grade semanal do mês atual: seg=Treino A, qua=Treino B, sex=Treino C.
+// ✔ = fez (3+ exercícios marcados naquele dia/treino) · ◐ = parcial (1–2) ·
+// ✖ = faltou (dia já passou sem registro) · — = futuro.
+function makeFreqGrid(s) {
+  const today = new Date(); today.setHours(0,0,0,0)
+  const y = today.getFullYear(), mo = today.getMonth()
+  const dim = new Date(y, mo + 1, 0).getDate()
+  const dir = (d, key) => `${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}|${key}`
+  const byDay = new Map()
+  ;(s.logs||[]).forEach(l => {
+    if (!l.checked || !l.done_at) return
+    if (!/^\d{4}-\d{2}-\d{2}/.test(l.done_at)) return
+    const key = ['a','b','c'].includes(l.session_id) ? l.session_id : 'a'
+    const k = dir(l.done_at.slice(0,10), key)
+    if (!byDay.has(k)) byDay.set(k, new Set())
+    byDay.get(k).add(l.exercise_id)
+  })
+  const slot = (day, key) => {
+    if (day < 1 || day > dim) return null
+    const d = new Date(y, mo, day); d.setHours(0,0,0,0)
+    const cnt = (byDay.get(dir(day, key)) || new Set()).size
+    if (cnt >= 3) return { cls:'fez', ic:'✔' }
+    if (cnt >= 1) return { cls:'parc', ic:'◐' }
+    if (d < today) return { cls:'nao', ic:'✖' }
+    return { cls:'fut', ic:'—' }
+  }
+  const names = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const firstMIdx = (new Date(y, mo, 1).getDay() + 6) % 7 // 0 = segunda
+  const weeks = Math.ceil((firstMIdx + dim) / 7)
+  const cols = [{ lab:'Treino A', off:0, key:'a' }, { lab:'Treino B', off:2, key:'b' }, { lab:'Treino C', off:4, key:'c' }]
+  let rows = '', fez = 0, passou = 0
+  for (let w = 0; w < weeks; w++) {
+    const monday = 1 + w * 7 - firstMIdx
+    rows += `<div class="freq-row"><div class="freq-wk">Sem ${w+1}</div>${cols.map(c => {
+      const day = monday + c.off
+      const st = slot(day, c.key)
+      if (!st) return '<div class="freq-slot fut"><span class="fd">'+c.lab+'</span><span class="fs">—</span></div>'
+      const isToday = day === today.getDate()
+      if (st.cls === 'fez') fez++
+      if (st.cls !== 'fut') passou++
+      return `<div class="freq-slot ${st.cls}${isToday?' today':''}"><span class="fd">${c.lab} · ${day}/${mo+1}${isToday?' (hoje)':''}</span><span class="fs">${st.ic}</span></div>`
+    }).join('')}</div>`
+  }
+  const summ = passou ? ` ${fez} de ${passou} treinos feitos` : ' (mês começou há pouco)'
+  return `<div class="freq-wrap">
+    <div class="freq-sum">📆 ${names[mo]} ${y}${summ}</div>
+    <div class="freq-hdr"><span>${names[mo]}</span><span>Seg<br>Treino A</span><span>Qua<br>Treino B</span><span>Sex<br>Treino C</span></div>
+    ${rows}
+    <div class="freq-legend">✔ fez &nbsp;·&nbsp; ◐ parcial &nbsp;·&nbsp; ✖ faltou &nbsp;·&nbsp; — futuro</div>
+  </div>`
 }
 
 // ── EXTRAS ──
