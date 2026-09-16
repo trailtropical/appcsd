@@ -1,0 +1,8 @@
+{
+  "appId": "br.com.trailtropical.corredorsemdor",
+  "appName": "Corredor Sem Dor",
+  "webDir": "www",
+  "ios": {
+    "backgroundColor": "#0F0F0E"
+  }
+}

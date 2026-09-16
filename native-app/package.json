@@ -1,0 +1,17 @@
+{
+  "name": "corredor-sem-dor-native",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:www": "./build-www.sh",
+    "sync": "npm run build:www && cap sync ios",
+    "open": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}
