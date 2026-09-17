@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='26';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='27';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -45,6 +45,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .btn-primary:active{transform:scale(.98);opacity:.9}
 .btn-primary:disabled{opacity:.35;cursor:not-allowed}
 .login-footer{font-size:11px;color:var(--hint);text-align:center;margin-top:20px;line-height:1.6}
+.login-msg{font-size:12px;line-height:1.5;padding:10px 12px;border-radius:10px;margin-bottom:16px;display:none}
+.login-msg.ok{display:block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ADE80}
+.login-msg.err{display:block;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444}
+.login-disclaimer{font-size:10.5px;color:var(--hint);text-align:center;margin-top:16px;line-height:1.5}
 .btn-download{width:100%;padding:14px;background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,transform .1s;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-download:active{transform:scale(.98);background:var(--surface2)}
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
@@ -566,12 +570,13 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
       <div class="logo-mark">CSD</div>
     </div>
     <div class="login-title">Corredor Sem Dor</div>
-    <div class="login-sub">Use o email e senha que você criou após a compra.</div>
+    <div class="login-sub">Entre com o email e senha da sua conta.</div>
     <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
     <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="sua-senha"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar</button>
-    <div class="login-footer"><a href="https://trailtropical.github.io/appcsd/reset.html" style="color:var(--orange);text-decoration:none">Esqueci minha senha</a></div>
+    <div class="login-footer"><a href="#" onclick="openReset();return false" style="color:var(--orange);text-decoration:none">Esqueci minha senha</a></div>
     <button class="btn-download" onclick="showInstallModal(true)"><span>📱</span> Baixar App</button>
+    <div class="login-disclaimer">Este aplicativo tem caráter informativo e não substitui a avaliação de um profissional de saúde.</div>
   </div>
 </div>
 
@@ -665,19 +670,41 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
   </div>
 </div>
 
-<!-- CADASTRO PÓS-COMPRA -->
+<!-- CRIAR CONTA -->
 <div id="s-signup" class="screen">
   <div class="login-card">
     <div class="login-logo">
       <div class="logo-mark">CSD</div>
     </div>
     <div class="login-title">Crie sua senha</div>
-    <div class="login-sub">Sua compra foi confirmada! Agora defina uma senha para acessar o programa.</div>
+    <div class="login-sub">Agora defina uma senha para acessar o programa.</div>
     <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="seu@email.com" readonly style="opacity:0.7"></div>
     <div class="field"><label>Senha</label><input type="password" id="signup-senha" placeholder="Mínimo 6 caracteres"></div>
     <div class="field"><label>Confirmar senha</label><input type="password" id="signup-senha2" placeholder="Repita a senha"></div>
     <button class="btn-primary" onclick="doSignupConfirm()">Criar conta e começar</button>
     <div class="login-footer">Já tem conta? <a href="#" onclick="showScreen('s-login');return false" style="color:var(--orange);text-decoration:none">Entrar</a></div>
+  </div>
+</div>
+
+<!-- REDEFINIR SENHA -->
+<div id="s-reset" class="screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark">CSD</div>
+    </div>
+    <div class="login-title" id="reset-title">Redefinir senha</div>
+    <div class="login-sub" id="reset-sub">Informe seu email e enviaremos um link para criar uma nova senha.</div>
+    <div class="login-msg" id="reset-msg"></div>
+    <div id="reset-phase-email">
+      <div class="field"><label>Email</label><input type="email" id="reset-email" placeholder="seu@email.com"></div>
+      <button class="btn-primary" id="reset-send-btn" onclick="sendResetEmail()">Enviar link de redefinição</button>
+    </div>
+    <div id="reset-phase-newpass" style="display:none">
+      <div class="field"><label>Nova senha</label><input type="password" id="reset-new-pass" placeholder="Mínimo 6 caracteres"></div>
+      <div class="field"><label>Confirmar senha</label><input type="password" id="reset-new-pass2" placeholder="Repita a senha"></div>
+      <button class="btn-primary" id="reset-save-btn" onclick="saveNewPassword()">Redefinir senha</button>
+    </div>
+    <div class="login-footer"><a href="#" onclick="showScreen('s-login');return false" style="color:var(--orange);text-decoration:none">← Voltar para o login</a></div>
   </div>
 </div>
 
@@ -2064,6 +2091,127 @@ async function doLogout() {
   showScreen('s-login')
 }
 
+// ══ REDEFINIR SENHA ══
+function setResetMsg(type, text) {
+  const el = document.getElementById('reset-msg')
+  if (!el) return
+  el.className = 'login-msg' + (type ? ' ' + type : '')
+  el.textContent = text || ''
+  el.style.display = text ? 'block' : 'none'
+}
+
+function openReset() {
+  document.getElementById('reset-phase-email').style.display = ''
+  document.getElementById('reset-phase-newpass').style.display = 'none'
+  document.getElementById('reset-title').textContent = 'Redefinir senha'
+  document.getElementById('reset-sub').textContent = 'Informe seu email e enviaremos um link para criar uma nova senha.'
+  setResetMsg('', '')
+  showScreen('s-reset')
+}
+
+async function sendResetEmail() {
+  const email = document.getElementById('reset-email').value.trim()
+  const btn = document.getElementById('reset-send-btn')
+  if (!email) { setResetMsg('err', 'Informe seu email.'); return }
+  if (!window._sbClient) { setResetMsg('err', 'Sistema indisponível. Recarregue a página.'); return }
+
+  btn.textContent = 'Enviando...'
+  btn.disabled = true
+  setResetMsg('', '')
+
+  const redirectTo = window.location.origin + window.location.pathname
+  const { error } = await window._sbClient.auth.resetPasswordForEmail(email, { redirectTo })
+
+  btn.textContent = 'Enviar link de redefinição'
+  btn.disabled = false
+
+  if (error) { setResetMsg('err', 'Não foi possível enviar. Verifique o email e tente novamente.'); return }
+  setResetMsg('ok', 'Link enviado! Verifique seu email (e o spam). Toque no link para criar a nova senha.')
+}
+
+function showSetNewPassword() {
+  document.getElementById('reset-phase-email').style.display = 'none'
+  document.getElementById('reset-phase-newpass').style.display = ''
+  document.getElementById('reset-title').textContent = 'Criar nova senha'
+  document.getElementById('reset-sub').textContent = 'Defina sua nova senha para voltar a acessar o programa.'
+  setResetMsg('', '')
+  showScreen('s-reset')
+}
+
+async function saveNewPassword() {
+  const pass = document.getElementById('reset-new-pass').value
+  const pass2 = document.getElementById('reset-new-pass2').value
+  const btn = document.getElementById('reset-save-btn')
+  if (!pass || !pass2) { setResetMsg('err', 'Preencha ambos os campos.'); return }
+  if (pass.length < 6) { setResetMsg('err', 'A senha deve ter no mínimo 6 caracteres.'); return }
+  if (pass !== pass2) { setResetMsg('err', 'As senhas não coincidem.'); return }
+
+  btn.textContent = 'Redefinindo...'
+  btn.disabled = true
+  setResetMsg('', '')
+
+  const { error } = await window._sbClient.auth.updateUser({ password: pass })
+
+  btn.textContent = 'Redefinir senha'
+  btn.disabled = false
+
+  if (error) { setResetMsg('err', 'Não foi possível redefinir. Abra o link do email novamente.'); return }
+  setResetMsg('ok', 'Senha redefinida! Redirecionando...')
+  try { window.history.replaceState({}, '', window.location.pathname) } catch(e) {}
+  setTimeout(() => { showScreen('s-login') }, 1200)
+}
+
+function handleRecoveryRedirect() {
+  const hash = window.location.hash || ''
+  if (hash.includes('type=recovery') || hash.includes('access_token')) {
+    showSetNewPassword()
+    return true
+  }
+  return false
+}
+
+// ══ EXCLUIR CONTA ══
+function confirmDeleteAccount() {
+  const ov = document.createElement('div')
+  ov.className = 'ex-done-overlay'
+  ov.innerHTML = `
+    <div style="text-align:center;max-width:320px;padding:0 20px">
+      <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Excluir sua conta?</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px">Esta ação é permanente. Sua conta e todos os seus dados de avaliação e treinos serão apagados e não poderão ser recuperados.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn-primary" id="delete-account-btn" onclick="deleteAccount()">Excluir minha conta</button>
+        <button class="btn-outline" onclick="this.closest('.ex-done-overlay').remove()">Cancelar</button>
+      </div>
+    </div>`
+  document.body.appendChild(ov)
+}
+
+async function deleteAccount() {
+  const btn = document.getElementById('delete-account-btn')
+  if (btn) { btn.textContent = 'Excluindo...'; btn.disabled = true }
+
+  if (!window._sbClient || !currentUser) {
+    if (btn) { btn.textContent = 'Excluir minha conta'; btn.disabled = false }
+    alert('Não foi possível excluir. Faça login novamente.')
+    return
+  }
+
+  const { error } = await window._sbClient.rpc('delete_my_account')
+
+  if (error) {
+    if (btn) { btn.textContent = 'Excluir minha conta'; btn.disabled = false }
+    alert('Não foi possível excluir a conta agora. Tente novamente.')
+    return
+  }
+
+  await window._sbClient.auth.signOut()
+  document.querySelector('.ex-done-overlay')?.remove()
+  currentUser = null
+  localStorage.clear()
+  showScreen('s-login')
+}
+
 async function doSignup() {
   const e = document.getElementById('login-email').value.trim()
   const s = document.getElementById('login-senha').value
@@ -3424,11 +3572,10 @@ function showReavResult() {
   showReport()
 }
 
-// ══ CADASTRO PÓS-COMPRA (Hotmart) ══
-function checkHotmartRedirect() {
+// ══ CRIAR CONTA ══
+function checkSignupRedirect() {
   const params = new URLSearchParams(window.location.search)
   const email = params.get('email')
-  console.log('[CSD] checkHotmartRedirect, email:', email)
   if (email) {
     document.getElementById('signup-email').value = email
     showScreen('s-signup')
@@ -3497,13 +3644,20 @@ async function doSignupConfirm() {
   showScreen('s-welcome')
 }
 
-// Auto-login: se tem sessão válida, vai pro dashboard (skip se veio da Hotmart)
+// Auto-login: se tem sessão válida, vai pro dashboard (skip se veio de link de cadastro)
 const _hasEmail = window.location.search.includes('email=')
 
-// Detectar redirect da Hotmart ao carregar
-checkHotmartRedirect()
+// Detectar link de redefinição de senha (recovery) ou de cadastro
+const _isRecovery = handleRecoveryRedirect()
+checkSignupRedirect()
 
-if (!_hasEmail) {
+if (window._sbClient) {
+  window._sbClient.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') showSetNewPassword()
+  })
+}
+
+if (!_hasEmail && !_isRecovery) {
   (async () => {
     if (window._sbClient) {
       const { data: { session } } = await window._sbClient.auth.getSession()
@@ -3577,17 +3731,29 @@ if (!_hasEmail) {
         <div class="settings-item-label">Instalar aplicativo</div>
       </div>
     </div>
+    <div class="settings-item" style="cursor:pointer" onclick="window.open('https://trailtropical.github.io/appcsd/privacy-policy.html','_blank')">
+      <div class="settings-item-left">
+        <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">🔒</div>
+        <div class="settings-item-label">Política de Privacidade</div>
+      </div>
+    </div>
     <div class="settings-item">
       <div class="settings-item-left">
         <div class="settings-item-label" style="color:var(--muted)">Última avaliação</div>
       </div>
       <div style="font-size:13px;color:var(--muted)" id="settings-last-eval">—</div>
     </div>
+    <div class="settings-item" style="cursor:pointer" onclick="closeSettings();confirmDeleteAccount()">
+      <div class="settings-item-left">
+        <div class="settings-item-label" style="color:var(--torn)">Excluir minha conta</div>
+      </div>
+    </div>
     <div class="settings-item" style="border-bottom:none;cursor:pointer" onclick="doLogout()">
       <div class="settings-item-left">
         <div class="settings-item-label" style="color:var(--torn)">Sair da conta</div>
       </div>
     </div>
+    <div style="font-size:10.5px;color:var(--hint);text-align:center;line-height:1.5;padding:14px 4px 4px">Este aplicativo tem caráter informativo e não substitui a avaliação de um profissional de saúde.</div>
   </div>
 </div>
 </body>

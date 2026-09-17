@@ -1,4 +1,4 @@
-const CACHE_NAME = 'csd-v14'
+const CACHE_NAME = 'csd-v15'
 const ASSETS = [
   './manifest.json',
   './icon-192.png',
