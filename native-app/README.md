@@ -6,18 +6,32 @@ projeto só cria uma **cópia pronta** para virar app iOS.
 
 ## Pré-requisitos (nesta máquina ainda faltam)
 
-1. **Node.js + npm** (o Capacitor usa): `brew install node`
+1. **Node.js + npm** — instalado via nvm (`v24`), carregado no `.zshrc`.
 2. **Xcode** (na App Store) e licença aceita: `sudo xcodebuild -license accept`
 3. Conta de desenvolvedor Apple ($99/ano) para assinar/subir o app.
 
-## Passo a passo (uma vez só)
+> **CocoaPods NÃO é necessário.** Este projeto usa o template **Swift Package
+> Manager (SPM)** do Capacitor. Existe um stub `~/bin/pod` apenas para
+> contornar uma checagem errada da CLI do Capacitor (`--packagemanager SPM` é
+> convertido para minúsculo e nunca bate com o valor esperado); com SPM nenhum
+> `pod` é executado de verdade. Quando a checagem for corrigida, dá pra apagar
+> o stub.
+
+## Passo a passo
+
+Já feito (projeto `ios/` gerado e web assets sincronizados):
 
 ```bash
 cd native-app
-npm install                     # instala o Capacitor
-./build-www.sh                  # monta a cópia www/ a partir do PWA
-npx cap add ios                 # cria o projeto Xcode (pasta ios/)
-npx cap sync ios                # sincroniza a cópia para dentro do projeto
+npm install                     # instala o Capacitor ✓ (feito)
+./build-www.sh                  # monta a cópia www/ a partir do PWA ✓ (feito)
+npx cap add ios --packagemanager SPM   # cria o projeto Xcode ✓ (feito)
+npx cap sync ios                # sincroniza ✓ (feito)
+```
+
+Falta só (quando o Xcode estiver instalado):
+
+```bash
 npx cap open ios                # abre o Xcode
 ```
 
@@ -28,11 +42,8 @@ Organizer → App Store Connect.
 
 ```bash
 cd native-app
-npx cap sync ios                # já roda build-www.sh? NÃO: rode:
-npm run sync                    # build-www.sh + cap sync ios
+npm run build:www && npx cap sync ios    # regenera a cópia e sincroniza
 ```
-
-(ou `npm run build:www && npx cap sync ios`)
 
 ## O que a cópia faz de diferente do PWA original (automaticamente)
 

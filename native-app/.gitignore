@@ -2,4 +2,5 @@ www/
 ios/App/Pods/
 ios/App/App/public/
 ios/build/
+node_modules/
 \.DS_Store
