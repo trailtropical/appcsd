@@ -7,13 +7,14 @@ Rascunho com as respostas pra agilizar a submissão. Confirmar cada item antes d
 | Campo | Valor sugerido |
 |---|---|
 | **Nome** (até 30 letras) | Corredor Sem Dor |
-| **Subtitle** (até 30) | Treino e reabilitação para correr |
+| **Subtitle** (até 30) | Você correndo leve de novo! (24 letras) |
 | **Bundle ID** | `br.com.trailtropical.corredorsemdor` |
 | **Versão** | 1.0 (build 1) |
 | **Categoria primária** | Health & Fitness |
 | **Categoria secundária** | Sports (opcional) |
 | **Classificação etária** | 4+ (não há conteúdo explícito; orienta exercícios) |
 | **Privacidade (URL)** | https://trailtropical.github.io/appcsd/privacy-policy.html |
+| **Operador (LGPD)** | Trail Tropical — CNPJ 68.420.244/0001-67 |
 
 ## Privacy questionnaire (respostas)
 
@@ -39,7 +40,7 @@ Rascunho com as respostas pra agilizar a submissão. Confirmar cada item antes d
 
 ## Antes de enviar para review
 
-- [ ] Criar **conta de teste** para o revisor (ex.: um aluno de verdade ou conta dedicada) e informar email+senha no campo "Sign-In Information" do App Review.
+- [ ] **Conta de teste** para o revisor: usar a própria `nmendes1994@gmail.com` / `123456` (tem check-up e plano completos) — informar email+senha em "Sign-In Information" do App Review.
 - [ ] Rodar o app num **aparelho físico** (testar login, vídeo, cores reais).
 - [ ] Build assinado via **Archive** no Xcode → Organizer → Upload (depois da conta Apple).
 - [ ] Validar com **xcrun altool --validate-app** antes do upload (ou direto no Organizer).
