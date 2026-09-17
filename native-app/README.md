@@ -58,10 +58,9 @@ Nada disso toca o `index.html` original.
 1. **Bundle ID**: confirmado como `br.com.trailtropical.corredorsemdor`
    (já consta em `project.pbxproj` e `capacitor.config.json`). Pode trocar agora,
    antes de criar o app no App Store Connect.
-2. **Login por link de e-mail (Supabase)**: hoje os magic links apontam para o
-   GitHub Pages. No app nativo, links assim abrem no Safari. Para o login
-   direto dentro do app vai precisar de um **URL scheme** (`CFBundleURLTypes`)
-   + redirect url no Supabase. Testar esse fluxo antes de subir.
+2. **Login**: o app usa **e-mail + senha** (`signInWithPassword`) direto no webview —
+   nenhum deep link/URL scheme é necessário. O link de cadastro (Hotmart) e o de
+   redefinição de senha apontam para o site (GitHub Pages) e funcionam fora do app.
 3. **Privacidade**: página criada em `privacy-policy.html` (publicada em
    `https://trailtropical.github.io/appcsd/privacy-policy.html`).
    **Antes de publicar, preencher**: razão social em "Quem somos (1)" e o
