@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='27';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='28';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -902,6 +902,11 @@ try {
   if (window.supabase && window.supabase.createClient) {
     window._sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
     console.log('[CSD] Supabase OK')
+
+    // Detecta link de redefinição de senha o quanto antes (evita race com a checagem localStorage)
+    window._sbClient.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') showSetNewPassword()
+    })
   } else {
     console.error('[CSD] Supabase SDK não carregou')
   }
@@ -2163,6 +2168,7 @@ async function saveNewPassword() {
 
 function handleRecoveryRedirect() {
   const hash = window.location.hash || ''
+  console.log('[CSD] recovery check hash:', hash.slice(0, 120) || '(vazio)')
   if (hash.includes('type=recovery') || hash.includes('access_token')) {
     showSetNewPassword()
     return true
@@ -3650,12 +3656,6 @@ const _hasEmail = window.location.search.includes('email=')
 // Detectar link de redefinição de senha (recovery) ou de cadastro
 const _isRecovery = handleRecoveryRedirect()
 checkSignupRedirect()
-
-if (window._sbClient) {
-  window._sbClient.auth.onAuthStateChange((event) => {
-    if (event === 'PASSWORD_RECOVERY') showSetNewPassword()
-  })
-}
 
 if (!_hasEmail && !_isRecovery) {
   (async () => {
