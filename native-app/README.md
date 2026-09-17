@@ -55,15 +55,20 @@ Nada disso toca o `index.html` original.
 
 ## Pendências para a submissão (importante ler)
 
-1. **Bundle ID**: o `appId` no `capacitor.config.json` é um placeholder
-   (`br.com.trailtropical.corredorsemdor`). Confirmar/trocar antes de subir.
+1. **Bundle ID**: confirmado como `br.com.trailtropical.corredorsemdor`
+   (já consta em `project.pbxproj` e `capacitor.config.json`). Pode trocar agora,
+   antes de criar o app no App Store Connect.
 2. **Login por link de e-mail (Supabase)**: hoje os magic links apontam para o
    GitHub Pages. No app nativo, links assim abrem no Safari. Para o login
-   direto dentro do app vai precisar de um **URL scheme** (`LSApplicationQueriesSchemes`/
-   `CFBundleURLTypes`) + redirect url no Supabase. Testar esse fluxo antes de subir.
-3. **Privacidade**: o app coleta dados de saúde (dores, avaliações) via Supabase.
-   A App Store pede: Privacy Policy publicada + declaração de coleta de dados.
+   direto dentro do app vai precisar de um **URL scheme** (`CFBundleURLTypes`)
+   + redirect url no Supabase. Testar esse fluxo antes de subir.
+3. **Privacidade**: página criada em `privacy-policy.html` (publicada em
+   `https://trailtropical.github.io/appcsd/privacy-policy.html`).
+   **Antes de publicar, preencher**: razão social em "Quem somos (1)" e o
+   e-mail real de contato na seção 9 (há `<!-- PLANEJAR: -->` marcando).
 4. **Pagamentos**: compra acontece só na Hotmart/site (fora do app). NÃO adicionar
    telas/preços de compra dentro do app, senão a Apple exige In-App Purchase.
-5. **Teste**: testar em Device (não só simulador) — login, vídeos do ConverteAI,
+5. **Orientação**: `Info.plist` bloqueado em retrato no iPhone (interface do app
+   é retrato). iPad continua livre — ajustar se quiser.
+6. **Teste**: testar em Device (não só simulador) — login, vídeos do ConverteAI,
    notificações não existem ainda (podem entrar depois via plugin Capacitor).
