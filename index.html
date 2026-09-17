@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='28';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='29';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -26,6 +26,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 #app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;touch-action:pan-y}
 .screen{display:none;flex-direction:column;min-height:100dvh}
 .screen.active{display:flex}
+/* iPhone centrado em telas largas (iPad / desktop): visual intencional em vez de esticado */
+@media (min-width:768px){
+  #app{box-shadow:0 0 0 1px var(--border2),0 24px 64px rgba(0,0,0,.08)}
+  body{background:linear-gradient(180deg,#EAEAE6,var(--bg))}
+}
 
 /* LOGIN */
 #s-login{justify-content:center;align-items:center;padding:32px 24px;position:relative;overflow:hidden}
@@ -571,8 +576,8 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     </div>
     <div class="login-title">Corredor Sem Dor</div>
     <div class="login-sub">Entre com o email e senha da sua conta.</div>
-    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
-    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="sua-senha"></div>
+    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="sua-senha" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar</button>
     <div class="login-footer"><a href="#" onclick="openReset();return false" style="color:var(--orange);text-decoration:none">Esqueci minha senha</a></div>
     <button class="btn-download" onclick="showInstallModal(true)"><span>📱</span> Baixar App</button>
@@ -679,8 +684,8 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div class="login-title">Crie sua senha</div>
     <div class="login-sub">Agora defina uma senha para acessar o programa.</div>
     <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="seu@email.com" readonly style="opacity:0.7"></div>
-    <div class="field"><label>Senha</label><input type="password" id="signup-senha" placeholder="Mínimo 6 caracteres"></div>
-    <div class="field"><label>Confirmar senha</label><input type="password" id="signup-senha2" placeholder="Repita a senha"></div>
+    <div class="field"><label>Senha</label><input type="password" id="signup-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+    <div class="field"><label>Confirmar senha</label><input type="password" id="signup-senha2" placeholder="Repita a senha" autocomplete="new-password"></div>
     <button class="btn-primary" onclick="doSignupConfirm()">Criar conta e começar</button>
     <div class="login-footer">Já tem conta? <a href="#" onclick="showScreen('s-login');return false" style="color:var(--orange);text-decoration:none">Entrar</a></div>
   </div>
@@ -696,12 +701,12 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div class="login-sub" id="reset-sub">Informe seu email e enviaremos um link para criar uma nova senha.</div>
     <div class="login-msg" id="reset-msg"></div>
     <div id="reset-phase-email">
-      <div class="field"><label>Email</label><input type="email" id="reset-email" placeholder="seu@email.com"></div>
+      <div class="field"><label>Email</label><input type="email" id="reset-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
       <button class="btn-primary" id="reset-send-btn" onclick="sendResetEmail()">Enviar link de redefinição</button>
     </div>
     <div id="reset-phase-newpass" style="display:none">
-      <div class="field"><label>Nova senha</label><input type="password" id="reset-new-pass" placeholder="Mínimo 6 caracteres"></div>
-      <div class="field"><label>Confirmar senha</label><input type="password" id="reset-new-pass2" placeholder="Repita a senha"></div>
+      <div class="field"><label>Nova senha</label><input type="password" id="reset-new-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+      <div class="field"><label>Confirmar senha</label><input type="password" id="reset-new-pass2" placeholder="Repita a senha" autocomplete="new-password"></div>
       <button class="btn-primary" id="reset-save-btn" onclick="saveNewPassword()">Redefinir senha</button>
     </div>
     <div class="login-footer"><a href="#" onclick="showScreen('s-login');return false" style="color:var(--orange);text-decoration:none">← Voltar para o login</a></div>
@@ -3634,10 +3639,15 @@ async function doSignupConfirm() {
   }
 
   if (!currentUser) {
-    console.warn('[CSD] signUp: currentUser ainda null — usando fallback localStorage')
-    // Fallback: armazena email para recuperar depois
-    localStorage.setItem('csd_pending_email', email)
-    localStorage.setItem('csd_pending_password', senha)
+    console.warn('[CSD] signUp: currentUser null — tentando login imediato')
+    const { data: d2, error: e2 } = await window._sbClient.auth.signInWithPassword({ email, password: senha })
+    if (e2) {
+      console.warn('[CSD] login pós-signup falhou:', e2.message)
+      alert('Conta criada! Confirme o email para ativar o acesso e depois faça login.')
+      showScreen('s-login')
+      return
+    }
+    currentUser = d2.user
   }
 
   // Login automático
@@ -3652,6 +3662,10 @@ async function doSignupConfirm() {
 
 // Auto-login: se tem sessão válida, vai pro dashboard (skip se veio de link de cadastro)
 const _hasEmail = window.location.search.includes('email=')
+
+// Limpa credenciais antigas gravadas em texto puro por versões anteriores
+localStorage.removeItem('csd_pending_password')
+localStorage.removeItem('csd_pending_email')
 
 // Detectar link de redefinição de senha (recovery) ou de cadastro
 const _isRecovery = handleRecoveryRedirect()
@@ -3671,26 +3685,7 @@ if (!_hasEmail && !_isRecovery) {
           goToDashboard()
         } else {
           showScreen('s-welcome')
-      }
-      // Fallback: se tem pending_email, tenta login
-      if (!currentUser) {
-        const pendEmail = localStorage.getItem('csd_pending_email')
-        const pendPass = localStorage.getItem('csd_pending_password')
-        if (pendEmail && pendPass) {
-          console.log('[CSD] Fallback login com pending_email:', pendEmail)
-          const { data: d2 } = await window._sbClient.auth.signInWithPassword({ email: pendEmail, password: pendPass })
-          if (d2?.user) {
-            currentUser = d2.user
-            localStorage.setItem('csd_logged', '1')
-            localStorage.setItem('csd_user_id', d2.user.id)
-            localStorage.removeItem('csd_pending_email')
-            localStorage.removeItem('csd_pending_password')
-            await loadUserData()
-            if (localStorage.getItem('csd_checkup')) { goToDashboard() }
-            else { showScreen('s-welcome') }
-          }
         }
-      }
       }
     }
   })()

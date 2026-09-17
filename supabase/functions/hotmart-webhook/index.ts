@@ -15,8 +15,9 @@ serve(async (req) => {
 
   try {
     const hottok = req.headers.get("x-hotmart-hottok")
-    if (HOTMART_TOKEN && HOTMART_TOKEN !== "placeholder" && hottok !== HOTMART_TOKEN) {
-      console.log("[hotmart] Invalid token:", hottok)
+    // Fail-closed: sem token configurado (ou "placeholder"), rejeita tudo.
+    if (!HOTMART_TOKEN || HOTMART_TOKEN === "placeholder" || hottok !== HOTMART_TOKEN) {
+      console.log("[hotmart] Invalid or missing token")
       return new Response("Unauthorized", { status: 401 })
     }
 

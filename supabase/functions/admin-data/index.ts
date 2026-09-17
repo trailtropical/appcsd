@@ -21,17 +21,43 @@ serve(async (req) => {
   }
 
   try {
-    const { email } = await req.json()
-
-    if (email !== ADMIN_EMAIL) {
-      return new Response("Unauthorized", { status: 401, headers: corsHeaders })
+    // ── Autorização: valida o JWT real do chamador ──
+    // Antes bastava mandar {"email": "<admin>"} no body, sem login, para receber PII de todos.
+    const authorization = req.headers.get("Authorization") || req.headers.get("authorization") || ""
+    const token = authorization.replace(/^Bearer\s+/i, "").trim()
+    if (!token) {
+      return new Response(JSON.stringify({ error: "missing token" }), { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } })
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    const userClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+    })
+    const { data: { user }, error: authError } = await userClient.auth.getUser()
+    if (authError || !user || !user.email) {
+      console.error("[admin] JWT inválido:", authError?.message)
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } })
+    }
 
-    const { data: profiles } = await supabase.from("profiles").select("*")
-    const { data: checkups } = await supabase.from("checkups").select("*").order("first_checkup_at", { ascending: false })
-    const { data: sessions } = await supabase.from("sessions").select("*")
+    // Precisa ser o email admin (verificado pelo JWT emitido pelo Supabase Auth).
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    if (user.email !== ADMIN_EMAIL) {
+      console.error("[admin] Sem permissão:", user.email)
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } })
+    }
+
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle()
+    if (profile && profile.role !== "admin") {
+      console.warn("[admin] role do admin não é 'admin':", profile.role)
+    }
+
+    const { data: profiles } = await admin.from("profiles").select("*")
+    const { data: checkups } = await admin.from("checkups").select("*").order("first_checkup_at", { ascending: false })
+    const { data: sessions } = await admin.from("sessions").select("*")
 
     return new Response(JSON.stringify({
       profiles: profiles || [],

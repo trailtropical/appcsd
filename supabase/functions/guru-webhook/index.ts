@@ -18,8 +18,9 @@ serve(async (req) => {
     console.log("[guru] Payload:", JSON.stringify(body).substring(0, 500))
 
     const guruToken = body.api_token
-    if (GURU_API_TOKEN && GURU_API_TOKEN !== "placeholder" && guruToken !== GURU_API_TOKEN) {
-      console.log("[guru] Invalid token:", guruToken)
+    // Fail-closed: sem token configurado (ou "placeholder"), rejeita tudo.
+    if (!GURU_API_TOKEN || GURU_API_TOKEN === "placeholder" || guruToken !== GURU_API_TOKEN) {
+      console.log("[guru] Invalid or missing token")
       return new Response("Unauthorized", { status: 401 })
     }
 
