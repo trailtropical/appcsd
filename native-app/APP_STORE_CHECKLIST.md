@@ -8,7 +8,7 @@ Rascunho com as respostas pra agilizar a submissão. Confirmar cada item antes d
 |---|---|
 | **Nome** (até 30 letras) | Corredor Sem Dor |
 | **Subtitle** (até 30) | Você correndo leve de novo! (24 letras) |
-| **Bundle ID** | `br.com.trailtropical.corredorsemdor` |
+| **Bundle ID** | `br.com.corredorsemdor` |
 | **Versão** | 1.0 (build 1) |
 | **Categoria primária** | Health & Fitness |
 | **Categoria secundária** | Sports (opcional) |

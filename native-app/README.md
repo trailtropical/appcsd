@@ -58,7 +58,7 @@ Nada disso toca o `index.html` original.
 > Veja também `APP_STORE_CHECKLIST.md` — rascunho com tudo que o App Store Connect
 > pergunta (categoria, faixa etária, respostas de privacidade, screenshots, descrição).
 
-1. **Bundle ID**: confirmado como `br.com.trailtropical.corredorsemdor`
+1. **Bundle ID**: confirmado como `br.com.corredorsemdor`
    (já consta em `project.pbxproj` e `capacitor.config.json`). Pode trocar agora,
    antes de criar o app no App Store Connect.
 2. **Login**: o app usa **e-mail + senha** (`signInWithPassword`) direto no webview —
