@@ -1146,7 +1146,7 @@ const EX = {
 const SIGNAL_MAP = {
   tornozelo:{label:'Restrição de tornozelo',color:'var(--torn)',
     months:[
-      {a:['e_cocoras','e_meio_ajoel','e_joelho_parede'],b:['e_pe_fechado','e_agach_ponta'],c:['e_cocoras','e_meio_ajoel','e_agach_ponta']},
+      {a:['e_cocoras','e_joelho_parede'],b:['e_pe_fechado','e_agach_ponta'],c:['e_cocoras','e_meio_ajoel','e_agach_ponta']},
       {a:['e_relogio_pe'],b:['e_cocoras','e_agach_ponta'],c:['e_relogio_pe','e_meio_ajoel']},
       {a:['e_salto_lat_cong'],b:['e_relogio_pe','e_salto_lat_cong'],c:['e_salto_lat_cong','e_agach_ponta']}
     ]},
@@ -1186,6 +1186,15 @@ const SIGNAL_MAP = {
       {a:['e_deadbug','e_bird_dog'],b:['e_urso_estatico','e_deadbug'],c:['e_deadbug','e_escalador']},
       {a:['e_pressao_anti_rot','e_prancha_lat_abd'],b:['e_toque_ombro_urso','e_prancha_lat'],c:['e_pressao_anti_rot','e_toque_ombro_urso']}
     ]}
+}
+
+// Irmãos "gêmeos": exercícios quase substituíveis dentro do mesmo padrão de
+// movimento (ex.: dor no tornozelo → dorsiflexão isolada). Regra: nunca os dois
+// no mesmo treino — se um já entrou na sessão, o outro é descartado.
+// Aplica a qualquer aluno novo, em qualquer combinação de sinais críticos.
+const GEMEOS = {
+  'e_meio_ajoel':'e_joelho_parede',
+  'e_joelho_parede':'e_meio_ajoel'
 }
 
 const SIGNAL_ORDER = ['tornozelo','quadril_mob','gluteo','propriocepcao','panturrilha','quadril_forca','flexores']
@@ -2842,6 +2851,7 @@ function renderPlanView() {
         if (!id || seen.has(id)) return
         const ex = EX[id]
         if (!ex || seenNames.has(ex.name)) return
+        const gemeo = GEMEOS[id]; if (gemeo && seen.has(gemeo)) return
         if ((monthAppear[id] || 0) >= 2) return
         const fk = id.replace(/_assist$/,'')
         // variante bloqueada globalmente no mês (ex.: assist quando o pleno foi escolhido)
