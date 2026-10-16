@@ -23,9 +23,9 @@ sed -i '' '/csd_cache_version/d' "$WEB/index.html"
 # 2) Remove o link do manifest PWA (desnecessário no nativo).
 sed -i '' '/rel="manifest"/d' "$WEB/index.html"
 
-# 3) Esconde a UI de "instalar app" (modal + botão Baixar App),
-#    que não faz sentido dentro de um app instalado pela App Store.
-sed -i '' 's|</head>|<style>#install-overlay,.btn-download{display:none!important}</style></head>|' "$WEB/index.html"
+# 3) Esconde a UI de "instalar app" (modal + botão Baixar App + item das
+#    Configurações), que não faz sentido dentro de um app instalado pela App Store.
+sed -i '' 's|</head>|<style>#install-overlay,.btn-download,.install-settings-row{display:none!important}</style></head>|' "$WEB/index.html"
 
 echo "OK: www/ montado ($(du -sh "$WEB" | cut -f1))"
 echo "Próximo passo: npx cap add ios  &&  npx cap sync ios"

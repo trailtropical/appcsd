@@ -1,2 +1,6 @@
 # Supabase CLI temp files
 supabase/.temp/
+
+# macOS / IDE
+.DS_Store
+native-app/.idea/

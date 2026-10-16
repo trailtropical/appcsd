@@ -327,7 +327,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .chat-opt{padding:14px 24px;background:var(--surface);border:1px solid var(--border2);border-radius:24px;font-size:18px;color:var(--text);cursor:pointer;font-family:inherit;transition:all .15s;user-select:none}
 .chat-opt:hover{background:var(--surface2);border-color:var(--orange)}
 .chat-opt.selected{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
-.chat-opt.sel{background:var(--orange);border-color:var(--orange);color:#fff}
 .custom-pain-wrap{margin-top:10px;width:100%}
 .custom-pain-input{width:100%;padding:14px;background:var(--surface);border:1px solid var(--border2);border-radius:16px;font-size:16px;color:var(--text);font-family:inherit;outline:none;transition:border-color .15s}
 .custom-pain-input:focus{border-color:var(--orange)}
@@ -388,17 +387,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .plan-locked-title{font-size:15px;font-weight:700;margin-bottom:4px}
 .plan-locked-sub{font-size:12px;color:var(--muted);line-height:1.5}
 
-/* REAVALIAÇÃO */
-.reav-hero{padding:40px 24px 24px;background:linear-gradient(180deg,rgba(56,189,248,.1) 0%,transparent 100%);border-bottom:1px solid var(--border)}
-.reav-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1.15;margin-bottom:8px}
-.reav-sub{font-size:13px;color:var(--muted);line-height:1.6}
-.reav-content{padding:20px 24px 40px;display:flex;flex-direction:column;gap:16px}
-.reav-compare{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.reav-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
-.reav-box-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-.reav-box-score{font-family:'Syne',sans-serif;font-size:28px;font-weight:800}
-.reav-box-score.antes{color:var(--muted)}
-.reav-box-score.depois{color:var(--orange)}
+/* EVOLUÇÃO (comparativo de reavaliação) */
 .reav-diff{text-align:center;font-size:13px;padding:8px;border-radius:var(--radius)}
 .reav-diff.up{background:rgba(74,222,128,.1);color:var(--glut)}
 .reav-diff.same{background:rgba(255,255,255,.05);color:var(--muted)}
@@ -856,23 +845,6 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
   <div class="bonus-detail" id="bonus-detail-content"></div>
 </div>
 
-<!-- REAVALIAÇÃO -->
-<div id="s-reavaliacao" class="screen">
-  <div class="top-bar">
-    <button class="back-btn" onclick="goToDashboard()">←</button>
-    <div class="top-label">Reavaliação</div>
-    <div class="top-badge">evolução</div>
-  </div>
-  <div class="reav-hero">
-    <div class="reav-title">Seu corpo mudou<br>desde a última <span style="color:var(--orange)">avaliação</span></div>
-    <div class="reav-sub">Para continuar evoluindo, precisamos verificar quais compensações já foram corrigidas.</div>
-  </div>
-  <div class="reav-content" id="reav-content">
-    <div class="reav-compare" id="reav-compare"></div>
-    <button class="btn-primary" onclick="startReavaliacao()">Refazer Check-up Corporal</button>
-  </div>
-</div>
-
 <!-- SESSÃO DETALHE -->
 <div id="s-session-detail" class="screen">
   <div class="top-bar">
@@ -1257,9 +1229,9 @@ const BONUSES = [
 const ONBOARDING = [
   {id:'painToday',q:'Hoje você sente alguma <span class="highlight">dor</span> durante a corrida?',type:'single',opts:['Sim','Não']},
   {id:'painLocation',q:'Onde você sente essa dor?',type:'multi',opts:['Joelho','Quadril','Panturrilha','Tornozelo','Pé','Canela','Lombar','Outro lugar'],show:d=>d.painToday==='Sim'},
-  {id:'painIntensity',q:'Qual a <span class="highlight">intensidade</span> da dor? (0 = nenhuma, 10 = insuportável)',type:'slider',min:0,max:10},
+  {id:'painIntensity',q:'Qual a <span class="highlight">intensidade</span> da dor? (0 = nenhuma, 10 = insuportável)',type:'slider',min:0,max:10,show:d=>d.painToday==='Sim'},
   {id:'painMoment',q:'Quando ela <span class="highlight">aparece</span>?',type:'single',opts:['Logo no início','Durante a corrida','No final','Após correr','No dia seguinte'],show:d=>d.painToday==='Sim'},
-  {id:'painDuration',q:'Há <span class="highlight">quanto tempo</span> você convive com isso?',type:'single',opts:['Menos de 1 semana','1–4 semanas','1–3 meses','Mais de 3 meses']},
+  {id:'painDuration',q:'Há <span class="highlight">quanto tempo</span> você convive com isso?',type:'single',opts:['Menos de 1 semana','1–4 semanas','1–3 meses','Mais de 3 meses'],show:d=>d.painToday==='Sim'},
   {id:'weeklyRuns',q:'Quantas vezes você <span class="highlight">corre por semana</span>?',type:'single',opts:['1','2','3','4','5+']},
   {id:'goal',q:'Qual seu <span class="highlight">principal objetivo</span> agora?',type:'single',opts:['Correr sem dor','Melhorar performance','Voltar a correr','Primeira prova','Meia Maratona','Maratona']}
 ]
@@ -1273,6 +1245,7 @@ let signalCounts = {}
 let onboardingData = {}
 let onboardingStep = 0
 let onboardingLocked = false
+let onbHistory = []
 
 // Nível (tier) de progressão por sinal — armazenado em csd_signalTiers
 let signalTiers = (() => {
@@ -1372,7 +1345,7 @@ function renderDashboard() {
     content.innerHTML = `<div class="db-empty fade-in">
       <div class="db-empty-icon">🏃</div>
       <div class="db-empty-title">Nenhuma avaliação ainda</div>
-      <div class="db-empty-sub">Complete o check-up de 7 testes para descubrir onde seu corpo está falhando na corrida.</div>
+      <div class="db-empty-sub">Complete o check-up de 7 testes para descobrir onde seu corpo está falhando na corrida.</div>
       <button class="btn-primary" onclick="showScreen('s-welcome')">Iniciar check-up →</button>
     </div>`
     setTimeout(showInstallModal, 600)
@@ -1885,13 +1858,7 @@ window.addEventListener('appinstalled', () => {
 })
 
 function showInstallModal(force = false) {
-  if (!force) {
-    const dismissed = localStorage.getItem('csd_install_dismissed')
-    if (dismissed) {
-      const daysSince = (Date.now() - parseInt(dismissed)) / 86400000
-      if (daysSince < 3) return
-    }
-  }
+  if (!force && localStorage.getItem('csd_install_dismissed')) return
   const overlay = document.getElementById('install-overlay')
   overlay.classList.add('open')
 }
@@ -2493,42 +2460,26 @@ function capturePrevSignals() {
   prevSignalCounts = (() => { try { return JSON.parse(localStorage.getItem('csd_prevSignals') || '{}') } catch(e) { return {} } })()
 }
 
-// Reteste: ajusta o tier de cada sinal comparando falhas atuais vs anteriores.
-// Melhorou (menos falhas) → sobe 1 tier (mantendo 1 exercício do próximo tier,
-// evitando o do mês anterior). Piorou/igual → fica. Novo sinal → tier 1.
+// Reteste: cada sinal EM TREINO progride 1 bloco por mês (M1→M2→M3), sem acelerar.
+// A progressão é por TEMPO DE PLANO, não por melhora: quem já vinha sendo trabalhado
+// (ou tinha bloco > 0) avança 1 bloco mesmo que o reteste não mostre alteração — assim
+// o mês seguinte sempre traz exercícios diferentes/progressões, nunca repete o anterior.
+// Achado NOVO (não estava em treino) começa no bloco M1 (0). Melhorar/piorar não muda
+// o ritmo do bloco (sem adiantar).
 function computeNewTiers(freshCounts) {
   const newTiers = {}
   SIGNAL_ORDER.forEach(sig => {
     const prev = prevSignalCounts[sig] || 0
     const now = freshCounts[sig] || 0
-    const had = prev > 0
-    if (!had && now > 0) {
-      newTiers[sig] = 1                      // novo sinal ativo → tier 1
-    } else if (had && now === 0) {
-      newTiers[sig] = getSignalTier(sig)     // resolvido → mantém tier para manutenção leve
-    } else if (had && now < prev) {
-      newTiers[sig] = Math.min(2, getSignalTier(sig) + 1)  // melhorou → sobe
-    } else {
-      newTiers[sig] = getSignalTier(sig)     // piorou/igual → fica
+    const cur = getSignalTier(sig)
+    const inPlan = prev > 0 || cur > 0
+    if (inPlan) {
+      newTiers[sig] = Math.min(2, cur + 1)   // avança 1 bloco neste mês
+    } else if (now > 0) {
+      newTiers[sig] = 0                      // achado novo → começa no M1
     }
   })
   return newTiers
-}
-
-// Resolvido: distribui 1 exercício de manutenção do próximo tier por sessão,
-// evitando os exercícios do mês anterior (anti-repetição).
-function resolvedMaintenanceExercises(sig, resolvedTier, monthIdx) {
-  const info = SIGNAL_MAP[sig]; if (!info || !info.months) return []
-  const targetMonth = Math.min(2, resolvedTier + 1)
-  const prevUsed = new Set()
-  const prevMonthObj = info.months[resolvedTier]
-  ;['a','b','c'].forEach(k => ((prevMonthObj && prevMonthObj[k]) || []).forEach(id => prevUsed.add(id)))
-  const pick = ['a','b','c'].map(k => {
-    const list = (info.months[targetMonth] || {})[k] || []
-    const cand = list.filter(id => EX[id] && !prevUsed.has(id))
-    return cand[0] || ''
-  })
-  return { a:[pick[0]], b:[pick[1]], c:[pick[2]] }
 }
 
 // Array mês atual em uso (0,1,2).
@@ -2636,15 +2587,21 @@ function showReport() {
   if (localStorage.getItem('csd_pendingReav') === '1') {
     const fresh = Object.keys(signalCounts).length > 0 ? signalCounts : {}
     const newTiers = computeNewTiers(fresh)
-    SIGNAL_ORDER.forEach(sig => setSignalTier(sig, newTiers[sig] || 0))
+    // Só grava os sinais que estão em treino (in-plan ou achado novo). Os demais
+    // não recebem chave, para não entrar no plano por engano.
+    Object.keys(newTiers).forEach(sig => setSignalTier(sig, newTiers[sig]))
     // Avança o mês do plano (M1→M2→M3)
     currentPlanMonth = Math.min(2, currentPlanMonth + 1)
     localStorage.setItem('csd_planMonth', currentPlanMonth.toString())
     localStorage.removeItem('csd_sessoes')
-    ;[0,1,2].forEach(i => localStorage.removeItem('csd_sessoes_m' + i))
-    // limpa histórico de sinais anteriores p/ próxima comparação
-    localStorage.setItem('csd_prevSignals', JSON.stringify(signalCounts))
-    try { prevSignalCounts = JSON.parse(localStorage.getItem('csd_prevSignals') || '{}') } catch(e) {}
+    // Limpa apenas o cache do NOVO mês atual (força regeneração com os tiers
+    // atualizados). Preserva csd_sessoes_m0/m1 — são a lista REALMENTE exercida
+    // no mês anterior, usada pelo gerador para não repetir exercícios.
+    localStorage.removeItem('csd_sessoes_m' + currentPlanMonth)
+    // NÃO sobrescrevemos csd_prevSignals aqui: prev precisa continuar sendo a
+    // comparação "antes do reteste" para o plano manter os sinais RESOLVIDOS
+    // (manutenção) e o filtro de sigs não descartá-los. O próximo check-up
+    // regrav prevSignals corretamente em capturePrevSignals().
     localStorage.removeItem('csd_pendingReav')
     saveSessionsToSupabase()
   }
@@ -2777,10 +2734,12 @@ function renderPlanView() {
   // (ex.: csd_sessoes do M1 restaurado do banco) apareçam no M2.
   const monthIdx = viewPlanMonth
   const viewingPast = viewPlanMonth < currentPlanMonth
-  const monthCache = viewingPast ? null : localStorage.getItem('csd_sessoes_m' + monthIdx)
+  // Meses passados também usam o cache (lista real que o aluno executou);
+  // sem cache válido, cai na geração por calendário abaixo.
+  const monthCache = localStorage.getItem('csd_sessoes_m' + monthIdx)
   const isValidSessoes = (arr) => Array.isArray(arr) && arr.length >= 3 &&
     (arr[0].length > 0 || arr[1].length > 0 || arr[2].length > 0)
-  if (monthCache && !viewingPast) {
+  if (monthCache) {
     try {
       const v = JSON.parse(monthCache)
       if (isValidSessoes(v)) { sessoes = v; localStorage.setItem('csd_sessoes', monthCache) }
@@ -2793,27 +2752,55 @@ function renderPlanView() {
 
   if (!isValidSessoes(sessoes)) {
     const viewingPast = viewPlanMonth < currentPlanMonth
-    const hasFreshSignals = viewingPast
-      ? (Object.keys(prevSignalCounts).length > 0)
-      : (Object.keys(signalCounts).length > 0)
     // Só consideramos sinais com alguma relevância: que estejam ativos,
     // que já foram trabalhados em meses anteriores, ou cujo tier subiu (progressão).
-    const sigs = (viewingPast
+    let sigs = (viewingPast
       ? SIGNAL_ORDER.filter(sig => (prevSignalCounts[sig]||0) > 0)
       : SIGNAL_ORDER.filter(sig =>
           (prevSignalCounts[sig]||0) > 0 || (signalCounts[sig]||0) > 0 || (getSignalTier(sig)||0) > 0
         )
     )
+    // Aluno SEM nenhum achado (plano base): no M2+ ele não pode receber o mesmo
+    // plano base do M1. Inferimos os sinais a partir dos exercícios que ele
+    // REALMENTE fez no mês anterior (cache) e progredimos esses sinais — assim o
+    // mês seguinte traz as progressões dos exercícios que ele fez, em vez de repetir.
+    if (!viewingPast && sigs.length === 0 && monthIdx > 0) {
+      let basePrev = null
+      try { basePrev = JSON.parse(localStorage.getItem('csd_sessoes_m' + (monthIdx - 1)) || 'null') } catch(e) {}
+      if (Array.isArray(basePrev)) {
+        const done = new Set(basePrev.flat())
+        SIGNAL_ORDER.forEach(sig => {
+          const info = SIGNAL_MAP[sig]; if (!info || !info.months) return
+          const owns = info.months.some(mo => ['a','b','c'].some(kk => (mo[kk]||[]).some(id => done.has(id))))
+          if (!owns) return
+          sigs.push(sig)
+          if (signalTiers[sig] === undefined) {
+            signalTiers[sig] = Math.min(2, monthIdx)   // entrou no M1 → progride pelo mês
+            localStorage.setItem('csd_signalTiers', JSON.stringify(signalTiers))
+          }
+        })
+      }
+    }
     const sessKeys = ['a','b','c']
     // Exercícios já vistos no mês anterior, para o mês atual não repetir
     const prevMonthIdx = monthIdx - 1
     const usedBefore = new Set()
     if (!viewingPast && monthIdx > 0) {
-      sigs.forEach(sig => {
-        const info = SIGNAL_MAP[sig]; if (!info || !info.months) return
-        const em = info.months[Math.max(0, Math.min(2, prevMonthIdx))]
-        ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
-      })
+      // Prefere a lista REALMENTE exercida no mês anterior (cache preservado).
+      // Os pools de calendário (months[prevMonthIdx]) só são fallback quando não
+      // há cache (ex.: aparelho novo) — com tier diferente do mês de calendário,
+      // o fallback apontava para exercícios que o aluno nem fez.
+      let actualPrev = null
+      try { actualPrev = JSON.parse(localStorage.getItem('csd_sessoes_m' + prevMonthIdx) || 'null') } catch(e) {}
+      if (Array.isArray(actualPrev) && actualPrev.length >= 3) {
+        actualPrev.forEach(arr => (Array.isArray(arr) ? arr : []).forEach(id => usedBefore.add(id)))
+      } else {
+        sigs.forEach(sig => {
+          const info = SIGNAL_MAP[sig]; if (!info || !info.months) return
+          const em = info.months[Math.max(0, Math.min(2, prevMonthIdx))]
+          ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
+        })
+      }
     }
     // Decisão GLOBAL por família _assist (ex.: cossack vs cossack_assist) para o mês:
     // se o exercício pleno estiver disponível no mês e não foi usado no M1, usamos o
@@ -2868,13 +2855,6 @@ function renderPlanView() {
           signalExercisesForMonth(sig, monthIdx, k).forEach(addEx)
           return
         }
-        if (hasFreshSignals && (prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
-          // sinal resolvido (tinha no mês anterior e zerou nesta avaliação) →
-          // manutenção leve do próximo tier, evitando repetir o mês anterior
-          const maint = resolvedMaintenanceExercises(sig, getSignalTier(sig), monthIdx)
-          ;(maint[k]||[]).forEach(addEx)
-          return
-        }
         // progressão normal pelo tier persistido (funciona mesmo sem avaliação nova,
         // pois depende de signalTiers carregados do banco, não de signalCounts).
         // No M2+ vetamos exercícios já vistos no M1 (evita repetir cócoras/agach.
@@ -2883,17 +2863,34 @@ function renderPlanView() {
         if (monthIdx > 0 && !viewingPast) {
           // Usamos o exercício do spot DESTE treino (k) quando ele é novo.
           // Só buscamos em outros spots se o spot atual só tiver exercício
-          // repetido do M1. Isso mantém variabilidade entre A/B/C.
-          const spotList = signalExercisesForMonth(sig, getSignalTier(sig), k)
+          // repetido do mês anterior. Isso mantém variabilidade entre A/B/C.
+          const tier = getSignalTier(sig)
+          const spotList = signalExercisesForMonth(sig, tier, k)
           const spotNovo = spotList.filter(id => !usedBefore.has(id))
           if (spotNovo.length) {
             spotNovo.forEach(addEx)
           } else {
             const outros = ['a','b','c'].filter(kk => kk !== k)
-              .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+              .flatMap(kk => signalExercisesForMonth(sig, tier, kk))
               .filter((id,idx,self) => self.indexOf(id) === idx)
             const outrosNovos = outros.filter(id => !usedBefore.has(id))
-            ;(outrosNovos.length ? outrosNovos : spotList).forEach(addEx)
+            if (outrosNovos.length) {
+              outrosNovos.forEach(addEx)
+            } else {
+              // Pool do tier esgotado (tudo já visto): tenta os tiers superiores
+              // por exercícios NOVOS antes de repetir — evita repassar o mês
+              // anterior idêntico quando o reteste não subiu o tier.
+              let novoPool = []
+              for (let t = tier + 1; t <= 2 && novoPool.length === 0; t++) {
+                const livre = id => !usedBefore.has(id) && (monthAppear[id] || 0) < 2
+                const spotNew = signalExercisesForMonth(sig, t, k).filter(livre)
+                const outrosNew = ['a','b','c'].filter(kk => kk !== k)
+                  .flatMap(kk => signalExercisesForMonth(sig, t, kk))
+                  .filter((id,ix,self) => self.indexOf(id) === ix && livre(id))
+                novoPool = spotNew.concat(outrosNew).filter((id,ix,self) => self.indexOf(id) === ix)
+              }
+              ;(novoPool.length ? novoPool : spotList).forEach(addEx)
+            }
           }
         } else {
           signalExercisesForMonth(sig, getSignalTier(sig), k).forEach(addEx)
@@ -2906,9 +2903,13 @@ function renderPlanView() {
       return ids
     })
     localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
-    localStorage.setItem('csd_sessoes_m' + monthIdx, JSON.stringify(sessoes))
-    localStorage.setItem('csd_month_appear', JSON.stringify(monthAppear))
-    saveSessionsToSupabase()
+    // Nunca sobrescrever o cache de meses PASSADOS com conteúdo regenerado —
+    // ele guarda a lista real exercida (anti-repetição do próximo mês + histórico).
+    if (!viewingPast) {
+      localStorage.setItem('csd_sessoes_m' + monthIdx, JSON.stringify(sessoes))
+      localStorage.setItem('csd_month_appear', JSON.stringify(monthAppear))
+      saveSessionsToSupabase()
+    }
   }
 
   const weeks = ['Semana 1','Semana 2','Semana 3','Semana 4']
@@ -3100,21 +3101,28 @@ function showSessionFromPlan(sessIdx) {
   const wrap = document.getElementById('sessao-exercises')
 
   if (viewingPast) {
-    // Mês anterior (histórico): mostra somente os exercícios daquele mês,
-    // gerados a partir do mês visualizado (nunca do mês atual), todos marcados
+    // Mês anterior (histórico): mostra os exercícios daquele mês, todos marcados
     // como feitos e sem permitir alterar o progresso atual.
-    const histSigs = Object.keys(prevSignalCounts && Object.keys(prevSignalCounts).length ? prevSignalCounts : signalCounts)
     const historyIds = []
     const histSeen = new Set()
     const histNames = new Set()
-    histSigs.forEach(sig => {
-      if (!SIGNAL_MAP[sig]) return
-      signalExercisesForMonth(sig, viewPlanMonth, sessionKey).forEach(id => {
-        if (id && EX[id] && !histSeen.has(id) && !histNames.has(EX[id].name)) {
-          histSeen.add(id); histNames.add(EX[id].name); historyIds.push(id)
-        }
+    const addHist = id => {
+      if (id && EX[id] && !histSeen.has(id) && !histNames.has(EX[id].name)) {
+        histSeen.add(id); histNames.add(EX[id].name); historyIds.push(id)
+      }
+    }
+    // Prefere a lista REALMENTE exercida naquele mês (cache preservado);
+    // fallback: gera a partir dos pools de calendário do mês exibido.
+    const cachedHist = (Array.isArray(sessoes) && sessoes.length >= 3 && Array.isArray(sessoes[si])) ? sessoes[si] : null
+    if (cachedHist && cachedHist.length) {
+      cachedHist.forEach(addHist)
+    } else {
+      const histSigs = Object.keys(prevSignalCounts && Object.keys(prevSignalCounts).length ? prevSignalCounts : signalCounts)
+      histSigs.forEach(sig => {
+        if (!SIGNAL_MAP[sig]) return
+        signalExercisesForMonth(sig, viewPlanMonth, sessionKey).forEach(addHist)
       })
-    })
+    }
     if (historyIds.length === 0) historyIds.push('e_prop_fechado','e_agach_ponta')
     let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
     html += ['Treino A','Treino B','Treino C'].map((d,i) =>
@@ -3134,12 +3142,6 @@ function showSessionFromPlan(sessIdx) {
   // 1. Specific exercises from decision engine
   let specific = [...new Set(sessoes[si] || [])]
 
-  // 2. Critical signal exercises (prioridade 1)
-  let critIds = []
-  if (criticalSignal) {
-    critIds = signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey)
-  }
-
   // 3. Garantir 5–6 exercícios com COBERTURA de todos os achados relevantes.
   //    Primeiro agrupamos o que cada sinal relevante traz para esta sessão,
   //    garantindo pelo menos 1 exercício por achado, depois completamos até 5–6.
@@ -3148,7 +3150,6 @@ function showSessionFromPlan(sessIdx) {
   const relevantSigs = SIGNAL_ORDER.filter(sig =>
     signalCounts[sig] > 0 || prevSignalCounts[sig] > 0 || (getSignalTier(sig)||0) > 0
   )
-  const hasFresh = Object.keys(signalCounts).length > 0
   // Exercícios já usados no mês anterior (M1), para o M2+ não repetir: coletamos
   // os exercícios do nível anterior de cada sinal relevante. Só considera se estamos
   // em um mês avançado e não visualizando histórico.
@@ -3185,56 +3186,6 @@ function showSessionFromPlan(sessIdx) {
     })
   }
   const famKey = (id) => id.replace(/_assist$/,'')
-  // Contagem global de quantas vezes cada exercício já aparece no mês (regra: no
-  // máximo 2 treinos). O renderPlanView salva isso em csd_month_appear; aqui usamos
-  // para não deixar o mesmo exercício em 3 treinos ao completar a sessão.
-  let monthAppear = {}
-  try { monthAppear = JSON.parse(localStorage.getItem('csd_month_appear') || '{}') } catch (e) {}
-  const sigExercises = {}
-  relevantSigs.forEach(sig => {
-    const list = []
-    if (!SIGNAL_MAP[sig]) return list
-    if (hasFresh && (prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
-      const maint = resolvedMaintenanceExercises(sig, getSignalTier(sig), viewPlanMonth)
-      ;(maint[sessionKey]||[]).forEach(id => { if (id && EX[id]) list.push(id) })
-    } else if (!viewingPast && viewPlanMonth > 0) {
-      // No M2+ queremos exercícios NOVOS (não usados no M1), mas mantendo
-      // variabilidade entre os treinos A/B/C. Começamos pelo exercício do spot
-      // atual da sessão; se ele repete algo já visto no M1 e existir um substituto
-      // novo no sinal, promovemos os novos para a frente (deixando repetidos por
-      // último). Só usamos exercício do M1 se não houver alternativa.
-      const info = SIGNAL_MAP[sig]
-      const spotList = signalExercisesForMonth(sig, getSignalTier(sig), sessionKey)
-        .filter(id => EX[id])
-      const outros = ['a','b','c']
-        .filter(kk => kk !== sessionKey)
-        .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
-        .filter((id,idx,self) => self.indexOf(id) === idx && EX[id])
-      const novos = outros.filter(id => !usedBefore.has(id))
-        .filter(id => !spotList.includes(id))
-      const spotNovos = spotList.filter(id => !usedBefore.has(id))
-      // ordem: novos do spot > novos de outros spots > spot (repetido) > outros (repetido)
-      ;[].concat(
-        spotNovos,
-        novos,
-        spotList.filter(id => usedBefore.has(id)),
-        outros.filter(id => usedBefore.has(id))
-      ).forEach(id => { if (!list.includes(id)) list.push(id) })
-    } else {
-      signalExercisesForMonth(sig, getSignalTier(sig), sessionKey).forEach(id => {
-        if (id && EX[id] && !list.includes(id)) list.push(id)
-      })
-    }
-    // mantém só os que têm vídeo/referência válida e não duplicados por nome,
-    // descartando a variante _assist globalmente rejeitada no mês (se o pleno
-    // foi escolhido, o assist não entra de jeito nenhum — inclusive no Passo A)
-    sigExercises[sig] = list.filter(id => {
-      const fk = famKey(id)
-      if (blockedFam[fk] && blockedFam[fk].has(id)) return false
-      if (chosenFam[fk] && chosenFam[fk] !== id && EX[chosenFam[fk]]) return false
-      return true
-    })
-  })
 
   // finalIds já inclui critical (prioridade 1) e específicos. Reconstruímos a lista
   // final garantindo cobertura: primeiro 1 exercício de cada sinal relevante,
@@ -3243,27 +3194,34 @@ function showSessionFromPlan(sessIdx) {
   // bloqueia variante _assist e respeita "nunca em 3 treinos"). NÃO re-adicionamos
   // excedentes por sinal aqui, pois isso reintroduziria o mesmo exercício em 3 treinos.
   // Completamos apenas com exercícios gerais diversificados (não interferem na regra).
-  let kept = specific.filter(id => id && EX[id] && !(blockedFam[famKey(id)] && blockedFam[famKey(id)].has(id)))
-  const keptNames = new Set(kept.map(id => EX[id].name))
-  // Passo E: garante 5–6 no total, se ainda faltar (sem cortar cobertura)
-  if (kept.length > MAX) {
-    kept = kept.slice(0, MAX)
-  } else if (kept.length < MIN) {
-    const pool = GERAL_ORDEM.flatMap(b => b.ids).filter(id => {
-      const ex = EX[id]
-      return !kept.includes(id) && ex && !keptNames.has(ex.name)
-    })
-    let i = 0
-    while (kept.length < MIN && i < pool.length) {
-      const id = pool[i++]
-      if (!kept.includes(id)) { kept.push(id); keptNames.add(EX[id].name) }
+    let kept = specific.filter(id => id && EX[id] && !(blockedFam[famKey(id)] && blockedFam[famKey(id)].has(id)))
+    // Fase 2: bloqueios do admin (protocol_blocks) ANTES do preenchimento —
+    // assim o preenchimento compensa e a sessão não encolhe abaixo do mínimo.
+    if (window._blocks && window._blocks.size) {
+      kept = kept.filter(id => !window._blocks.has(id))
     }
-  }
-  let finalIds = kept.slice(0, MAX)
-  // Fase 2: remove exercícios bloqueados pelo admin (protocol_blocks)
-  if (window._blocks && window._blocks.size) {
-    finalIds = finalIds.filter(id => !window._blocks.has(id))
-  }
+    let keptNames = new Set(kept.map(id => EX[id].name))
+    // Passo E: garante 5–6 no total, se ainda faltar (sem cortar cobertura)
+    if (kept.length > MAX) {
+      kept = kept.slice(0, MAX)
+    } else if (kept.length < MIN) {
+      const pool = GERAL_ORDEM.flatMap(b => b.ids).filter(id => {
+        const ex = EX[id]
+        return !kept.includes(id) && ex && !keptNames.has(ex.name) &&
+          !(window._blocks && window._blocks.has(id))
+      })
+      // Giro por treino: A/B/C começam em pontos diferentes do pool geral,
+      // evitando que os três terminem com os mesmos exercícios de preenchimento
+      // (quando os achados específicos faltam, os treinos ficavam idênticos).
+      const offset = pool.length ? (sessIdx * 2) % pool.length : 0
+      let i = 0
+      while (kept.length < MIN && i < pool.length) {
+        const id = pool[(i + offset) % pool.length]
+        i++
+        if (!kept.includes(id)) { kept.push(id); keptNames.add(EX[id].name) }
+      }
+    }
+    let finalIds = kept.slice(0, MAX)
 
   // 5. Render as flat list (síncrono — garante que a tela aparece imediatamente)
   const seen = new Set()
@@ -3381,7 +3339,7 @@ function closeExDetail() {
 
 // ══ ONBOARDING ══
 function startOnboarding() {
-  onboardingData = {}; onboardingStep = 0; onboardingLocked = false
+  onboardingData = {}; onboardingStep = 0; onboardingLocked = false; onbHistory = []
   document.getElementById('chat-area').innerHTML = ''
   showScreen('s-onboarding')
   renderOnboardingStep()
@@ -3389,7 +3347,11 @@ function startOnboarding() {
 
 function goBackOnboarding() {
   if (onboardingLocked) return
-  showScreen('s-welcome')
+  const lastId = onbHistory.pop()
+  if (!lastId) { showScreen('s-welcome'); return }
+  delete onboardingData[lastId]
+  onboardingStep = Math.max(0, ONBOARDING.findIndex(q => q.id === lastId))
+  renderOnboardingStep()
 }
 
 function scrollChat() {
@@ -3502,6 +3464,7 @@ function confirmMultiOpt(id) {
 function selectOnbOpt(id, val) {
   if (onboardingLocked) return
   onboardingData[id] = val
+  onbHistory.push(id)
   onboardingLocked = true
   const area = document.getElementById('chat-area')
   Array.from(area.children).forEach(el => {
@@ -3568,29 +3531,6 @@ function startReavaliacao() {
   localStorage.removeItem('csd_completedWeeks')
   completedWeeks = 0
   showScreen('s-welcome')
-}
-
-function showReavResult() {
-  // After re-checkup, show comparison
-  const { overall, scores } = calculateIndex()
-  const lastScores = localStorage.getItem('csd_lastScores')
-  const comp = document.getElementById('reav-compare')
-  let oldOverall = '?', diff = ''
-  if (lastScores) {
-    try {
-      const old = JSON.parse(lastScores)
-      oldOverall = old.overall
-      const delta = overall - old.overall
-      if (delta > 0) diff = `<div class="reav-diff up">↑ +${delta} pontos — evolução detectada</div>`
-      else if (delta === 0) diff = `<div class="reav-diff same">→ Índice mantido</div>`
-      else diff = `<div class="reav-diff down">↓ ${delta} pontos — redução detectada</div>`
-    } catch(e) {}
-  }
-  comp.innerHTML = `
-    <div class="reav-box"><div class="reav-box-label">Antes</div><div class="reav-box-score antes">${oldOverall}/100</div></div>
-    <div class="reav-box"><div class="reav-box-label">Depois</div><div class="reav-box-score depois">${overall}/100</div></div>
-    ${diff}`
-  showReport()
 }
 
 // ══ CRIAR CONTA ══
@@ -3730,7 +3670,7 @@ if (!_hasEmail && !_isRecovery) {
         <div class="settings-item-label">Refazer avaliação</div>
       </div>
     </div>
-    <div class="settings-item" style="cursor:pointer" onclick="closeSettings();closeInstallTutorial();showInstallModal(true)">
+    <div class="settings-item install-settings-row" style="cursor:pointer" onclick="closeSettings();closeInstallTutorial();showInstallModal(true)">
       <div class="settings-item-left">
         <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">📱</div>
         <div class="settings-item-label">Instalar aplicativo</div>
