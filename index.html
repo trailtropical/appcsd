@@ -1338,6 +1338,7 @@ function renderDashboard() {
     const savedNivel = localStorage.getItem('csd_nivel')
     if (savedNivel) nivel = savedNivel
     getActiveSignals()
+    migrateEngineV2()
   }
 
   if (!done) {
@@ -2432,13 +2433,34 @@ function getActiveSignals() {
 }
 
 // ══ TIERS DE PROGRESSÃO (M1/M2/M3) ══
-// Tier por sinal. Ajusta conforme melhora (menos falhas no reteste).
+// Tier/bloco do sinal = índice do mês em que ele está no plano (0=M1, 1=M2, 2=M3).
 function getSignalTier(sig) {
   return (signalTiers[sig] !== undefined) ? signalTiers[sig] : 0
 }
 function setSignalTier(sig, tier) {
   signalTiers[sig] = Math.max(0, Math.min(2, tier))
   localStorage.setItem('csd_signalTiers', JSON.stringify(signalTiers))
+}
+
+// Migração do motor de progressão (v2): antes o tier subia por "melhora" no
+// reteste; agora o bloco acompanha o MÊS do plano. Para quem já está no meio
+// (tiers gravados na regra antiga), reposicionamos os sinais EM TREINO para o
+// bloco do mês atual e limpamos o cache do mês para regenerar com a nova lógica.
+// Roda uma única vez por dispositivo (flag csd_engine_v2).
+function migrateEngineV2() {
+  if (localStorage.getItem('csd_engine_v2') === '1') return
+  const inPlan = SIGNAL_ORDER.filter(sig =>
+    (prevSignalCounts[sig] || 0) > 0 || (getSignalTier(sig) || 0) > 0
+  )
+  if (inPlan.length || Object.keys(signalTiers).length) {
+    const rebuilt = {}
+    inPlan.forEach(sig => { rebuilt[sig] = Math.min(2, currentPlanMonth) })
+    signalTiers = rebuilt
+    localStorage.setItem('csd_signalTiers', JSON.stringify(signalTiers))
+    localStorage.removeItem('csd_sessoes')
+    localStorage.removeItem('csd_sessoes_m' + currentPlanMonth)
+  }
+  localStorage.setItem('csd_engine_v2', '1')
 }
 
 // Seleciona os exercícios de um sinal para o mês atual (dedup por nome).
