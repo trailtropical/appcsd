@@ -610,9 +610,9 @@ const TESTE_INFO = {
   thomas:{ title:'Teste de Thomas', opts:{ levanta:'Perna levantou do chão', dor:'Dor ou desconforto', ok:'Perna no chão, sem dor' } }
 }
 const EX_NAME = {
-  g_volta_mundo:'Volta ao mundo', g_cocoras:'Cócoras', g_prancha:'Prancha Frontal', g_panturrilha:'Elevação de Panturrilha Unilateral', g_equilibrio:'Equilíbrio Unilateral', g_stepdown:'Step-Down', g_terra:'Levantamento Terra 1 perna',
+  g_volta_mundo_4apoios:'Volta ao mundo (4 apoios)', g_volta_mundo:'Volta ao mundo (em pé)', g_cocoras:'Cócoras', g_prancha:'Prancha Frontal', g_panturrilha:'Elevação de Panturrilha Unilateral', g_equilibrio:'Equilíbrio Unilateral', g_stepdown:'Step-Down', g_terra:'Levantamento Terra 1 perna',
   e_cocoras:'Cócoras', e_meio_ajoel:'Meio Ajoelhado', e_pe_fechado:'1 pé c/ olhos fechados', e_agach_ponta:'Agachamento ponta do pé', e_saltos_quad:'Saltos no quadrado', e_joelho_parede:'Joelho na Parede',
-  e_volta_mundo:'Volta ao mundo', e_noventa:'90/90', e_iliopsoas:'Alongamento do Iliopsoas',
+  e_volta_mundo_4apoios:'Volta ao mundo (4 apoios)', e_volta_mundo:'Volta ao mundo (em pé)', e_noventa:'90/90', e_iliopsoas:'Alongamento do Iliopsoas',
   e_elev_pelv:'Elevação Pélvica', e_coice:'Coice 4 Apoios', e_bulg:'Afundo Búlgaro',
   e_prop_fechado:'1 pé c/ olhos fechados', e_prop_ponta:'Agachamento ponta do pé', e_prop_step:'Step-Down',
   e_plant:'Plantiflexão', e_step_esp:'Step-Down', e_skatista:'Agachamento Skatista',
@@ -627,7 +627,7 @@ function exName(id) { return EX_NAME[id] || id || '—' }
 
 // Gerais na mesma ordem do GERAL_ORDEM do app (usados para completar a lista até 5–6,
 // espelhando o preenchimento que o showSessionFromPlan faz no dispositivo do aluno)
-const GERAL_FILL = ['g_volta_mundo','g_cocoras','g_prancha','g_panturrilha','g_terra','g_equilibrio','g_stepdown']
+const GERAL_FILL = ['g_volta_mundo_4apoios','g_volta_mundo','g_cocoras','g_prancha','g_panturrilha','g_terra','g_equilibrio','g_stepdown']
 
 // Mapa exercício → sinal(is) que o sugeriram, espelhando o SIGNAL_MAP do app.
 // Ex.: e_noventa → 'Restrição de mobilidade de quadril'. Derivação por varredura.
@@ -647,7 +647,7 @@ const SIGNAL_POOL = {
     {a:['e_relogio_pe'],b:['e_cocoras','e_agach_ponta'],c:['e_relogio_pe','e_meio_ajoel']},
     {a:['e_salto_lat_cong'],b:['e_relogio_pe','e_salto_lat_cong'],c:['e_salto_lat_cong','e_agach_ponta']}],
   quadril_mob:[
-    {a:['e_volta_mundo','e_noventa'],b:['e_iliopsoas'],c:['e_volta_mundo','e_noventa']},
+    {a:['e_volta_mundo_4apoios','e_noventa'],b:['e_iliopsoas'],c:['e_volta_mundo','e_noventa']},
     {a:['e_cossack_assist'],b:['e_volta_mundo','e_cossack_assist'],c:['e_cossack_assist','e_noventa']},
     {a:['e_cossack','e_shin_box'],b:['e_cossack','e_noventa'],c:['e_shin_box','e_cossack_assist']}],
   gluteo:[
@@ -796,6 +796,9 @@ function rebuildPlanForStudent(s) {
     return ids
   })
   const MIN = 5, MAX = 6
+  const geralFill = s.nivel === 'init'
+    ? ['g_volta_mundo_4apoios','g_cocoras','g_prancha','g_panturrilha','g_terra','g_equilibrio','g_stepdown']
+    : GERAL_FILL.filter(id => id !== 'g_volta_mundo_4apoios')
   return sessoes.map(specific => {
     let kept = specific.filter(id => {
       const fk = id.replace(/_assist$/,'')
@@ -805,7 +808,7 @@ function rebuildPlanForStudent(s) {
     if (kept.length > MAX) {
       kept = kept.slice(0, MAX)
     } else if (kept.length < MIN) {
-      const pool = GERAL_FILL.filter(id => EX_NAME[id] && !kept.includes(id) && !keptNames.has(EX_NAME[id]))
+      const pool = geralFill.filter(id => EX_NAME[id] && !kept.includes(id) && !keptNames.has(EX_NAME[id]))
       let i = 0
       while (kept.length < MIN && i < pool.length) {
         const id = pool[i++]
@@ -858,7 +861,7 @@ function flaggedSignals(s) {
   return fa
 }
 // Gerais: motivo fixo por bloco
-const REASON_GERAL = { g_volta_mundo:'Mobilidade geral', g_cocoras:'Mobilidade geral', g_prancha:'Ativação muscular', g_panturrilha:'Ativação muscular', g_terra:'Ativação muscular', g_equilibrio:'Mobilidade geral', g_stepdown:'Ativação muscular' }
+const REASON_GERAL = { g_volta_mundo_4apoios:'Mobilidade geral', g_volta_mundo:'Mobilidade geral', g_cocoras:'Mobilidade geral', g_prancha:'Ativação muscular', g_panturrilha:'Ativação muscular', g_terra:'Ativação muscular', g_equilibrio:'Mobilidade geral', g_stepdown:'Ativação muscular' }
 function exReason(id, flagged){ return flagged ? (REASONS_SIG[id]||[]).filter(sig=>flagged.has(sig)).map(sig=>SIGNAL_LABEL[sig]).join(' · ') || null : (REASONS[id] ? REASONS[id].join(' · ') : (REASON_GERAL[id]||null)) }
 
 const avColors = {

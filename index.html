@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='29';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='30';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -483,7 +483,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 .ex-detail-video .video-fs-btn{position:absolute;top:10px;right:10px;z-index:9;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .ex-detail-video .video-fs-btn:active{transform:scale(.92)}
 .ex-detail-video.video-fs{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;margin:0;border:none;border-radius:0;aspect-ratio:auto;height:100vh;height:100dvh;width:100vw;background:#000;justify-content:center}
-.ex-detail-video.video-fs .video-fs-btn{top:14px;right:14px;width:42px;height:42px;font-size:19px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
+.ex-detail-video.video-fs .video-fs-btn{top:auto;right:calc(env(safe-area-inset-right,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);width:46px;height:46px;font-size:20px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
 .ex-detail-video.video-fs>div{width:100%;height:100%;margin:0}
 .ex-detail-video.video-fs>div>div{padding:0!important;position:absolute;inset:0;height:100%;width:100%}
 .ex-detail-body{padding:16px 20px 40px}
@@ -1024,16 +1024,31 @@ function vturbEmbed(vid) {
   const embedUrl = `${VTURB_BASE}${vid}/v4/embed.html`
   return `<div style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0;background:#000"><iframe frameborder="0" allowfullscreen allow="fullscreen; autoplay; encrypted-media; picture-in-picture" src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="origin" title="Vídeo do exercício"></iframe><button class="video-fs-btn" onclick="event.stopPropagation();toggleVideoFs(this)" type="button">⛶</button></div></div>`
 }
+async function lockFsOrientation(landscape) {
+  try {
+    const cap = window.Capacitor
+    if (cap && cap.isNativePlatform && cap.isNativePlatform() && cap.isPluginAvailable && cap.isPluginAvailable('ScreenOrientation')) {
+      const so = cap.Plugins.ScreenOrientation || cap.registerPlugin('ScreenOrientation')
+      await so.lock({ orientation: landscape ? 'landscape' : 'portrait' })
+      return
+    }
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock(landscape ? 'landscape' : 'portrait')
+    }
+  } catch (e) {}
+}
 function toggleVideoFs(btn) {
   const wrap = btn.closest('.ex-detail-video, .video-placeholder')
   if (!wrap) return
   const isFs = wrap.classList.toggle('video-fs')
   btn.textContent = isFs ? '✕' : '⛶'
   document.body.style.overflow = isFs ? 'hidden' : ''
+  lockFsOrientation(isFs)
 }
 const EX = {
   // BLOCO GERAL
-  g_volta_mundo:{name:'Volta ao mundo',di:'2 séries · 30s cada lado · 4 apoios',dm:'2 séries · 30s cada lado · em pé',da:'2 séries · 30s cada lado · em pé',vidi:'6a54dec82c2f06556e0e0ef7',tag:'mobilidade',tc:'qmob',why:'Abre o quadril em todas as direções antes de sair para correr.',vid:'6a54dede0a9f72b511fbdb30'},
+  g_volta_mundo_4apoios:{name:'Volta ao mundo (4 apoios)',di:'2 séries · 30s cada lado · 4 apoios',dm:'2 séries · 30s cada lado · 4 apoios',da:'2 séries · 30s cada lado · 4 apoios',tag:'mobilidade',tc:'qmob',why:'Abre o quadril em todas as direções antes de sair para correr.',vid:'6a54dec82c2f06556e0e0ef7'},
+  g_volta_mundo:{name:'Volta ao mundo (em pé)',di:'2 séries · 30s cada lado · em pé',dm:'2 séries · 30s cada lado · em pé',da:'2 séries · 30s cada lado · em pé',tag:'mobilidade',tc:'qmob',why:'Abre o quadril em todas as direções antes de sair para correr.',vid:'6a54dede0a9f72b511fbdb30'},
   g_cocoras:{name:'Cócoras',di:'2 séries · 30 segundos',dm:'2 séries · 45 segundos',da:'2 séries · 60 segundos',tag:'mobilidade',tc:'qmob',why:'Mobiliza tornozelo e quadril simultaneamente.',vid:'6a54e6240a9f72b511fbefb4'},
   g_prancha:{name:'Prancha Frontal',di:'3 séries · 20s',dm:'3 séries · 30s',da:'3 séries · 45s',tag:'core',tc:'flex',why:'Ativa o core — base de estabilidade para a corrida.',vid:'6a54de5f0a7249098836dd59'},
   g_panturrilha:{name:'Elevação de Panturrilha Unilateral',di:'3 séries · 8 reps · mãos na parede',dm:'3 séries · 10 reps',da:'3 séries · 12 reps',tag:'força',tc:'pant',why:'Prepara a panturrilha e o tornozelo para o impacto da corrida.',vid:'6a54deb92c2f06556e0e0e9c'},
@@ -1050,7 +1065,8 @@ const EX = {
   e_joelho_parede:{name:'Joelho na Parede',di:'3 séries · 30s cada lado',dm:'3 séries · 45s cada lado',da:'3 séries · 60s cada lado',tag:'tornozelo',tc:'torn',why:'Ganho de dorsiflexão em carga com o joelho avançando sobre a ponta do pé.',vid:'6a91cc56b8cb77a9126afd5a'},
 
   // QUADRIL MOBILIDADE
-  e_volta_mundo:{name:'Volta ao mundo',di:'3 séries · 30s · 4 apoios',dm:'3 séries · 30s · em pé',da:'3 séries · 30s · em pé com carga',vidi:'6a54dec82c2f06556e0e0ef7',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.',vid:'6a54dede0a9f72b511fbdb30'},
+  e_volta_mundo_4apoios:{name:'Volta ao mundo (4 apoios)',di:'3 séries · 30s · 4 apoios',dm:'3 séries · 30s · 4 apoios',da:'3 séries · 30s · 4 apoios',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.',vid:'6a54dec82c2f06556e0e0ef7'},
+  e_volta_mundo:{name:'Volta ao mundo (em pé)',di:'3 séries · 30s · em pé',dm:'3 séries · 30s · em pé',da:'3 séries · 30s · em pé com carga',tag:'quadril mob.',tc:'qmob',why:'Abre o quadril em todas as direções de rotação.',vid:'6a54dede0a9f72b511fbdb30'},
   e_noventa:{name:'90/90',di:'3 séries · 60s cada lado',dm:'3 séries · 60s + rotação ativa',da:'3 séries · 90s + pressão ativa',tag:'quadril mob.',tc:'qmob',why:'Trabalha rotação interna e externa do quadril simultaneamente.',vid:'6a54dec2453615a5c5ae7b22'},
   e_iliopsoas:{name:'Alongamento do Iliopsoas',di:'3 séries · 45s cada lado',dm:'3 séries · 60s',da:'3 séries · 60s com elevação de braço',tag:'flexores',tc:'flex',why:'Alonga o flexor de quadril que encurta com horas sentado e limita a passada.',vid:'6a54e6ce1e490ba6e5ff99d5'},
 
@@ -1124,8 +1140,8 @@ const SIGNAL_MAP = {
     ]},
   quadril_mob:{label:'Restrição de mobilidade de quadril',color:'var(--qmob)',
     months:[
-      {a:['e_volta_mundo','e_noventa'],b:['e_iliopsoas'],c:['e_volta_mundo','e_noventa']},
-      {a:['e_cossack_assist'],b:['e_volta_mundo','e_cossack_assist'],c:['e_cossack_assist','e_noventa']},
+       {a:['e_volta_mundo_4apoios','e_noventa'],b:['e_iliopsoas'],c:['e_volta_mundo','e_noventa']},
+       {a:['e_cossack_assist'],b:['e_volta_mundo','e_cossack_assist'],c:['e_cossack_assist','e_noventa']},
       {a:['e_cossack','e_shin_box'],b:['e_cossack','e_noventa'],c:['e_shin_box','e_cossack_assist']}
     ]},
   gluteo:{label:'Fraqueza de glúteo',color:'var(--glut)',
@@ -1171,11 +1187,16 @@ const GEMEOS = {
 
 const SIGNAL_ORDER = ['tornozelo','quadril_mob','gluteo','propriocepcao','panturrilha','quadril_forca','flexores']
 
-const GERAL_ORDEM = [
-  {bloco:'🔵 Mobilidade geral — antes de correr', ids:['g_volta_mundo','g_cocoras']},
-  {bloco:'🟠 Ativação muscular — antes de correr', ids:['g_prancha','g_panturrilha','g_terra']},
-  {bloco:'🟢 Controle neuromuscular — antes de correr', ids:['g_equilibrio','g_stepdown']}
-]
+// Bloco geral de preenchimento. O "Volta ao mundo" tem duas versões (4 apoios
+// no iniciante, em pé nos demais níveis). Nos demais ids, nível não muda nada.
+function getGeralOrdem() {
+  const vm = nivel === 'init' ? 'g_volta_mundo_4apoios' : 'g_volta_mundo'
+  return [
+    {bloco:'🔵 Mobilidade geral — antes de correr', ids:[vm,'g_cocoras']},
+    {bloco:'🟠 Ativação muscular — antes de correr', ids:['g_prancha','g_panturrilha','g_terra']},
+    {bloco:'🟢 Controle neuromuscular — antes de correr', ids:['g_equilibrio','g_stepdown']}
+  ]
+}
 
 const SESSION_INFO = [
   {day:'Segunda-feira', focus:'Foco: mobilidade · tornozelo · quadril', color:'var(--torn)'},
@@ -1360,7 +1381,7 @@ function renderDashboard() {
   const msg = getPersonalizedMsg()
 
   const m = PLAN_MONTHS[currentPlanMonth]
-  phaseEl.innerHTML = `Seu plano está ativo!<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
+  phaseEl.innerHTML = `Seu plano está ativo<br><strong>Mês ${currentPlanMonth+1}</strong> — ${m.title}`
 
   const progressPct = getCompletionPct()
 
@@ -1666,8 +1687,6 @@ function getDetail(ex) {
 }
 
 function getExVid(ex) {
-  if (nivel === 'init' && ex.vidi) return ex.vidi
-  if (nivel === 'adv' && ex.vida) return ex.vida
   return ex.vid
 }
 
@@ -3227,7 +3246,7 @@ function showSessionFromPlan(sessIdx) {
     if (kept.length > MAX) {
       kept = kept.slice(0, MAX)
     } else if (kept.length < MIN) {
-      const pool = GERAL_ORDEM.flatMap(b => b.ids).filter(id => {
+      const pool = getGeralOrdem().flatMap(b => b.ids).filter(id => {
         const ex = EX[id]
         return !kept.includes(id) && ex && !keptNames.has(ex.name) &&
           !(window._blocks && window._blocks.has(id))
@@ -3642,6 +3661,9 @@ localStorage.removeItem('csd_pending_email')
 // Detectar link de redefinição de senha (recovery) ou de cadastro
 const _isRecovery = handleRecoveryRedirect()
 checkSignupRedirect()
+
+// Mantém o app em retrato fora do vídeo em tela cheia
+lockFsOrientation(false)
 
 if (!_hasEmail && !_isRecovery) {
   (async () => {
