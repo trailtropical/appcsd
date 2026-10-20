@@ -4,3 +4,6 @@ supabase/.temp/
 # macOS / IDE
 .DS_Store
 native-app/.idea/
+
+# Xcode / build local
+native-app/build/
