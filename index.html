@@ -215,7 +215,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .bonus-hero-icon{font-size:48px;text-align:center;padding-top:20px}
 
 /* DASHBOARD */
-.db-hero{padding:40px 24px 24px;background:linear-gradient(180deg,rgba(232,80,10,.1) 0%,transparent 100%);border-bottom:1px solid var(--border)}
+.db-hero{padding:64px 24px 24px;background:linear-gradient(180deg,rgba(232,80,10,.1) 0%,transparent 100%);border-bottom:1px solid var(--border)}
 .db-hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
 .db-greeting{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
 .db-greeting .online{width:6px;height:6px;border-radius:50%;background:var(--glut);display:inline-block}
@@ -480,12 +480,15 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 .ex-detail-video{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:16px 20px 0;cursor:pointer;overflow:hidden;position:relative}
 .ex-detail-video.has-video{height:auto;aspect-ratio:16/9}
 .ex-detail-video.has-video iframe{width:100%;height:100%;border:none}
-.ex-detail-video .video-fs-btn{position:absolute;top:10px;right:10px;z-index:9;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
-.ex-detail-video .video-fs-btn:active{transform:scale(.92)}
-.ex-detail-video.video-fs{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;margin:0;border:none;border-radius:0;aspect-ratio:auto;height:100vh;height:100dvh;width:100vw;background:#000;justify-content:center}
-.ex-detail-video.video-fs .video-fs-btn{top:auto;right:calc(env(safe-area-inset-right,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);width:46px;height:46px;font-size:20px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
-.ex-detail-video.video-fs>div{width:100%;height:100%;margin:0}
-.ex-detail-video.video-fs>div>div{padding:0!important;position:absolute;inset:0;height:100%;width:100%}
+.video-fs-host{position:relative;overflow:hidden}
+.bonus-video{margin-bottom:16px;border-radius:12px;overflow:hidden}
+.video-fs-host .video-fs-btn{position:absolute;top:10px;right:10px;z-index:9;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.video-fs-host .video-fs-btn:active{transform:scale(.92)}
+.video-fs-host.video-fs{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;margin:0;border:none;border-radius:0;aspect-ratio:auto;height:100vh;height:100dvh;width:100vw;background:#000;justify-content:center}
+.video-fs-host.video-fs .video-fs-btn{top:auto;right:calc(env(safe-area-inset-right,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);width:46px;height:46px;font-size:20px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
+.video-fs-host.video-fs>div{width:100%;height:100%;margin:0}
+.video-fs-host.video-fs>div>div{padding:0!important;position:absolute;inset:0;height:100%;width:100%}
+.video-fs-host.video-fs>iframe{width:100%!important;height:100%!important;border-radius:0!important}
 .ex-detail-body{padding:16px 20px 40px}
 .ex-detail-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1.2;margin-bottom:4px}
 .ex-detail-detail{font-size:14px;color:var(--orange);font-weight:600;margin-bottom:12px}
@@ -764,7 +767,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
       <div class="test-title" id="test-title"></div>
     </div>
 
-    <div class="video-placeholder">
+    <div class="video-placeholder video-fs-host">
       <div class="play-btn">▶</div>
       <div class="video-label" id="video-label"></div>
     </div>
@@ -862,7 +865,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div class="top-label" id="ex-detail-label">Exercício</div>
     <div class="top-badge" id="ex-detail-badge"></div>
   </div>
-  <div class="ex-detail-video">
+  <div class="ex-detail-video video-fs-host">
     <div class="play-btn">▶</div>
     <div class="video-label" id="ex-video-label">Vídeo em breve</div>
   </div>
@@ -1022,7 +1025,10 @@ const CONSEQUENCES = {
 const VTURB_BASE = 'https://scripts.converteai.net/5129f968-9c0f-495d-9f4c-842e6c88a022/players/'
 function vturbEmbed(vid) {
   const embedUrl = `${VTURB_BASE}${vid}/v4/embed.html`
-  return `<div style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0;background:#000"><iframe frameborder="0" allowfullscreen allow="fullscreen; autoplay; encrypted-media; picture-in-picture" src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="origin" title="Vídeo do exercício"></iframe><button class="video-fs-btn" onclick="event.stopPropagation();toggleVideoFs(this)" type="button">⛶</button></div></div>`
+  return `<div style="margin:0 auto;width:100%"><div style="position:relative;padding:56.25% 0 0 0;background:#000"><iframe frameborder="0" allowfullscreen allow="fullscreen; autoplay; encrypted-media; picture-in-picture" src="${embedUrl}" style="position:absolute;top:0;left:0;width:100%;height:100%" referrerpolicy="origin" title="Vídeo do exercício"></iframe></div></div>`
+}
+function fsBtn() {
+  return `<button class="video-fs-btn" onclick="event.stopPropagation();toggleVideoFs(this)" type="button">⛶</button>`
 }
 async function lockFsOrientation(landscape) {
   try {
@@ -1038,7 +1044,7 @@ async function lockFsOrientation(landscape) {
   } catch (e) {}
 }
 function toggleVideoFs(btn) {
-  const wrap = btn.closest('.ex-detail-video, .video-placeholder')
+  const wrap = btn.closest('.video-fs-host')
   if (!wrap) return
   const isFs = wrap.classList.toggle('video-fs')
   btn.textContent = isFs ? '✕' : '⛶'
@@ -1764,7 +1770,7 @@ function showBonusDetail(idx, subIdx) {
       <h2>${sub.title}</h2>
       <p>${sub.sub}</p>
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${sub.freq||''}</div>
-      <div style="margin-bottom:16px;border-radius:12px;overflow:hidden">${vturbEmbed(sub.vid)}</div>`
+      <div class="video-fs-host bonus-video">${vturbEmbed(sub.vid)}${fsBtn()}</div>`
     sub.steps.forEach(step => {
       contentHtml += `<div style="margin-bottom:12px">
         <div style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:6px">${step.label}</div>
@@ -2352,9 +2358,9 @@ function loadTest(idx) {
 
   const vp = document.querySelector('.video-placeholder')
   if (t.videoUrl) {
-    vp.innerHTML = `<iframe width="100%" height="100%" src="${t.videoUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border-radius:12px"></iframe>`
+    vp.innerHTML = `<iframe width="100%" height="100%" src="${t.videoUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="border-radius:12px"></iframe>` + fsBtn()
   } else if (t.videoEmbed) {
-    vp.innerHTML = t.videoEmbed
+    vp.innerHTML = t.videoEmbed + fsBtn()
     if (t.videoScript && !document.querySelector(`script[src="${t.videoScript}"]`)) {
       const s = document.createElement('script')
       s.src = t.videoScript; s.async = true
@@ -3346,7 +3352,7 @@ function showExerciseDetail(id) {
   const videoWrap = document.querySelector('.ex-detail-video')
   const exVid = getExVid(ex)
   if (exVid) {
-    videoWrap.innerHTML = vturbEmbed(exVid)
+    videoWrap.innerHTML = vturbEmbed(exVid) + fsBtn()
     videoWrap.classList.add('has-video')
   } else {
     videoWrap.innerHTML = '<div class="play-btn">▶</div><div class="video-label">Vídeo em breve</div>'
