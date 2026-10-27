@@ -408,6 +408,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .ex-done-icon{font-size:64px;animation:doneBounce .6s ease}
 .ex-done-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--text);text-align:center}
 .ex-done-sub{font-size:14px;color:var(--muted);text-align:center}
+.confirm-card{position:relative;width:calc(100% - 48px);max-width:360px;background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:28px 24px 24px;box-shadow:0 24px 64px rgba(0,0,0,.35);text-align:center}
+.confirm-close{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.confirm-close:active{transform:scale(.94)}
+.btn-danger{width:100%;padding:14px;background:var(--torn);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s,transform .1s}
+.btn-danger:active{transform:scale(.98);opacity:.9}
+.btn-danger:disabled{opacity:.35;cursor:not-allowed}
 @keyframes doneBounce{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
 .confetti{position:fixed;width:8px;height:8px;border-radius:2px;z-index:201;animation:confettiFall 1.5s ease forwards}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
@@ -1545,14 +1551,16 @@ function closeSettings() {
 function confirmRefazer() {
   const ov = document.createElement('div')
   ov.className = 'ex-done-overlay'
+  ov.onclick = e => { if (e.target === ov) ov.remove() }
   ov.innerHTML = `
-    <div style="text-align:center;max-width:320px;padding:0 20px">
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="refazer-title">
+      <button class="confirm-close" aria-label="Fechar" onclick="this.closest('.ex-done-overlay').remove()">✕</button>
       <div style="font-size:40px;margin-bottom:12px">⚠️</div>
-      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Refazer avaliação?</div>
+      <div id="refazer-title" style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Refazer avaliação?</div>
       <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px">Ao refazer o check-up, seus exercícios recomendados podem mudar de acordo com os novos resultados do seu corpo.</p>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-primary" onclick="refazerAvaliacao()">Refazer avaliação</button>
         <button class="btn-outline" onclick="this.closest('.ex-done-overlay').remove()">Cancelar</button>
+        <button class="btn-primary" onclick="refazerAvaliacao()">Refazer avaliação</button>
       </div>
     </div>`
   document.body.appendChild(ov)
@@ -2187,14 +2195,16 @@ function handleRecoveryRedirect() {
 function confirmDeleteAccount() {
   const ov = document.createElement('div')
   ov.className = 'ex-done-overlay'
+  ov.onclick = e => { if (e.target === ov) ov.remove() }
   ov.innerHTML = `
-    <div style="text-align:center;max-width:320px;padding:0 20px">
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+      <button class="confirm-close" aria-label="Fechar" onclick="this.closest('.ex-done-overlay').remove()">✕</button>
       <div style="font-size:40px;margin-bottom:12px">⚠️</div>
-      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Excluir sua conta?</div>
+      <div id="delete-title" style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Excluir sua conta?</div>
       <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px">Esta ação é permanente. Sua conta e todos os seus dados de avaliação e treinos serão apagados e não poderão ser recuperados.</p>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-primary" id="delete-account-btn" onclick="deleteAccount()">Excluir minha conta</button>
         <button class="btn-outline" onclick="this.closest('.ex-done-overlay').remove()">Cancelar</button>
+        <button class="btn-danger" id="delete-account-btn" onclick="deleteAccount()">Sim, excluir permanentemente</button>
       </div>
     </div>`
   document.body.appendChild(ov)
@@ -3102,9 +3112,9 @@ function showDoneAnimation(weekComplete) {
   }
   const ov = document.createElement('div')
   ov.className = 'ex-done-overlay'
-  ov.innerHTML = weekComplete
+  ov.innerHTML = `<div class="confirm-card">${weekComplete
     ? `<div class="ex-done-icon">🎉</div><div class="ex-done-title">Semana completa!</div><div class="ex-done-sub">Todos os treinos da semana foram finalizados. Continue firme na jornada.</div>`
-    : `<div class="ex-done-icon">🎉</div><div class="ex-done-title">Parabéns!</div><div class="ex-done-sub">Treino completo. Continue firme na jornada.</div>`
+    : `<div class="ex-done-icon">🎉</div><div class="ex-done-title">Parabéns!</div><div class="ex-done-sub">Treino completo. Continue firme na jornada.</div>`}</div>`
   ov.onclick = () => ov.remove()
   document.body.appendChild(ov)
   setTimeout(() => ov.remove(), 3000)
@@ -3119,14 +3129,17 @@ function showMonthAdvancePrompt() {
   ov.className = 'ex-done-overlay'
   ov.style.background = 'rgba(0,0,0,.6)'
   ov.innerHTML = `
-    <div class="ex-done-icon">🎉</div>
-    <div class="ex-done-title">${lastMonth ? 'Você concluiu todos os meses!' : 'Você completou um mês!'}</div>
-    <div class="ex-done-sub">${lastMonth
-      ? 'Parabéns! Você finalizou todo o plano. Continue com os hábitos e refaça a avaliação ao completar cada mês para monitorar sua evolução.'
-      : 'Para receber os exercícios do próximo mês (' + m.label + '), refaça o check-up agora. O novo plano será liberado conforme sua evolução.'}</div>
-    <div style="display:flex;gap:10px;margin-top:18px;width:100%">
-      <button class="btn-outline" style="flex:1" onclick="goToDashboard()">Depois</button>
-      <button class="btn-primary" style="flex:1" onclick="startReavaliacao()">Refazer avaliação</button>
+    <div class="confirm-card" role="dialog" aria-modal="true">
+      <button class="confirm-close" aria-label="Fechar" onclick="this.closest('.ex-done-overlay').remove();goToDashboard()">✕</button>
+      <div class="ex-done-icon">🎉</div>
+      <div class="ex-done-title">${lastMonth ? 'Você concluiu todos os meses!' : 'Você completou um mês!'}</div>
+      <div class="ex-done-sub">${lastMonth
+        ? 'Parabéns! Você finalizou todo o plano. Continue com os hábitos e refaça a avaliação ao completar cada mês para monitorar sua evolução.'
+        : 'Para receber os exercícios do próximo mês (' + m.label + '), refaça o check-up agora. O novo plano será liberado conforme sua evolução.'}</div>
+      <div style="display:flex;gap:10px;margin-top:18px;width:100%">
+        <button class="btn-outline" style="flex:1" onclick="this.closest('.ex-done-overlay').remove();goToDashboard()">Depois</button>
+        <button class="btn-primary" style="flex:1" onclick="this.closest('.ex-done-overlay').remove();startReavaliacao()">Refazer avaliação</button>
+      </div>
     </div>`
   ov.onclick = e => { if (e.target === ov) ov.remove() }
   document.body.appendChild(ov)
