@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='30';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='31';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -1210,6 +1210,17 @@ function getGeralOrdem() {
   ]
 }
 
+// Plano base (aluno sem nenhum achado). No M1 é o par histórico; nos meses
+// seguintes gira pelo bloco geral para NUNCA repetir o mês anterior inteiro.
+function baseExercisesForMonth(monthIdx) {
+  const classic = ['e_prop_fechado','e_agach_ponta']
+  if (!monthIdx || monthIdx <= 0) return classic
+  const pool = getGeralOrdem().flatMap(b => b.ids).filter(id => EX[id])
+  if (!pool.length) return classic
+  const off = (monthIdx * 3) % pool.length
+  return [pool[off], pool[(off + 2) % pool.length]]
+}
+
 const SESSION_INFO = [
   {day:'Segunda-feira', focus:'Foco: mobilidade · tornozelo · quadril', color:'var(--torn)'},
   {day:'Quarta-feira',  focus:'Foco: força · glúteo · controle motor', color:'var(--glut)'},
@@ -1571,11 +1582,11 @@ function refazerAvaliacao() {
   localStorage.removeItem('csd_checkup')
   localStorage.removeItem('csd_answers')
   localStorage.removeItem('csd_nivel')
-  localStorage.removeItem('csd_lastCheckup')
-  localStorage.removeItem('csd_lastScores')
-  localStorage.removeItem('csd_completedWeeks')
-  completedWeeks = 0
-  showScreen('s-welcome')
+  // NÃO apaga csd_completedWeeks / csd_lastCheckup aqui: são os fatos que
+  // provam que o mês foi concluído. Se apagássemos antes do novo check-up
+  // (e o app fosse fechado no meio), o aluno refaria a avaliação e voltaria
+  // para o mesmo mês. O reset das semanas acontece só ao liberar o próximo mês.
+  startReavaliacao()
 }
 
 function getBodyStatus(sigCounts) {
@@ -2055,8 +2066,13 @@ async function loadUserData() {
       localStorage.setItem('csd_sessoes', JSON.stringify(s.exercicios || []))
     }
     localStorage.setItem('csd_sessionChecks', JSON.stringify(s.checks || {}))
-    localStorage.setItem('csd_planMonth', s.plan_month.toString())
-    currentPlanMonth = Math.min(2, parseInt(s.plan_month) || 0)
+    // O mês do plano SÓ AVANÇA. Se o aparelho já liberou um mês e o save no
+    // banco atrasou/falhou, não podemos voltar o aluno para o mês anterior
+    // (era o que fazia a reavaliação "não valer" ao reabrir o app).
+    const localMonth = Math.min(2, parseInt(localStorage.getItem('csd_planMonth') || '0') || 0)
+    const serverMonth = Math.min(2, parseInt(s.plan_month) || 0)
+    currentPlanMonth = Math.max(localMonth, serverMonth)
+    localStorage.setItem('csd_planMonth', currentPlanMonth.toString())
     if (s.session_exercises) localStorage.setItem('csd_sessionExercises', JSON.stringify(s.session_exercises))
     // Preserva o MAIOR valor de semanas entre o local e o servidor (não perde progresso
     // de quem concluiu na versão antiga que não persistia completed_weeks no banco)
@@ -2065,15 +2081,22 @@ async function loadUserData() {
     const weeks = Math.max(localWeeks, serverWeeks)
     localStorage.setItem('csd_completedWeeks', weeks.toString())
     completedWeeks = weeks
-    // Deriva a pendência de reavaliação a partir das semanas concluídas
-    if (weeks >= 4 && currentPlanMonth < 2) {
+    // Deriva a pendência de reavaliação a partir das semanas concluídas.
+    // Se o aparelho já liberou um mês que o banco ainda não registrou
+    // (localMonth > serverMonth), NÃO reabre a pendência: o aluno já avançou.
+    const advancedLocally = localMonth > serverMonth
+    if (weeks >= 4 && currentPlanMonth < 2 && !advancedLocally) {
       localStorage.setItem('csd_pendingReav', '1')
     }
-    // Sincroniza tiers de progressão e sinais anteriores vindos do Supabase
+    // Sincroniza tiers de progressão e sinais anteriores vindos do Supabase.
+    // Tiers também só crescem: usa o maior bloco entre local e banco para não
+    // regredir a progressão de quem já avançou no aparelho.
     if (s.signal_tiers) {
       try {
         const t = (typeof s.signal_tiers === 'string') ? JSON.parse(s.signal_tiers) : s.signal_tiers
-        signalTiers = t || {}
+        const merged = { ...signalTiers }
+        Object.keys(t || {}).forEach(k => { merged[k] = Math.max(merged[k] || 0, t[k] || 0) })
+        signalTiers = merged
         localStorage.setItem('csd_signalTiers', JSON.stringify(signalTiers))
       } catch(e) {}
     }
@@ -2084,6 +2107,9 @@ async function loadUserData() {
         localStorage.setItem('csd_prevSignals', JSON.stringify(prevSignalCounts))
       } catch(e) {}
     }
+    // Aparelho estava à frente do banco (mês/semanas): reenvia o estado local
+    // para o servidor não voltar o aluno de mês no próximo login.
+    if (advancedLocally || localWeeks > serverWeeks) saveSessionsToSupabase()
   }
 
   // Carregar bloqueios de exercício (Fase 2): lista de e_* que o app deve OCULTAR
@@ -2507,6 +2533,16 @@ function signalExercisesForMonth(sig, monthIdx, sessionKey) {
   return list.filter((id,i) => list.indexOf(id) === i && EX[id])
 }
 
+// Bloco efetivo do sinal para o mês exibido. Sinais que já estavam em treino
+// acompanham o mês do plano (bloco = índice do mês), mesmo que o tier gravado
+// tenha ficado atrás (prev_signals perdido, troca de aparelho, versão antiga).
+// Achado novo (sem histórico e tier 0) continua começando no bloco do M1.
+function effectiveSignalTier(sig, monthIdx) {
+  const stored = getSignalTier(sig)
+  const inTraining = (prevSignalCounts[sig] || 0) > 0 || stored > 0
+  return inTraining ? Math.max(stored, Math.min(2, monthIdx)) : stored
+}
+
 // Captura o estado anterior antes de um novo check-up (para comparar evolução).
 function capturePrevSignals() {
   if (Object.keys(signalCounts).length > 0) {
@@ -2531,7 +2567,10 @@ function computeNewTiers(freshCounts) {
     const cur = getSignalTier(sig)
     const inPlan = prev > 0 || cur > 0
     if (inPlan) {
-      newTiers[sig] = Math.min(2, cur + 1)   // avança 1 bloco neste mês
+      // O bloco acompanha o MÊS do plano. Usamos max(cur, mês atual) + 1 para
+      // que o tier nunca fique atrás do mês (ex.: prev_signals perdido/troca de
+      // aparelho) — tier atrasado era o que repetia os exercícios do mês anterior.
+      newTiers[sig] = Math.min(2, Math.max(cur, currentPlanMonth) + 1)
     } else if (now > 0) {
       newTiers[sig] = 0                      // achado novo → começa no M1
     }
@@ -2544,6 +2583,8 @@ function currentMonthIdx() {
   return Math.max(0, Math.min(2, currentPlanMonth))
 }
 function showReport() {
+  // Já existia avaliação antes desta? (serve para diferenciar 1º check-up de reavaliação)
+  const hadCheckup = localStorage.getItem('csd_checkup') === '1' || !!localStorage.getItem('csd_firstCheckup')
   const { sigCounts, sigSources } = getActiveSignals()
   const sigs = Object.keys(sigCounts)
   const count = sigs.length
@@ -2640,8 +2681,21 @@ function showReport() {
   if (!localStorage.getItem('csd_firstCheckup')) localStorage.setItem('csd_firstCheckup', Date.now().toString())
   localStorage.setItem('csd_answers',JSON.stringify(answers))
   localStorage.setItem('csd_nivel',nivel)
-  // Advance plan month + adjust tiers only when the student completed the month (4 weeks)
-  if (localStorage.getItem('csd_pendingReav') === '1') {
+  // Libera o próximo mês quando o aluno concluiu as 4 semanas. A conclusão vem
+  // do flag local OU das semanas persistidas (banco/local) — antes dependia só
+  // do flag `csd_pendingReav`, que se perdia em login novo/troca de aparelho e
+  // fazia a reavaliação devolver exatamente os exercícios do mês anterior.
+  const checkupTs = localStorage.getItem('csd_lastCheckup') || ''
+  const alreadyAdvanced = localStorage.getItem('csd_advanceFor') === checkupTs
+  // Usa também o valor persistido: cobre estados em que a memória ficou atrás
+  // do localStorage (reload/restauração) e evita perder a liberação do mês.
+  const weeksDone = Math.max(
+    parseInt(completedWeeks || 0) || 0,
+    parseInt(localStorage.getItem('csd_completedWeeks') || '0') || 0
+  ) >= 4
+  const monthDone = localStorage.getItem('csd_pendingReav') === '1' || weeksDone
+  let advancedMonth = false
+  if (monthDone && currentPlanMonth < 2 && !alreadyAdvanced) {
     const fresh = Object.keys(signalCounts).length > 0 ? signalCounts : {}
     const newTiers = computeNewTiers(fresh)
     // Só grava os sinais que estão em treino (in-plan ou achado novo). Os demais
@@ -2650,17 +2704,23 @@ function showReport() {
     // Avança o mês do plano (M1→M2→M3)
     currentPlanMonth = Math.min(2, currentPlanMonth + 1)
     localStorage.setItem('csd_planMonth', currentPlanMonth.toString())
-    localStorage.removeItem('csd_sessoes')
+    // NÃO remove csd_sessoes aqui: ele é a última lista REAL do aluno e serve de
+    // referência anti-repetição (é regenerado ao abrir o plano do novo mês).
     // Limpa apenas o cache do NOVO mês atual (força regeneração com os tiers
     // atualizados). Preserva csd_sessoes_m0/m1 — são a lista REALMENTE exercida
     // no mês anterior, usada pelo gerador para não repetir exercícios.
     localStorage.removeItem('csd_sessoes_m' + currentPlanMonth)
+    // Consome a conclusão do mês: zera as semanas SÓ agora, depois de liberar.
+    localStorage.removeItem('csd_pendingReav')
+    localStorage.removeItem('csd_completedWeeks')
+    completedWeeks = 0
+    localStorage.setItem('csd_advanceFor', checkupTs)
     // NÃO sobrescrevemos csd_prevSignals aqui: prev precisa continuar sendo a
     // comparação "antes do reteste" para o plano manter os sinais RESOLVIDOS
     // (manutenção) e o filtro de sigs não descartá-los. O próximo check-up
-    // regrav prevSignals corretamente em capturePrevSignals().
-    localStorage.removeItem('csd_pendingReav')
+    // regrava prevSignals corretamente em capturePrevSignals().
     saveSessionsToSupabase()
+    advancedMonth = true
   }
 
   // Salvar no Supabase
@@ -2688,6 +2748,19 @@ function showReport() {
   }
 
   showScreen('s-result')
+  if (advancedMonth) {
+    document.getElementById('report-content').insertAdjacentHTML('afterbegin',
+      `<div class="report-block fade-in" style="border-color:rgba(74,222,128,.35)">
+        <div class="report-block-title">plano liberado</div>
+        <div style="font-size:14px;line-height:1.6;color:var(--text)">✅ Você concluiu as 4 semanas: <strong>${PLAN_MONTHS[currentPlanMonth].label}</strong> liberado. Seus novos exercícios já estão no plano.</div>
+      </div>`)
+  } else if (hadCheckup && currentPlanMonth < 2) {
+    document.getElementById('report-content').insertAdjacentHTML('afterbegin',
+      `<div class="report-block fade-in" style="border-color:rgba(251,146,60,.35)">
+        <div class="report-block-title">próximo mês</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--text)">Para liberar os exercícios do próximo mês, conclua as 4 semanas de treino do <strong>${PLAN_MONTHS[currentPlanMonth].label}</strong> e refaça a avaliação pelo aviso que aparece no painel.</div>
+      </div>`)
+  }
 }
 
 // ══ POR QUE SEU PLANO É DIFERENTE ══
@@ -2824,6 +2897,16 @@ function renderPlanView() {
     if (!viewingPast && sigs.length === 0 && monthIdx > 0) {
       let basePrev = null
       try { basePrev = JSON.parse(localStorage.getItem('csd_sessoes_m' + (monthIdx - 1)) || 'null') } catch(e) {}
+      // Sem o cache mensal (login novo/aparelho novo), usa a lista REAL que o
+      // aluno executou (session_exercises é persistido no banco). Sem isso, o
+      // aluno sem achados recebia exatamente o mesmo plano base todo mês.
+      if (!Array.isArray(basePrev)) {
+        try {
+          const sessEx = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
+          const arr = Object.keys(sessEx).sort().map(k => sessEx[k]).filter(Array.isArray)
+          if (arr.length) basePrev = arr
+        } catch(e) {}
+      }
       if (Array.isArray(basePrev)) {
         const done = new Set(basePrev.flat())
         SIGNAL_ORDER.forEach(sig => {
@@ -2843,20 +2926,24 @@ function renderPlanView() {
     const prevMonthIdx = monthIdx - 1
     const usedBefore = new Set()
     if (!viewingPast && monthIdx > 0) {
-      // Prefere a lista REALMENTE exercida no mês anterior (cache preservado).
-      // Os pools de calendário (months[prevMonthIdx]) só são fallback quando não
-      // há cache (ex.: aparelho novo) — com tier diferente do mês de calendário,
-      // o fallback apontava para exercícios que o aluno nem fez.
+      // Pools de calendário do mês anterior: nunca devem reaparecer. Isso vale
+      // mesmo quando o tier gravado apontava para outro bloco (tier atrasado).
+      sigs.forEach(sig => {
+        const info = SIGNAL_MAP[sig]; if (!info || !info.months) return
+        const em = info.months[Math.max(0, Math.min(2, prevMonthIdx))]
+        ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
+      })
+      // Prefere a lista REALMENTE exercida no mês anterior (cache preservado)
+      // e, sem ele (aparelho novo/login), a lista exibida persistida no banco.
       let actualPrev = null
       try { actualPrev = JSON.parse(localStorage.getItem('csd_sessoes_m' + prevMonthIdx) || 'null') } catch(e) {}
       if (Array.isArray(actualPrev) && actualPrev.length >= 3) {
         actualPrev.forEach(arr => (Array.isArray(arr) ? arr : []).forEach(id => usedBefore.add(id)))
       } else {
-        sigs.forEach(sig => {
-          const info = SIGNAL_MAP[sig]; if (!info || !info.months) return
-          const em = info.months[Math.max(0, Math.min(2, prevMonthIdx))]
-          ;['a','b','c'].forEach(kk => (em && em[kk] || []).forEach(id => usedBefore.add(id)))
-        })
+        try {
+          const sessEx = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
+          Object.keys(sessEx).forEach(k => (Array.isArray(sessEx[k]) ? sessEx[k] : []).forEach(id => usedBefore.add(id)))
+        } catch(e) {}
       }
     }
     // Decisão GLOBAL por família _assist (ex.: cossack vs cossack_assist) para o mês:
@@ -2869,7 +2956,7 @@ function renderPlanView() {
       sigs.forEach(sig => {
         if (!SIGNAL_MAP[sig]) return
         const pool = ['a','b','c']
-          .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+          .flatMap(kk => signalExercisesForMonth(sig, effectiveSignalTier(sig, monthIdx), kk))
           .filter((id,ix,self) => self.indexOf(id) === ix)
         pool.forEach(id => {
           if (!/_assist$/.test(id)) return
@@ -2921,7 +3008,7 @@ function renderPlanView() {
           // Usamos o exercício do spot DESTE treino (k) quando ele é novo.
           // Só buscamos em outros spots se o spot atual só tiver exercício
           // repetido do mês anterior. Isso mantém variabilidade entre A/B/C.
-          const tier = getSignalTier(sig)
+          const tier = effectiveSignalTier(sig, monthIdx)
           const spotList = signalExercisesForMonth(sig, tier, k)
           const spotNovo = spotList.filter(id => !usedBefore.has(id))
           if (spotNovo.length) {
@@ -2950,13 +3037,18 @@ function renderPlanView() {
             }
           }
         } else {
-          signalExercisesForMonth(sig, getSignalTier(sig), k).forEach(addEx)
+          signalExercisesForMonth(sig, effectiveSignalTier(sig, monthIdx), k).forEach(addEx)
         }
       })
       if (!viewingPast && criticalSignal) {
-        signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), k).forEach(addEx)
+        // Reforço do achado crítico: só exercícios NOVOS (nunca os do mês anterior,
+        // que já foram filtrados acima). Sem esse filtro o crítico reintroduzia
+        // exercícios do mês passado e o plano parecia repetido.
+        signalExercisesForMonth(criticalSignal, effectiveSignalTier(criticalSignal, monthIdx), k)
+          .filter(id => !usedBefore.has(id))
+          .forEach(addEx)
       }
-      if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
+      if (ids.length===0) baseExercisesForMonth(monthIdx).forEach(id => addEx(id))
       return ids
     })
     localStorage.setItem('csd_sessoes',JSON.stringify(sessoes))
@@ -3183,7 +3275,7 @@ function showSessionFromPlan(sessIdx) {
         signalExercisesForMonth(sig, viewPlanMonth, sessionKey).forEach(addHist)
       })
     }
-    if (historyIds.length === 0) historyIds.push('e_prop_fechado','e_agach_ponta')
+    if (historyIds.length === 0) baseExercisesForMonth(viewPlanMonth).forEach(addHist)
     let html = `<div style="display:flex;gap:8px;margin-bottom:12px">`
     html += ['Treino A','Treino B','Treino C'].map((d,i) =>
       `<button class="${i===sessIdx?'btn-primary':'btn-outline'}" style="flex:1;font-size:12px;padding:10px 0" onclick="showSessionFromPlan(${i})">${d}</button>`
@@ -3231,7 +3323,7 @@ function showSessionFromPlan(sessIdx) {
     relevantSigs.forEach(sig => {
       if (!SIGNAL_MAP[sig]) return
       const pool = ['a','b','c']
-        .flatMap(kk => signalExercisesForMonth(sig, getSignalTier(sig), kk))
+        .flatMap(kk => signalExercisesForMonth(sig, effectiveSignalTier(sig, viewPlanMonth), kk))
         .filter((id,ix,self) => self.indexOf(id) === ix)
       pool.forEach(id => {
         if (!/_assist$/.test(id)) return
@@ -3270,10 +3362,10 @@ function showSessionFromPlan(sessIdx) {
         return !kept.includes(id) && ex && !keptNames.has(ex.name) &&
           !(window._blocks && window._blocks.has(id))
       })
-      // Giro por treino: A/B/C começam em pontos diferentes do pool geral,
-      // evitando que os três terminem com os mesmos exercícios de preenchimento
-      // (quando os achados específicos faltam, os treinos ficavam idênticos).
-      const offset = pool.length ? (sessIdx * 2) % pool.length : 0
+      // Giro por treino E por mês: A/B/C começam em pontos diferentes do pool
+      // geral e cada mês começa em outro trecho (evita repetir o mês anterior
+      // e evita que os três treinos fiquem idênticos).
+      const offset = pool.length ? (viewPlanMonth * 3 + sessIdx * 2) % pool.length : 0
       let i = 0
       while (kept.length < MIN && i < pool.length) {
         const id = pool[(i + offset) % pool.length]
@@ -3294,7 +3386,7 @@ function showSessionFromPlan(sessIdx) {
   finalIds.forEach(id => {
     if (seen.has(id)) return
     seen.add(id)
-    const isCrit = criticalSignal && signalExercisesForMonth(criticalSignal, getSignalTier(criticalSignal), sessionKey).includes(id)
+    const isCrit = criticalSignal && signalExercisesForMonth(criticalSignal, effectiveSignalTier(criticalSignal, viewPlanMonth), sessionKey).includes(id)
     const isEsp = specificSet.has(id)
     const rendered = renderExCard(id, n, isEsp, isCrit)
     if (rendered) { html += rendered; n++ }
@@ -3588,8 +3680,12 @@ function startReavaliacao() {
     localStorage.setItem('csd_lastScores',JSON.stringify({overall,scores:calculateIndex().scores,date:Date.now()}))
   }
   capturePrevSignals()
-  localStorage.removeItem('csd_completedWeeks')
-  completedWeeks = 0
+  // Persiste já o "antes do reteste". Se o aluno fechar/recarregar o app no meio
+  // do check-up (ou trocar de aparelho), prev_signals e as semanas concluídas
+  // continuam no banco e o próximo mês ainda é liberado corretamente.
+  saveSessionsToSupabase()
+  // As semanas concluídas só são zeradas quando o mês é realmente liberado
+  // (showReport). Mantê-las aqui é o que garante a liberação mesmo em reload.
   showScreen('s-welcome')
 }
 
