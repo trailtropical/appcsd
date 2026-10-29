@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSD — Var: play grande, centralizado baixo</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,sans-serif;background:#F5F5F3;color:#1A1A18;padding:20px;line-height:1.5}
+  .container{max-width:430px;margin:0 auto}
+  h1{font-size:20px;margin-bottom:6px;color:#E8500A;font-family:'Syne',sans-serif}
+  .subtitle{color:#6B6B68;font-size:13px;margin-bottom:24px}
+  .sess-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6B6B68;font-weight:600;margin-bottom:8px}
+  .ex-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start;position:relative;margin-bottom:10px;transition:all .15s ease}
+  .ex-card.especifico{border-color:rgba(232,80,10,.3);background:rgba(232,80,10,.05)}
+  .ex-check{width:22px;height:22px;border-radius:3px;border:2px solid #9CA3AF;background:#F5F5F3;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .25s ease;margin-top:2px;font-size:12px;color:transparent;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
+  .ex-check.done{background:#4ADE80;border-color:#4ADE80;color:#fff}
+  .ex-body{flex:1}
+  .ex-name{font-size:14px;font-weight:600;color:#1A1A18;margin-bottom:2px}
+  .ex-detail{font-size:12px;color:#6B6B68}
+  .ex-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .ex-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;border:1px solid;background:transparent;text-transform:uppercase;letter-spacing:.04em}
+  .ex-why{font-size:12px;color:#6B6B68;margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.08);line-height:1.55;font-style:italic}
+
+  /* BOTÃO GRANDO — CENTRALIZADO, MAIS BAIXO, USANDO ESPAÇO EM BRANCO */
+  .btn-play-big{
+    position:absolute;top:25%;left:75%;transform:translate(-50%,-50%);
+    width:44px;height:44px;border-radius:50%;
+    background:#E8500A;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;box-shadow:0 4px 14px rgba(232,80,10,.35);
+    animation:pulse 2.2s infinite;cursor:pointer;
+    z-index:2;border:2px solid rgba(255,255,255,.9);
+  }
+  .btn-play-big::before{content:'▶';font-size:14px}
+  @keyframes pulse{0%,100%{opacity:1;transform:translateX(-50%) scale(1)}50%{opacity:.85;transform:translateX(-50%) scale(1.08)}}
+
+  .note{margin-top:24px;padding:14px;border-radius:12px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);font-size:13px;color:#15803d}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>CSD — Play grande, centralizado baixo</h1>
+  <p class="subtitle">Botão igual ao do item 2 (🎯 play no checkbox), mas maior, e posicionado no espaço em branco do card (mais pro centro/baixo, não no canto).</p>
+
+  <div class="sess-label">Treino A — Segunda-feira</div>
+
+  <div class="ex-card especifico fade-in">
+    <div class="ex-check"></div>
+    <div class="ex-body">
+      <div class="ex-name">Propriedade fechada</div>
+      <div class="ex-detail">Movimento de abdução/luz.</div>
+      <div class="ex-tags"><span class="ex-tag" style="color:#38BDF8">propriocepção</span></div>
+      <div class="ex-why">Treina o sistema proprioceptivo sem compensação visual.</div>
+    </div>
+    <div class="btn-play-big" title="Ver vídeo"></div>
+  </div>
+
+  <div class="ex-card especifico fade-in">
+    <div class="ex-check"></div>
+    <div class="ex-body">
+      <div class="ex-name">Agachamento ponta do pé</div>
+      <div class="ex-detail">Força isométrica.</div>
+      <div class="ex-tags"><span class="ex-tag" style="color:#38BDF8">tornozelo</span></div>
+      <div class="ex-why">Fortalece tornozelo e panturrilha.</div>
+    </div>
+    <div class="btn-play-big" title="Ver vídeo"></div>
+  </div>
+
+  <div class="ex-card geral fade-in">
+    <div class="ex-check"></div>
+    <div class="ex-body">
+      <div class="ex-name">Volta ao mundo (em pé)</div>
+      <div class="ex-detail">2 séries · 30s cada lado · em pé</div>
+      <div class="ex-tags"><span class="ex-tag" style="color:#FB923C">mobilidade</span></div>
+      <div class="ex-why">Abre o quadril em todas as direções antes de correr.</div>
+    </div>
+    <div class="btn-play-big" title="Ver vídeo"></div>
+  </div>
+
+  <div class="note">✓ Cards 100% fiéis ao CSS real. Só adicionamos o botão laranja grande (44px) centralizado no espaço em branco inferior do card.</div>
+</div>
+</body>
+</html>
