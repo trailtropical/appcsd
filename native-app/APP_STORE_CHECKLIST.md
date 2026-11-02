@@ -9,10 +9,10 @@ Rascunho com as respostas pra agilizar a submissão. Confirmar cada item antes d
 | **Nome** (até 30 letras) | Corredor Sem Dor |
 | **Subtitle** (até 30) | Você correndo leve de novo! (24 letras) |
 | **Bundle ID** | `br.com.corredorsemdor` |
-| **Versão** | 1.0 (build 1) |
+| **Versão** | 1.0 (build 3) |
 | **Categoria primária** | Health & Fitness |
 | **Categoria secundária** | Sports (opcional) |
-| **Classificação etária** | 4+ (não há conteúdo explícito; orienta exercícios) |
+| **Classificação etária** | **Health or Wellness Topics: Sim** (exigido na revisão 2.3.6); sem conteúdo explícito |
 | **Privacidade (URL)** | https://trailtropical.github.io/appcsd/privacy-policy.html |
 | **Operador (LGPD)** | Trail Tropical — CNPJ 68.420.244/0001-67 |
 
