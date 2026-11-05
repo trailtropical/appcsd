@@ -4,6 +4,16 @@ Rascunho com as respostas pra agilizar a submissão. Confirmar cada item antes d
 
 > **Status: PUBLICADO** — versão 1.0 (build 3) aprovada e liberada na App Store em 05/11/2026.
 > Link: https://apps.apple.com/br/app/corredor-sem-dor/id6824963334
+> **Em preparação:** 1.0.1 (build 4) — primeiro acesso dentro do app + validação de compra.
+
+## Próxima versão — 1.0.1 (build 4)
+
+- Primeiro acesso dentro do app: e-mail da compra → criar senha.
+- Validação de compra na tabela `purchases` + Edge Function `first-access`.
+- Bloqueio automático de acesso em reembolso/chargeback.
+- Cadastro público desativado no Supabase (só o webhook cria contas).
+- Botão "Primeiro acesso? Criar senha" na tela de login.
+- Instruções de deploy em `DEPLOY_ACESSO.md`.
 
 ## Registro do app (App Store Connect)
 

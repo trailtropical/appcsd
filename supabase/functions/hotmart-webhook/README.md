@@ -1,81 +1,68 @@
-# Hotmart Webhook → Supabase + Email (Resend)
+# Hotmart Webhook → Supabase + E-mail (Resend)
 
-## O que faz
-Recebe webhook da Hotmart quando alguém compra, cria o usuário no Supabase e envia email com link de cadastro.
+Recebe o webhook da Hotmart quando a compra é aprovada, registra a compra,
+cria a conta do aluno e envia o e-mail com o link da App Store.
+
+O aluno **não cria mais a conta pelo site**: ele baixa o app, toca em
+"Primeiro acesso", informa o e-mail da compra e cria a senha dentro do app.
+A validação é feita pela Edge Function `first-access`.
 
 ## Fluxo
+
 ```
 Aluno compra na Hotmart
-  → Hotmart envia POST para a Edge Function
-  → Edge Function valida o token
-  → Cria usuário no Supabase Auth (senha temporária)
-  → Envia email via Resend com link para criar senha
-  → Aluno clica no link → cria senha → começa o programa
+  → Hotmart envia POST para esta função
+  → Grava a compra em public.purchases (status approved)
+  → Cria a conta no Supabase Auth (e-mail já confirmado)
+  → Desbloqueia o perfil (access_blocked = false)
+  → Envia e-mail com o botão "Baixar na App Store"
 ```
+
+Reembolso, chargeback, cancelamento e protesto:
+
+```
+Hotmart envia PURCHASE_REFUNDED / PURCHASE_CHARGEBACK / ...
+  → Atualiza a compra para status = refunded
+  → Marca profiles.access_blocked = true
+  → O app bloqueia o acesso no próximo login
+```
+
+## Variáveis de ambiente
+
+| Secret | Descrição |
+|---|---|
+| `HOTMART_TOKEN` | Token de verificação do webhook Hotmart (`x-hotmart-hottok`) |
+| `RESEND_API_KEY` | API key do Resend |
+| `FROM_EMAIL` | Remetente verificado no Resend |
+| `APP_STORE_URL` | Opcional. Padrão: link da App Store do Corredor Sem Dor |
+
+## Configurar na Hotmart
+
+1. Hotmart → Ferramentas → Webhook.
+2. URL: `https://zjsadtpxdexlflfykqzy.supabase.co/functions/v1/hotmart-webhook`
+3. Eventos: compra aprovada/completa, reembolso, chargeback, cancelamento e protesto.
+4. Token: o mesmo valor de `HOTMART_TOKEN`.
 
 ## Deploy
 
-### 1. Criar conta no Resend
-- Acesse https://resend.com → Sign Up
-- Crie uma API Key em **API Keys**
-- Adicione seu domínio em **Domains** e configure DNS
-
-### 2. Instalar Supabase CLI
-```bash
-npm install -g supabase
-```
-
-### 3. Login e link
-```bash
-supabase login
-supabase link --project-ref zjsadtpxdexlflfykqzy
-```
-
-### 4. Setar as secrets
-```bash
-supabase secrets set HOTMART_TOKEN=seu_token_hotmart
-supabase secrets set RESEND_API_KEY=re_sua_api_key
-supabase secrets set APP_URL=https://trailtropical.github.io/appcsd/
-supabase secrets set FROM_EMAIL=noreply@seudominio.com
-```
-
-### 5. Deploy
 ```bash
 supabase functions deploy hotmart-webhook --no-verify-jwt
 ```
 
-## Configurar na Hotmart
-1. **Produtos → [produto] → Configurações → Webhooks**
-2. URL: `https://zjsadtpxdexlflfykqzy.supabase.co/functions/v1/hotmart-webhook`
-3. Evento: **Compra aprovada**
+## Teste rápido
 
-## Testar
 ```bash
 curl -X POST https://zjsadtpxdexlflfykqzy.supabase.co/functions/v1/hotmart-webhook \
   -H "Content-Type: application/json" \
-  -H "x-hotmart-hottok: seu_token_hotmart" \
+  -H "x-hotmart-hottok: seu_token" \
   -d '{
-    "event": "PURCHASE_COMPLETE",
+    "event": "PURCHASE_APPROVED",
     "data": {
-      "buyer": {
-        "name": "Aluno Teste",
-        "email": "aluno@teste.com"
-      }
+      "buyer": { "email": "aluno@teste.com", "name": "Aluno Teste" },
+      "product": { "id": 123, "name": "Corredor Sem Dor" },
+      "purchase": { "transaction": "HP-TESTE-001", "status": "APPROVED" }
     }
   }'
 ```
 
-## Email enviado
-O email contém:
-- Logo CSD
-- Mensagem de boas-vindas
-- Botão "Criar minha senha e começar"
-- Link backup caso o botão não funcione
-
-## Variáveis de ambiente
-| Secret | Descrição |
-|---|---|
-| `HOTMART_TOKEN` | Token de verificação do webhook Hotmart |
-| `RESEND_API_KEY` | API key do Resend |
-| `APP_URL` | URL do app (default: GitHub Pages) |
-| `FROM_EMAIL` | Email remetente (precisa ser do domínio verificado) |
+Resposta esperada: `{"success":true,"email":"aluno@teste.com","transactionId":"HP-TESTE-001","status":"approved"}`.

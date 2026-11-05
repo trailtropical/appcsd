@@ -50,9 +50,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .btn-primary:active{transform:scale(.98);opacity:.9}
 .btn-primary:disabled{opacity:.35;cursor:not-allowed}
 .login-footer{font-size:11px;color:var(--hint);text-align:center;margin-top:20px;line-height:1.6}
+.login-note{font-size:11.5px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.55}
+.login-back{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);text-decoration:none;margin-bottom:18px}
+.login-back:hover{color:var(--text)}
 .login-msg{font-size:12px;line-height:1.5;padding:10px 12px;border-radius:10px;margin-bottom:16px;display:none}
 .login-msg.ok{display:block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ADE80}
 .login-msg.err{display:block;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#EF4444}
+.login-msg.info{display:block;background:var(--surface2);border:1px solid var(--border2);color:var(--muted)}
 .login-disclaimer{font-size:10.5px;color:var(--hint);text-align:center;margin-top:16px;line-height:1.5}
 .btn-download{width:100%;padding:14px;background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,transform .1s;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-download:active{transform:scale(.98);background:var(--surface2)}
@@ -580,7 +584,10 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
     <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="sua-senha" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    <div id="login-msg" class="login-msg" style="display:none"></div>
     <div class="login-footer"><a href="#" onclick="openReset();return false" style="color:var(--orange);text-decoration:none">Esqueci minha senha</a></div>
+    <div class="login-footer" style="margin-top:6px"><a href="#" onclick="openFirstAccess();return false" style="color:var(--orange);text-decoration:none">Primeiro acesso? Criar senha</a></div>
+    <div class="login-note">O acesso é liberado após a compra do programa. Use o e-mail informado na compra.</div>
     <button class="btn-download" onclick="showInstallModal(true)"><span>📱</span> Baixar App</button>
     <div class="login-disclaimer">Este aplicativo tem caráter informativo e não substitui a avaliação de um profissional de saúde.</div>
   </div>
@@ -593,7 +600,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div class="modal-sub">Escolha o sistema do seu celular</div>
     <div class="modal-btns">
       <button class="modal-btn android" onclick="installAndroid()"><span class="modal-btn-icon">🤖</span>Android</button>
-      <button class="modal-btn ios" onclick="showIosSteps()"><span class="modal-btn-icon">🍎</span>iPhone</button>
+      <button class="modal-btn ios" onclick="openAppStore()"><span class="modal-btn-icon">🍎</span>App Store</button>
     </div>
     <div class="ios-steps" id="ios-steps" style="display:none">
       <div style="margin-bottom:10px;font-size:14px;color:var(--text);font-weight:600">Como adicionar à tela inicial:</div>
@@ -676,19 +683,31 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
   </div>
 </div>
 
-<!-- CRIAR CONTA -->
-<div id="s-signup" class="screen">
+<!-- PRIMEIRO ACESSO -->
+<div id="s-first-access" class="screen">
   <div class="login-card">
+    <a class="login-back" href="#" onclick="showScreen('s-login');return false">← Voltar para o login</a>
     <div class="login-logo">
       <div class="logo-mark">CSD</div>
     </div>
-    <div class="login-title">Crie sua senha</div>
-    <div class="login-sub">Agora defina uma senha para acessar o programa.</div>
-    <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="seu@email.com" readonly style="opacity:0.7"></div>
-    <div class="field"><label>Senha</label><input type="password" id="signup-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
-    <div class="field"><label>Confirmar senha</label><input type="password" id="signup-senha2" placeholder="Repita a senha" autocomplete="new-password"></div>
-    <button class="btn-primary" onclick="doSignupConfirm()">Criar conta e começar</button>
-    <div class="login-footer">Já tem conta? <a href="#" onclick="showScreen('s-login');return false" style="color:var(--orange);text-decoration:none">Entrar</a></div>
+    <div class="login-title">Ative seu acesso</div>
+    <div class="login-sub">Use o mesmo e-mail da sua compra.</div>
+
+    <div id="fa-step-email">
+      <div class="field"><label>Email</label><input type="email" id="fa-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+      <button class="btn-primary" id="fa-continue" onclick="firstAccessCheck()">Continuar</button>
+      <div id="fa-msg" class="login-msg" style="display:none"></div>
+    </div>
+
+    <div id="fa-step-pass" style="display:none">
+      <div class="field"><label>Email</label><input type="email" id="fa-email-2" readonly style="opacity:0.7"></div>
+      <div class="field"><label>Senha</label><input type="password" id="fa-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+      <div class="field"><label>Confirmar senha</label><input type="password" id="fa-senha2" placeholder="Repita a senha" autocomplete="new-password"></div>
+      <button class="btn-primary" id="fa-create" onclick="firstAccessSet()">Criar senha e começar</button>
+      <div id="fa-msg2" class="login-msg" style="display:none"></div>
+    </div>
+
+    <div class="login-note">O acesso é liberado após a compra do programa. Se você comprou com outro e-mail, use o e-mail informado na compra.</div>
   </div>
 </div>
 
@@ -1836,12 +1855,8 @@ function openDownloadModal() {
   document.getElementById('ios-steps').style.display = 'none'
   document.getElementById('android-steps').style.display = 'none'
 
-  if (deferredPrompt) {
-    document.getElementById('android-steps').style.display = 'none'
-  } else if (isAndroid()) {
+  if (!deferredPrompt && isAndroid()) {
     document.getElementById('android-steps').style.display = 'block'
-  } else if (isIOS()) {
-    document.getElementById('ios-steps').style.display = 'block'
   }
 }
 
@@ -1862,6 +1877,11 @@ async function installAndroid() {
 
 function showIosSteps() {
   document.getElementById('ios-steps').style.display = 'block'
+}
+
+function openAppStore() {
+  closeDownloadModal()
+  window.location.href = 'https://apps.apple.com/br/app/corredor-sem-dor/id6824963334'
 }
 
 // ══ PWA INSTALL SYSTEM ══
@@ -2012,6 +2032,7 @@ async function doLogin() {
   }
 
   currentUser = data.user
+  if (!(await checkAccessAllowed())) return
   // Limpar dados antigos do CSD (manter sessão Supabase)
   const sbKeys = Object.keys(localStorage).filter(k => k.startsWith('sb-') || k.startsWith('supabase'))
   const sbData = {}
@@ -2264,34 +2285,6 @@ async function deleteAccount() {
   currentUser = null
   localStorage.clear()
   showScreen('s-login')
-}
-
-async function doSignup() {
-  const e = document.getElementById('login-email').value.trim()
-  const s = document.getElementById('login-senha').value
-  if (!e || !s) { alert('Preencha email e senha para criar conta.'); return }
-  if (s.length < 6) { alert('A senha deve ter no mínimo 6 caracteres.'); return }
-
-  const btn = document.querySelector('#s-login .btn-primary')
-  btn.textContent = 'Criando conta...'
-  btn.disabled = true
-
-  const { data, error } = await window._sbClient.auth.signUp({ email: e, password: s })
-
-  btn.textContent = 'Entrar'
-  btn.disabled = false
-
-  if (error) {
-    alert('Erro ao criar conta: ' + error.message)
-    return
-  }
-
-  // Criar profile
-  if (data.user) {
-    await window._sbClient.from('profiles').upsert({ id: data.user.id, email: e })
-  }
-
-  alert('Conta criada! Verifique seu email para confirmar o cadastro.')
 }
 
 // ══ SALVAR DADOS NO SUPABASE ══
@@ -3694,81 +3687,150 @@ function startReavaliacao() {
   showScreen('s-welcome')
 }
 
-// ══ CRIAR CONTA ══
-function checkSignupRedirect() {
+// ══ PRIMEIRO ACESSO ══
+function faMsg(id, text, type) {
+  const el = document.getElementById(id)
+  if (!el) return
+  if (!text) { el.style.display = 'none'; el.textContent = ''; return }
+  el.textContent = text
+  el.className = 'login-msg ' + (type || 'info')
+  el.style.display = ''
+}
+
+function openFirstAccess(email) {
+  document.getElementById('fa-step-email').style.display = ''
+  document.getElementById('fa-step-pass').style.display = 'none'
+  document.getElementById('fa-email').value = email || ''
+  document.getElementById('fa-email-2').value = ''
+  document.getElementById('fa-senha').value = ''
+  document.getElementById('fa-senha2').value = ''
+  faMsg('fa-msg', '')
+  faMsg('fa-msg2', '')
+  faMsg('login-msg', '')
+  showScreen('s-first-access')
+}
+
+function firstAccessErrorMessage(code) {
+  switch (code) {
+    case 'no_purchase': return 'Não encontramos uma compra com este e-mail. Use o e-mail informado na compra ou fale com o suporte.'
+    case 'blocked': return 'Este acesso está bloqueado. Fale com o suporte para regularizar.'
+    case 'rate_limited': return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.'
+    case 'invalid_email': return 'Informe um e-mail válido.'
+    default: return 'Não foi possível continuar agora. Tente novamente em instantes.'
+  }
+}
+
+async function invokeFirstAccess(payload) {
+  const { data, error } = await window._sbClient.functions.invoke('first-access', { body: payload })
+  if (error) {
+    let code = ''
+    try { const body = await error.context?.json(); code = body?.code || '' } catch {}
+    if (code) return { ok: false, code }
+    console.error('[CSD] first-access:', error.message || error)
+    return { ok: false, code: 'server_error' }
+  }
+  return data || { ok: false, code: 'server_error' }
+}
+
+async function firstAccessCheck() {
+  const email = document.getElementById('fa-email').value.trim().toLowerCase()
+  if (!email || !email.includes('@')) { faMsg('fa-msg', 'Informe um e-mail válido.', 'err'); return }
+  if (!window._sbClient) { faMsg('fa-msg', 'Sistema indisponível. Recarregue a página.', 'err'); return }
+
+  const btn = document.getElementById('fa-continue')
+  btn.textContent = 'Verificando...'
+  btn.disabled = true
+  faMsg('fa-msg', '')
+
+  const res = await invokeFirstAccess({ action: 'check', email })
+
+  btn.textContent = 'Continuar'
+  btn.disabled = false
+
+  if (!res.ok) { faMsg('fa-msg', firstAccessErrorMessage(res.code), 'err'); return }
+
+  if (!res.needs_password) {
+    document.getElementById('login-email').value = email
+    document.getElementById('login-senha').value = ''
+    faMsg('login-msg', 'Este e-mail já tem conta. Entre com sua senha ou use "Esqueci minha senha".')
+    showScreen('s-login')
+    return
+  }
+
+  document.getElementById('fa-email-2').value = email
+  document.getElementById('fa-step-email').style.display = 'none'
+  document.getElementById('fa-step-pass').style.display = ''
+  setTimeout(() => document.getElementById('fa-senha').focus(), 80)
+}
+
+async function firstAccessSet() {
+  const email = document.getElementById('fa-email-2').value.trim().toLowerCase()
+  const senha = document.getElementById('fa-senha').value
+  const senha2 = document.getElementById('fa-senha2').value
+
+  if (senha.length < 6) { faMsg('fa-msg2', 'A senha deve ter no mínimo 6 caracteres.', 'err'); return }
+  if (senha !== senha2) { faMsg('fa-msg2', 'As senhas não coincidem.', 'err'); return }
+  if (!window._sbClient) { faMsg('fa-msg2', 'Sistema indisponível. Recarregue a página.', 'err'); return }
+
+  const btn = document.getElementById('fa-create')
+  btn.textContent = 'Criando senha...'
+  btn.disabled = true
+  faMsg('fa-msg2', '')
+
+  const res = await invokeFirstAccess({ action: 'set', email, password: senha })
+
+  btn.textContent = 'Criar senha e começar'
+  btn.disabled = false
+
+  if (!res.ok) {
+    if (res.code === 'already_set') {
+      document.getElementById('login-email').value = email
+      faMsg('login-msg', 'Este e-mail já tem senha. Entre com sua senha.')
+      showScreen('s-login')
+      return
+    }
+    faMsg('fa-msg2', firstAccessErrorMessage(res.code), 'err')
+    return
+  }
+
+  // Entra direto com a senha recém-criada
+  document.getElementById('login-email').value = email
+  document.getElementById('login-senha').value = senha
+  await doLogin()
+}
+
+// Link antigo (?email=...) abre a ativação com o e-mail já preenchido.
+function checkEmailRedirect() {
   const params = new URLSearchParams(window.location.search)
   const email = params.get('email')
   if (email) {
-    document.getElementById('signup-email').value = email
-    showScreen('s-signup')
+    openFirstAccess(email)
     window.history.replaceState({}, '', window.location.pathname)
   }
 }
 
-async function doSignupConfirm() {
-  const email = document.getElementById('signup-email').value.trim()
-  const senha = document.getElementById('signup-senha').value
-  const senha2 = document.getElementById('signup-senha2').value
-
-  if (!email || !senha) { alert('Preencha email e senha.'); return }
-  if (senha.length < 6) { alert('A senha deve ter no mínimo 6 caracteres.'); return }
-  if (senha !== senha2) { alert('As senhas não coincidem.'); return }
-
-  const btn = document.querySelector('#s-signup .btn-primary')
-  btn.textContent = 'Criando conta...'
-  btn.disabled = true
-
-  const { data, error } = await window._sbClient.auth.signUp({ email: email, password: senha })
-
-  btn.textContent = 'Criar conta e começar'
-  btn.disabled = false
+// Reembolso/chargeback: bloqueia o acesso após o login.
+async function checkAccessAllowed() {
+  if (!currentUser) return true
+  const { data, error } = await window._sbClient
+    .from('profiles')
+    .select('access_blocked')
+    .eq('id', currentUser.id)
+    .maybeSingle()
 
   if (error) {
-    if (error.message?.includes('already')) {
-      alert('Este email já tem conta. Faça login.')
-      showScreen('s-login')
-      document.getElementById('login-email').value = email
-    } else {
-      alert('Erro: ' + error.message)
-    }
-    return
+    console.warn('[CSD] checkAccessAllowed:', error.message)
+    return true
   }
-
-  // Criar profile
-  if (data.user) {
-    currentUser = data.user
-    await window._sbClient.from('profiles').upsert({ id: data.user.id, email: email })
-  } else {
-    // Se data.user veio nulo (ex: confirmação de email ativa), tenta login
-    console.log('[CSD] signUp: data.user null, tentando signInWithPassword')
-    const { data: loginData, error: loginError } = await window._sbClient.auth.signInWithPassword({ email, password: senha })
-    if (loginError) {
-      console.warn('[CSD] signIn após signup falhou:', loginError.message)
-    } else if (loginData?.user) {
-      currentUser = loginData.user
-    }
+  if (data?.access_blocked) {
+    await window._sbClient.auth.signOut()
+    localStorage.clear()
+    currentUser = null
+    alert('Seu acesso está suspenso. Entre em contato com o suporte.')
+    showScreen('s-login')
+    return false
   }
-
-  if (!currentUser) {
-    console.warn('[CSD] signUp: currentUser null — tentando login imediato')
-    const { data: d2, error: e2 } = await window._sbClient.auth.signInWithPassword({ email, password: senha })
-    if (e2) {
-      console.warn('[CSD] login pós-signup falhou:', e2.message)
-      alert('Conta criada! Confirme o email para ativar o acesso e depois faça login.')
-      showScreen('s-login')
-      return
-    }
-    currentUser = d2.user
-  }
-
-  // Login automático
-  if (currentUser) {
-    localStorage.setItem('csd_logged', '1')
-    localStorage.setItem('csd_user_id', currentUser.id)
-  }
-
-  // Primeiro acesso → welcome
-  showScreen('s-welcome')
+  return true
 }
 
 // Auto-login: se tem sessão válida, vai pro dashboard (skip se veio de link de cadastro)
@@ -3780,7 +3842,7 @@ localStorage.removeItem('csd_pending_email')
 
 // Detectar link de redefinição de senha (recovery) ou de cadastro
 const _isRecovery = handleRecoveryRedirect()
-checkSignupRedirect()
+checkEmailRedirect()
 
 // Mantém o app em retrato fora do vídeo em tela cheia
 lockFsOrientation(false)
@@ -3792,6 +3854,7 @@ if (!_hasEmail && !_isRecovery) {
       if (session?.user) {
         console.log('[CSD] Sessão encontrada, auto-login:', session.user.email)
         currentUser = session.user
+        if (!(await checkAccessAllowed())) return
         localStorage.setItem('csd_logged', '1')
         localStorage.setItem('csd_user_id', session.user.id)
         await loadUserData()
