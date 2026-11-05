@@ -2,6 +2,9 @@
 
 Rascunho com as respostas pra agilizar a submissão. Confirmar cada item antes de publicar.
 
+> **Status: PUBLICADO** — versão 1.0 (build 3) aprovada e liberada na App Store em 05/11/2026.
+> Link: https://apps.apple.com/br/app/corredor-sem-dor/id6824963334
+
 ## Registro do app (App Store Connect)
 
 | Campo | Valor sugerido |
