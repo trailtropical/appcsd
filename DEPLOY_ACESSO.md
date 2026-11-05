@@ -67,6 +67,30 @@ Opcional: `APP_STORE_URL` (se não existir, usa o link oficial do app).
 
 ---
 
+## 3.1 Publicar a função `guru-webhook` (vendas pela Guru)
+
+A Guru **não tem campo de token** no webhook, então a chave de segurança vai na
+própria URL.
+
+1. Em **Secrets**, crie (ou atualize) `GURU_API_TOKEN` com uma chave longa.
+   Se já existir, sobrescreva o valor para ter certeza de qual é.
+2. Menu **Edge Functions** → `guru-webhook` → **Code**.
+3. Substitua o conteúdo por `supabase/functions/guru-webhook/index.ts`.
+4. **Verify JWT desligado** → **Deploy updates**.
+5. No painel da Guru, no webhook, use a URL:
+
+```
+https://zjsadtpxdexlflfykqzy.supabase.co/functions/v1/guru-webhook?key=SUA_CHAVE
+```
+
+6. Deixe **apenas um webhook ativo** apontando para o Supabase, senão o aluno
+   recebe dois e-mails.
+
+A função aceita `application/json`, `application/x-www-form-urlencoded` e
+`multipart/form-data`.
+
+---
+
 ## 4. Testar antes de desligar o cadastro
 
 1. No **SQL Editor**, crie uma compra de teste:
