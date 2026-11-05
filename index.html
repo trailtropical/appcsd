@@ -51,6 +51,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .btn-primary:disabled{opacity:.35;cursor:not-allowed}
 .login-footer{font-size:11px;color:var(--hint);text-align:center;margin-top:20px;line-height:1.6}
 .login-note{font-size:11.5px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.55}
+.entry-hint{font-size:11px;color:var(--hint);text-align:center;margin:7px 0 18px;line-height:1.5}
+.entry-hint strong{color:var(--muted);font-weight:600}
 .login-back{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);text-decoration:none;margin-bottom:18px}
 .login-back:hover{color:var(--text)}
 .login-msg{font-size:12px;line-height:1.5;padding:10px 12px;border-radius:10px;margin-bottom:16px;display:none}
@@ -573,21 +575,42 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 <body>
 <div id="app">
 
-<!-- LOGIN -->
-<div id="s-login" class="screen active">
+<!-- ENTRADA: escolha entre primeiro acesso e login -->
+<div id="s-entry" class="screen active">
   <div class="login-card">
     <div class="login-logo">
       <div class="logo-mark">CSD</div>
     </div>
-    <div class="login-title">Corredor Sem Dor</div>
-    <div class="login-sub">Entre com o email e senha da sua conta.</div>
+    <div class="login-title">Corredor<br>Sem Dor</div>
+    <div class="login-sub">Para começar, escolha uma opção.</div>
+
+    <button class="btn-primary" onclick="openFirstAccess()">Primeiro acesso</button>
+    <div class="entry-hint">Comprei o programa e <strong>ainda não criei</strong> minha senha.</div>
+
+    <button class="btn-outline" onclick="showScreen('s-login')">Já tenho conta</button>
+    <div class="entry-hint">Já criei minha senha e quero entrar.</div>
+
+    <div class="login-note">O acesso é liberado após a compra do programa. Use o e-mail informado na compra.</div>
+    <button class="btn-download" onclick="showInstallModal(true)"><span>📱</span> Baixar App</button>
+    <div class="login-disclaimer">Este aplicativo tem caráter informativo e não substitui a avaliação de um profissional de saúde.</div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="s-login" class="screen">
+  <div class="login-card">
+    <a class="login-back" href="#" onclick="showScreen('s-entry');return false">← Voltar</a>
+    <div class="login-logo">
+      <div class="logo-mark">CSD</div>
+    </div>
+    <div class="login-title">Entrar</div>
+    <div class="login-sub">Use o email e a senha da sua conta.</div>
     <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
     <div class="field"><label>Senha</label><input type="password" id="login-senha" placeholder="sua-senha" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar</button>
     <div id="login-msg" class="login-msg" style="display:none"></div>
     <div class="login-footer"><a href="#" onclick="openReset();return false" style="color:var(--orange);text-decoration:none">Esqueci minha senha</a></div>
-    <div class="login-footer" style="margin-top:6px"><a href="#" onclick="openFirstAccess();return false" style="color:var(--orange);text-decoration:none">Primeiro acesso? Criar senha</a></div>
-    <div class="login-note">O acesso é liberado após a compra do programa. Use o e-mail informado na compra.</div>
+    <div class="login-footer" style="margin-top:6px"><a href="#" onclick="openFirstAccess();return false" style="color:var(--hint);text-decoration:none">Ainda não criei minha senha</a></div>
     <button class="btn-download" onclick="showInstallModal(true)"><span>📱</span> Baixar App</button>
     <div class="login-disclaimer">Este aplicativo tem caráter informativo e não substitui a avaliação de um profissional de saúde.</div>
   </div>
@@ -686,7 +709,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 <!-- PRIMEIRO ACESSO -->
 <div id="s-first-access" class="screen">
   <div class="login-card">
-    <a class="login-back" href="#" onclick="showScreen('s-login');return false">← Voltar para o login</a>
+    <a class="login-back" href="#" onclick="showScreen('s-entry');return false">← Voltar</a>
     <div class="login-logo">
       <div class="logo-mark">CSD</div>
     </div>
@@ -2160,7 +2183,7 @@ async function doLogout() {
   await window._sbClient.auth.signOut()
   currentUser = null
   localStorage.clear()
-  showScreen('s-login')
+  showScreen('s-entry')
 }
 
 // ══ REDEFINIR SENHA ══
