@@ -164,6 +164,8 @@ serve(async (req) => {
     }
 
     const email = normalizeEmail(pick(body, ["email", "contact.email", "buyer.email", "customer.email"]))
+    // Cópia oculta opcional (usada em liberações manuais de cortesia).
+    const bcc = normalizeEmail(pick(body, ["bcc", "bcc_email", "copy_to"]))
     const name = pick(body, ["name", "contact.name", "buyer.name", "customer.name", "full_name"])
     const productName = pick(body, ["product_name", "product.name", "offer_name"]) || "Corredor Sem Dor"
     const productId = pick(body, ["product_id", "product.id"])
@@ -314,6 +316,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: `Corredor Sem Dor <${FROM_EMAIL}>`,
         to: email,
+        ...(bcc ? { bcc: [bcc] } : {}),
         subject: "Seu acesso ao Corredor Sem Dor",
         html: emailHtml
       })
