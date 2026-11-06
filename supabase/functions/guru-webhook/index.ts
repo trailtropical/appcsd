@@ -263,8 +263,9 @@ serve(async (req) => {
       .update({ access_blocked: false })
       .eq("email", email)
 
-    // ── 4. E-mail: download do app + instruções ────────────
+    // ── 4. E-mail: primeiro criar a senha, depois baixar o app ─
     const firstName = name.split(" ")[0] || "atleta"
+    const activateUrl = `${APP_URL}?email=${encodeURIComponent(email)}`
     const emailHtml = `
       <div style="font-family: 'Inter', -apple-system, sans-serif; max-width: 520px; margin: 0 auto; padding: 40px 20px; background: #0F0F0E; color: #F0F0EE;">
         <div style="text-align: center; margin-bottom: 28px;">
@@ -274,31 +275,29 @@ serve(async (req) => {
         <p style="font-size: 16px; color: #8A8A87; text-align: center; margin: 0 0 28px;">Olá ${firstName}, sua compra foi confirmada!</p>
 
         <div style="background: #1A1A18; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 26px 24px; margin-bottom: 24px;">
-          <p style="font-size: 15px; color: #F0F0EE; margin: 0 0 18px; text-align: center; font-weight: 600;">Escolha seu celular</p>
-
-          <p style="font-size: 12px; color: #8A8A87; margin: 0 0 8px;">iPhone / iPad</p>
-          <a href="${APP_STORE_URL}" style="display: block; background: #E8500A; color: white; text-align: center; text-decoration: none; font-weight: 700; font-size: 16px; padding: 16px 32px; border-radius: 12px;">Baixar na App Store →</a>
-
-          <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 22px 0;"></div>
-
-          <p style="font-size: 12px; color: #8A8A87; margin: 0 0 8px;">Android</p>
-          <a href="${APP_URL}" style="display: block; background: #FFFFFF; color: #0F0F0E; text-align: center; text-decoration: none; font-weight: 700; font-size: 16px; padding: 16px 32px; border-radius: 12px;">Instalar no Android →</a>
-          <p style="font-size: 12px; color: #8A8A87; margin: 12px 0 0; line-height: 1.6;">
-            Abra o link no <strong style="color:#F0F0EE">Chrome</strong>, toque nos <strong style="color:#F0F0EE">3 pontos (⋮)</strong> e escolha
-            <strong style="color:#F0F0EE">"Instalar app"</strong> ou <strong style="color:#F0F0EE">"Adicionar à tela inicial"</strong>.
-            Fica igual a um app.
+          <p style="font-size: 15px; color: #F0F0EE; margin: 0 0 6px; text-align: center; font-weight: 700;">Falta só criar sua senha</p>
+          <p style="font-size: 13px; color: #8A8A87; margin: 0 0 20px; text-align: center;">Leva menos de 1 minuto.</p>
+          <a href="${activateUrl}" style="display: block; background: #E8500A; color: white; text-align: center; text-decoration: none; font-weight: 700; font-size: 16px; padding: 16px 32px; border-radius: 12px;">Criar minha senha →</a>
+          <p style="font-size: 12px; color: #8A8A87; margin: 16px 0 0; text-align: center; line-height: 1.6;">
+            Use este e-mail:<br>
+            <strong style="color: #F0F0EE; font-size: 13px; word-break: break-all;">${email}</strong>
           </p>
         </div>
 
         <div style="background: #1A1A18; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px;">
-          <p style="font-size: 14px; color: #8A8A87; margin: 0 0 12px;">Depois de instalar:</p>
-          <p style="font-size: 14px; color: #F0F0EE; margin: 0 0 8px;">1. Abra o app e toque em <strong>Primeiro acesso</strong>.</p>
-          <p style="font-size: 14px; color: #F0F0EE; margin: 0 0 8px;">2. Informe este e-mail:</p>
-          <p style="font-size: 15px; color: #E8500A; margin: 0 0 8px; font-weight: 700; word-break: break-all;">${email}</p>
-          <p style="font-size: 14px; color: #F0F0EE; margin: 0;">3. Crie sua senha e comece o check-up.</p>
-          <p style="font-size: 12px; color: #8A8A87; margin: 16px 0 0; line-height: 1.6; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
-            Não encontrou a opção <strong style="color:#F0F0EE">Primeiro acesso</strong>?
-            Abra <a href="${APP_URL}" style="color: #E8500A; font-weight: 600;">este link no navegador</a> do seu celular e crie a senha por lá.
+          <p style="font-size: 14px; color: #F0F0EE; margin: 0 0 4px; font-weight: 600;">Prefere usar o app?</p>
+          <p style="font-size: 12px; color: #8A8A87; margin: 0 0 16px;">Depois de criar a senha, entre com o mesmo e-mail.</p>
+
+          <p style="font-size: 11px; color: #8A8A87; margin: 0 0 6px;">iPhone / iPad</p>
+          <a href="${APP_STORE_URL}" style="display: block; background: #E8500A; color: white; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 24px; border-radius: 10px;">Baixar na App Store →</a>
+
+          <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 18px 0;"></div>
+
+          <p style="font-size: 11px; color: #8A8A87; margin: 0 0 6px;">Android</p>
+          <a href="${APP_URL}" style="display: block; background: #FFFFFF; color: #0F0F0E; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 24px; border-radius: 10px;">Instalar no Android →</a>
+          <p style="font-size: 11px; color: #8A8A87; margin: 10px 0 0; line-height: 1.6;">
+            Abra no <strong style="color:#F0F0EE">Chrome</strong>, toque nos <strong style="color:#F0F0EE">3 pontos (⋮)</strong> e escolha
+            <strong style="color:#F0F0EE">"Instalar app"</strong>.
           </p>
         </div>
 
