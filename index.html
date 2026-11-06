@@ -726,11 +726,48 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
       <div class="field"><label>Email</label><input type="email" id="fa-email-2" readonly style="opacity:0.7"></div>
       <div class="field"><label>Senha</label><input type="password" id="fa-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
       <div class="field"><label>Confirmar senha</label><input type="password" id="fa-senha2" placeholder="Repita a senha" autocomplete="new-password"></div>
-      <button class="btn-primary" id="fa-create" onclick="firstAccessSet()">Criar senha e começar</button>
+      <button class="btn-primary" id="fa-create" onclick="firstAccessSet()">Criar senha</button>
       <div id="fa-msg2" class="login-msg" style="display:none"></div>
     </div>
 
     <div class="login-note">O acesso é liberado após a compra do programa. Se você comprou com outro e-mail, use o e-mail informado na compra.</div>
+  </div>
+</div>
+
+<!-- SENHA CRIADA: INSTALAR O APP -->
+<div id="s-app-download" class="screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark">CSD</div>
+    </div>
+    <div class="login-title">Senha criada!</div>
+    <div class="login-sub" style="margin-bottom:20px">Sua conta está ativa. Agora instale o app para começar o check-up.</div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;margin-bottom:20px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Sua conta</div>
+      <div id="dl-email" style="font-size:12.5px;font-weight:600;line-height:1.5;overflow-wrap:anywhere"></div>
+    </div>
+
+    <div style="font-size:12px;color:var(--muted);margin:0 0 8px">iPhone / iPad</div>
+    <button class="btn-primary" onclick="openAppStore()">Baixar na App Store</button>
+
+    <div style="height:1px;background:var(--border2);margin:20px 0"></div>
+
+    <div style="font-size:12px;color:var(--muted);margin:0 0 8px">Android</div>
+    <button class="btn-outline" onclick="installAndroidFromSuccess()">Instalar no Android</button>
+
+    <div id="dl-android-steps" style="display:none;font-size:12.5px;color:var(--text);line-height:1.7;margin-top:14px;padding:14px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px">
+      <div style="font-weight:600;margin-bottom:8px">Abra este link no Chrome do Android:</div>
+      <div>1. Toque nos <b>3 pontos (⋮)</b></div>
+      <div>2. Toque em <b>"Instalar app"</b> ou <b>"Adicionar à tela inicial"</b></div>
+      <div>3. Confirme em <b>"Instalar"</b></div>
+    </div>
+
+    <div class="login-footer" style="margin-top:20px">
+      <a href="#" onclick="goToLoginAfterSignup();return false" style="color:var(--muted);text-decoration:none;font-size:12px">Prefiro entrar pelo navegador</a>
+    </div>
+
+    <div class="login-note">Guarde seu e-mail e senha: você vai usá-los para entrar no app.</div>
   </div>
 </div>
 
@@ -3802,7 +3839,7 @@ async function firstAccessSet() {
 
   const res = await invokeFirstAccess({ action: 'set', email, password: senha })
 
-  btn.textContent = 'Criar senha e começar'
+  btn.textContent = 'Criar senha'
   btn.disabled = false
 
   if (!res.ok) {
@@ -3816,10 +3853,44 @@ async function firstAccessSet() {
     return
   }
 
-  // Entra direto com a senha recém-criada
+  // No app nativo não faz sentido pedir para instalar: entra direto.
+  const cap = window.Capacitor
+  const isNativeApp = !!(cap && cap.isNativePlatform && cap.isNativePlatform())
+  if (isNativeApp) {
+    document.getElementById('login-email').value = email
+    document.getElementById('login-senha').value = senha
+    await doLogin()
+    return
+  }
+
+  // No navegador, para aqui e mostra como instalar o app.
+  document.getElementById('dl-email').textContent = email
+  document.getElementById('dl-android-steps').style.display = 'none'
+  showScreen('s-app-download')
+}
+
+async function installAndroidFromSuccess() {
+  if (PWA.canInstall && PWA.deferredPrompt) {
+    try {
+      await PWA.deferredPrompt.prompt()
+      const { outcome } = await PWA.deferredPrompt.userChoice
+      PWA.deferredPrompt = null
+      if (outcome === 'accepted') localStorage.setItem('csd_install_done', '1')
+      return
+    } catch (e) {
+      console.warn('[CSD] instalação automática indisponível:', e)
+    }
+  }
+  // Sem prompt do navegador: mostra o passo a passo.
+  document.getElementById('dl-android-steps').style.display = 'block'
+}
+
+function goToLoginAfterSignup() {
+  const email = (document.getElementById('dl-email').textContent || '').trim()
   document.getElementById('login-email').value = email
-  document.getElementById('login-senha').value = senha
-  await doLogin()
+  document.getElementById('login-senha').value = ''
+  faMsg('login-msg', 'Conta criada. Entre com a senha que você acabou de definir.')
+  showScreen('s-login')
 }
 
 // Link antigo (?email=...) abre a ativação com o e-mail já preenchido.
