@@ -7,6 +7,7 @@ const HOTMART_TOKEN = Deno.env.get("HOTMART_TOKEN")!
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "noreply@seudominio.com"
 const APP_STORE_URL = Deno.env.get("APP_STORE_URL") || "https://apps.apple.com/br/app/corredor-sem-dor/id6824963334"
+const APP_URL = Deno.env.get("APP_URL") || "https://trailtropical.github.io/appcsd/"
 
 const APPROVED_EVENTS = ["PURCHASE_APPROVED", "PURCHASE_COMPLETE", "COMPLETED", "APPROVED"]
 const REFUNDED_EVENTS = [
@@ -179,9 +180,20 @@ serve(async (req) => {
         <p style="font-size: 16px; color: #8A8A87; text-align: center; margin: 0 0 28px;">Olá ${firstName}, sua compra foi confirmada!</p>
 
         <div style="background: #1A1A18; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 26px 24px; margin-bottom: 24px;">
-          <p style="font-size: 15px; color: #F0F0EE; margin: 0 0 18px; text-align: center; font-weight: 600;">Baixe o app para começar</p>
+          <p style="font-size: 15px; color: #F0F0EE; margin: 0 0 18px; text-align: center; font-weight: 600;">Escolha seu celular</p>
+
+          <p style="font-size: 12px; color: #8A8A87; margin: 0 0 8px;">iPhone / iPad</p>
           <a href="${APP_STORE_URL}" style="display: block; background: #E8500A; color: white; text-align: center; text-decoration: none; font-weight: 700; font-size: 16px; padding: 16px 32px; border-radius: 12px;">Baixar na App Store →</a>
-          <p style="font-size: 12px; color: #8A8A87; margin: 14px 0 0; text-align: center;">Grátis para baixar no iPhone. O acesso é liberado após a compra.</p>
+
+          <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 22px 0;"></div>
+
+          <p style="font-size: 12px; color: #8A8A87; margin: 0 0 8px;">Android</p>
+          <a href="${APP_URL}" style="display: block; background: #FFFFFF; color: #0F0F0E; text-align: center; text-decoration: none; font-weight: 700; font-size: 16px; padding: 16px 32px; border-radius: 12px;">Instalar no Android →</a>
+          <p style="font-size: 12px; color: #8A8A87; margin: 12px 0 0; line-height: 1.6;">
+            Abra o link no <strong style="color:#F0F0EE">Chrome</strong>, toque nos <strong style="color:#F0F0EE">3 pontos (⋮)</strong> e escolha
+            <strong style="color:#F0F0EE">"Instalar app"</strong> ou <strong style="color:#F0F0EE">"Adicionar à tela inicial"</strong>.
+            Fica igual a um app.
+          </p>
         </div>
 
         <div style="background: #1A1A18; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px;">
@@ -190,6 +202,10 @@ serve(async (req) => {
           <p style="font-size: 14px; color: #F0F0EE; margin: 0 0 8px;">2. Informe este e-mail:</p>
           <p style="font-size: 15px; color: #E8500A; margin: 0 0 8px; font-weight: 700; word-break: break-all;">${email}</p>
           <p style="font-size: 14px; color: #F0F0EE; margin: 0;">3. Crie sua senha e comece o check-up.</p>
+          <p style="font-size: 12px; color: #8A8A87; margin: 16px 0 0; line-height: 1.6; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+            Não encontrou a opção <strong style="color:#F0F0EE">Primeiro acesso</strong>?
+            Abra <a href="${APP_URL}" style="color: #E8500A; font-weight: 600;">este link no navegador</a> do seu celular e crie a senha por lá.
+          </p>
         </div>
 
         <p style="font-size: 12px; color: #5A5A57; margin: 24px 0 0; text-align: center;">Se você já tem conta, é só entrar com seu e-mail e senha. Dúvidas? Responda este e-mail.</p>
