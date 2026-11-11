@@ -625,9 +625,7 @@ const EX_NAME = {
 }
 function exName(id) { return EX_NAME[id] || id || '—' }
 
-// Gerais na mesma ordem do GERAL_ORDEM do app (usados para completar a lista até 5–6,
-// espelhando o preenchimento que o showSessionFromPlan faz no dispositivo do aluno)
-const GERAL_FILL = ['g_volta_mundo_4apoios','g_volta_mundo','g_cocoras','g_prancha','g_panturrilha','g_terra','g_equilibrio','g_stepdown']
+// Gerais na mesma ordem do GERAL_ORDEM do app (ver geralOrdemIds).
 
 // Mapa exercício → sinal(is) que o sugeriram, espelhando o SIGNAL_MAP do app.
 // Ex.: e_noventa → 'Restrição de mobilidade de quadril'. Derivação por varredura.
@@ -706,20 +704,24 @@ function sigExForMonth(sig, tier, k) {
   const list = months[tier][k] || []
   return list.filter((id,i) => list.indexOf(id)===i && EX_NAME[id])
 }
-// Sinal resolvido → 1 exercício de manutenção do próximo tier por sessão
-function resolvedMaintenance(sig, resolvedTier) {
-  const months = SIGNAL_POOL[sig]; if (!months) return {a:[],b:[],c:[]}
-  const targetMonth = Math.min(2, resolvedTier + 1)
-  const prevUsed = new Set()
-  const prevObj = months[resolvedTier]
-  ;['a','b','c'].forEach(k => ((prevObj && prevObj[k]) || []).forEach(id => prevUsed.add(id)))
-  const pick = ['a','b','c'].map(k => {
-    const list = (months[targetMonth] || {})[k] || []
-    const cand = list.filter(id => EX_NAME[id] && !prevUsed.has(id))
-    return cand[0] || ''
-  })
-  return { a:[pick[0]], b:[pick[1]], c:[pick[2]] }
+// Exercícios "gêmeos" (mesmo padrão de movimento): nunca no mesmo treino.
+const GEMEOS_PLAN = { 'e_meio_ajoel':'e_joelho_parede', 'e_joelho_parede':'e_meio_ajoel' }
+
+// Bloco geral na mesma ordem do getGeralOrdem do app (varia só o "volta ao mundo").
+function geralOrdemIds(nivel) {
+  const vm = nivel === 'init' ? 'g_volta_mundo_4apoios' : 'g_volta_mundo'
+  return [vm, 'g_cocoras', 'g_prancha', 'g_panturrilha', 'g_terra', 'g_equilibrio', 'g_stepdown']
 }
+// Exercícios do plano base quando o treino fica vazio (idêntico ao baseExercisesForMonth do app).
+function baseExercisesForMonth(monthIdx, nivel) {
+  const classic = ['e_prop_fechado', 'e_agach_ponta']
+  if (!monthIdx || monthIdx <= 0) return classic
+  const pool = geralOrdemIds(nivel).filter(id => EX_NAME[id])
+  if (!pool.length) return classic
+  const off = (monthIdx * 3) % pool.length
+  return [pool[off], pool[(off + 2) % pool.length]]
+}
+
 // Reconstrói o plano atual do aluno → [[a_ids],[b_ids],[c_ids]] finais (5–6, como o app renderiza)
 function rebuildPlanForStudent(s) {
   const tiers = readSessionField(s, 'signal_tiers', {})
@@ -727,10 +729,35 @@ function rebuildPlanForStudent(s) {
   const prevSignalCounts = readSessionField(s, 'prev_signals', {})
   const criticalSignal = criticalSignalFor(signalCounts)
   const monthIdx = Math.max(0, Math.min(2, parseInt(s.latestSession?.plan_month ?? s.sessions?.[0]?.plan_month ?? 0) || 0))
-  const hasFreshSignals = Object.keys(signalCounts).length > 0
-  const sigs = SIGNAL_ORDER2.filter(sig =>
+  const nivel = s.nivel
+  // Bloco efetivo do sinal — idêntico ao effectiveSignalTier do app: quem já estava
+  // em treino acompanha o mês do plano (M1→bloco 0, M2→bloco 1, M3→bloco 2), mesmo
+  // que o tier gravado tenha ficado atrás. É isso que faz o Copenhagen (blocos 1–2)
+  // aparecer no app e sumir aqui quando usávamos só o tier cru.
+  const effTier = (sig) => {
+    const stored = tiers[sig] || 0
+    const inTraining = (prevSignalCounts[sig] || 0) > 0 || stored > 0
+    return inTraining ? Math.max(stored, Math.min(2, monthIdx)) : stored
+  }
+  let sigs = SIGNAL_ORDER2.filter(sig =>
     (prevSignalCounts[sig]||0) > 0 || (signalCounts[sig]||0) > 0 || (tiers[sig]||0) > 0
   )
+  // Aluno sem achados no M2+: infere os sinais pelos exercícios que ele viu no mês
+  // anterior (session_exercises), como o app faz com csd_sessoes_m/csd_sessionExercises.
+  if (sigs.length === 0 && monthIdx > 0) {
+    const sessExPrev = readSessionField(s, 'session_exercises', {})
+    const arrPrev = Object.keys(sessExPrev || {}).sort().map(k => sessExPrev[k]).filter(Array.isArray)
+    if (arrPrev.length) {
+      const done = new Set(arrPrev.flat())
+      SIGNAL_ORDER2.forEach(sig => {
+        const mm = SIGNAL_POOL[sig]; if (!mm) return
+        const owns = mm.some(mo => ['a','b','c'].some(kk => (mo[kk] || []).some(id => done.has(id))))
+        if (!owns) return
+        sigs.push(sig)
+        if (tiers[sig] === undefined) tiers[sig] = Math.min(2, monthIdx)
+      })
+    }
+  }
   const usedBefore = new Set()
   if (monthIdx > 0) {
     sigs.forEach(sig => {
@@ -743,7 +770,7 @@ function rebuildPlanForStudent(s) {
   if (monthIdx > 0) {
     sigs.forEach(sig => {
       const mm = SIGNAL_POOL[sig]; if (!mm) return
-      const pool = ['a','b','c'].flatMap(kk => sigExForMonth(sig, tiers[sig]||0, kk)).filter((id,ix,self)=>self.indexOf(id)===ix)
+      const pool = ['a','b','c'].flatMap(kk => sigExForMonth(sig, effTier(sig), kk)).filter((id,ix,self)=>self.indexOf(id)===ix)
       pool.forEach(id => {
         if (!/_assist$/.test(id)) return
         const pleno = id.replace(/_assist$/,'')
@@ -762,6 +789,7 @@ function rebuildPlanForStudent(s) {
     const addEx = (id) => {
       if (!id || seen.has(id)) return
       const nm = EX_NAME[id]; if (!nm || seenNames.has(nm)) return
+      const gemeo = GEMEOS_PLAN[id]; if (gemeo && seen.has(gemeo)) return
       if ((monthAppear[id]||0) >= 2) return
       const fk = id.replace(/_assist$/,'')
       if (blockedFam[fk] && blockedFam[fk].has(id)) return
@@ -771,12 +799,7 @@ function rebuildPlanForStudent(s) {
     }
     sigs.forEach(sig => {
       const mm = SIGNAL_POOL[sig]; if (!mm) return
-      const tier = tiers[sig]||0
-      if (hasFreshSignals && (prevSignalCounts[sig]||0) > 0 && (signalCounts[sig]||0) === 0) {
-        const maint = resolvedMaintenance(sig, tier)
-        ;(maint[k]||[]).forEach(addEx)
-        return
-      }
+      const tier = effTier(sig)
       if (monthIdx > 0) {
         const spotList = sigExForMonth(sig, tier, k)
         const spotNovo = spotList.filter(id => !usedBefore.has(id))
@@ -785,21 +808,36 @@ function rebuildPlanForStudent(s) {
         } else {
           const outros = ['a','b','c'].filter(kk=>kk!==k).flatMap(kk => sigExForMonth(sig, tier, kk)).filter((id,ix,self)=>self.indexOf(id)===ix)
           const outrosNovos = outros.filter(id => !usedBefore.has(id))
-          ;(outrosNovos.length ? outrosNovos : spotList).forEach(addEx)
+          if (outrosNovos.length) {
+            outrosNovos.forEach(addEx)
+          } else {
+            // Pool do tier esgotado: tenta tiers superiores por exercícios NOVOS
+            // antes de repetir o mês anterior (igual ao app).
+            let novoPool = []
+            for (let t = tier + 1; t <= 2 && novoPool.length === 0; t++) {
+              const livre = id => !usedBefore.has(id) && (monthAppear[id] || 0) < 2
+              const spotNew = sigExForMonth(sig, t, k).filter(livre)
+              const outrosNew = ['a','b','c'].filter(kk => kk !== k)
+                .flatMap(kk => sigExForMonth(sig, t, kk))
+                .filter((id,ix,self) => self.indexOf(id) === ix && livre(id))
+              novoPool = spotNew.concat(outrosNew).filter((id,ix,self) => self.indexOf(id) === ix)
+            }
+            ;(novoPool.length ? novoPool : spotList).forEach(addEx)
+          }
         }
       } else {
         sigExForMonth(sig, tier, k).forEach(addEx)
       }
     })
-    if (criticalSignal) sigExForMonth(criticalSignal, tiers[criticalSignal]||0, k).forEach(addEx)
-    if (ids.length===0) ids.push('e_prop_fechado','e_agach_ponta')
+    if (criticalSignal) sigExForMonth(criticalSignal, effTier(criticalSignal), k)
+      .filter(id => !usedBefore.has(id))
+      .forEach(addEx)
+    if (ids.length===0) baseExercisesForMonth(monthIdx, nivel).forEach(addEx)
     return ids
   })
   const MIN = 5, MAX = 6
-  const geralFill = s.nivel === 'init'
-    ? ['g_volta_mundo_4apoios','g_cocoras','g_prancha','g_panturrilha','g_terra','g_equilibrio','g_stepdown']
-    : GERAL_FILL.filter(id => id !== 'g_volta_mundo_4apoios')
-  return sessoes.map(specific => {
+  const geralFill = geralOrdemIds(nivel).filter(id => EX_NAME[id])
+  return sessoes.map((specific, sessIdx) => {
     let kept = specific.filter(id => {
       const fk = id.replace(/_assist$/,'')
       return id && EX_NAME[id] && !((blockedFam[fk] || new Set()).has(id))
@@ -808,10 +846,14 @@ function rebuildPlanForStudent(s) {
     if (kept.length > MAX) {
       kept = kept.slice(0, MAX)
     } else if (kept.length < MIN) {
-      const pool = geralFill.filter(id => EX_NAME[id] && !kept.includes(id) && !keptNames.has(EX_NAME[id]))
+      const pool = geralFill.filter(id => !kept.includes(id) && !keptNames.has(EX_NAME[id]))
+      // Giro por treino E por mês — igual ao app (A/B/C não ficam idênticos e o
+      // mês seguinte não repete o preenchimento do anterior).
+      const offset = pool.length ? (monthIdx * 3 + sessIdx * 2) % pool.length : 0
       let i = 0
       while (kept.length < MIN && i < pool.length) {
-        const id = pool[i++]
+        const id = pool[(i + offset) % pool.length]
+        i++
         if (!kept.includes(id)) { kept.push(id); keptNames.add(EX_NAME[id]) }
       }
     }
