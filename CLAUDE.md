@@ -174,6 +174,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 - **Android:** **1.1.0 (versionCode 5)** enviada para revisão do Google em 12/nov (produção, 100%, todos os países). Próximo versionCode: **6**. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
 - Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
+- **App Store Connect:** declaração de **comerciante** (DSA/UE) preenchida em 12/nov (contato público na UE: dados da empresa + trailtropicalpodcast@gmail.com).
 - **Páginas legais:** Política de Privacidade, Termos de Uso (`termos.html`), Suporte e Exclusão de Conta publicadas.
 
 ### Backend
