@@ -39,7 +39,12 @@ GitHub Pages publica `main` em ~1 min. Sempre confira com:
 curl -s -o /dev/null -w "%{http_code}\n" https://trailtropical.github.io/appcsd/
 ```
 
-**Cache:** `index.html` tem um cache-buster na linha 7: `const v='32'`. **Ao publicar mudanças no app, incremente esse número** (`v='33'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
+**Cache:** `index.html` tem um cache-buster na linha 7: `const v='33'`. **Ao publicar mudanças no app, incremente esse número** (`v='34'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
+
+### Versão mínima do app nativo
+- `index.html` tem `const APP_BUILD = 5`: **aumente a cada build nova enviada às lojas** (iOS e Android usam o mesmo contador).
+- O app nativo lê `app-config.json` (no site). Se `APP_BUILD < min_build`, mostra "Atualize o app" com o link da loja. Para forçar atualização, suba `min_build` e publique. Falha de rede deixa entrar.
+- Só funciona a partir da build que tem esse código (APP_BUILD 5). Builds antigas (iOS 1.0 b3, Android vc4) não fazem a checagem.
 
 ### Edge Functions
 O dono do projeto **não fornece token/CLI do Supabase**. Deploy é **manual pelo dashboard**:
@@ -178,6 +183,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 - Edge Functions `first-access`, `hotmart-webhook` e `guru-webhook` **deployadas em 12/nov** iguais ao commit `5b15ca4` (botão Android → Play Store). O `guru-webhook` inclui o suporte a `bcc` (commit `1524a9f`), inativo: só age se o payload trouxer `bcc`/`copy_to`.
 
 ### Correções recentes
+- **12/nov (UX, web v=33):** painel com "Progresso do Mês" (12 treinos/mês; antes media só a semana e voltava a 0% ao fechar a semana) e "Semana X de 4"; relatório começa pela conclusão (`buildReportHtml` sem efeitos; `viewReport()` reabre pelo painel sem regravar); treino com tempo estimado, contador de feitos, descanso (30 s, até 1 min) e "Marcar treino como feito"; cards de exercício simplificados (nome, dose, ★ Crítico, "Ver vídeo"); cronômetro no detalhe dos exercícios em segundos; convite "Baixar App" leva às lojas; Termos nas configurações; checagem de versão mínima (`APP_BUILD`/`app-config.json`).
 - **11/nov:** `admin.html` passou a reconstruir o plano com o mesmo motor do app (`effTier = max(tier, min(2, mês))`), resolvendo o caso "Copenhagen aparece no Treino C do aluno e não no painel". Também alinhados: `GEMEOS`, reforço do crítico filtrado por `!usedBefore`, fallback `baseExercisesForMonth` e preenchimento geral com giro por treino/mês.
 
 ---

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='32';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='33';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -33,11 +33,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 }
 
 /* LOGIN */
-#s-login{justify-content:center;align-items:center;padding:32px 24px;position:relative;overflow:hidden}
+#s-login,#s-entry,#s-first-access,#s-app-download,#s-reset{justify-content:center;align-items:center;padding:32px 24px;position:relative;overflow:hidden}
 #s-login::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(232,80,10,0.18) 0%,transparent 70%);pointer-events:none}
 .login-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:36px 28px;position:relative;z-index:1}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
-.logo-mark{width:36px;height:36px;background:var(--orange);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff}
+.logo-mark{width:40px;height:40px;background:var(--orange);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;letter-spacing:-.02em;color:#fff;flex-shrink:0}
 .logo-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
 .login-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px;line-height:1.2}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
@@ -182,8 +182,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .session-header-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
 .session-header-sub{font-size:12px;color:var(--muted)}
 .ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;gap:12px;align-items:flex-start;position:relative}
-.ex-card.especifico{border-color:rgba(232,80,10,.3);background:rgba(232,80,10,.05)}
-.ex-card.critico{border-color:var(--torn);background:rgba(239,68,68,.06)}
+.ex-card.especifico,.ex-card.critico{border-color:var(--border);background:var(--surface)}
+.ex-card{align-items:center}
+.ex-play{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;padding:2px 0 0 4px}
+.ex-play-label{font-size:10.5px;font-weight:600;color:var(--orange);white-space:nowrap}
 .ex-card.geral .ex-num{background:var(--surface2);color:var(--muted);border:1px solid var(--border2)}
 .ex-num{width:28px;height:28px;border-radius:50%;background:var(--orange);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 .ex-body{flex:1}
@@ -421,9 +423,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 .btn-danger:active{transform:scale(.98);opacity:.9}
 .btn-danger:disabled{opacity:.35;cursor:not-allowed}
 @keyframes doneBounce{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
-.btn-play-big{position:absolute;top:25%;left:75%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#E8500A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 14px rgba(232,80,10,.35);animation:pulse 2.2s infinite;cursor:pointer;z-index:2;border:2px solid rgba(255,255,255,.9)}
+.btn-play-big{position:relative;width:44px;height:44px;border-radius:50%;background:#E8500A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 14px rgba(232,80,10,.35);animation:playPulse 2.2s infinite;cursor:pointer;z-index:2;border:2px solid rgba(255,255,255,.9)}
 .btn-play-big::before{content:'▶';font-size:14px}
 @keyframes pulse{0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}50%{opacity:.85;transform:translate(-50%,-50%) scale(1.08)}}
+@keyframes playPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .confetti{position:fixed;width:8px;height:8px;border-radius:2px;z-index:201;animation:confettiFall 1.5s ease forwards}
 @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
 
@@ -509,6 +512,22 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 .ex-detail-detail{font-size:14px;color:var(--orange);font-weight:600;margin-bottom:12px}
 .ex-detail-why{font-size:13px;color:var(--muted);line-height:1.7;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px}
 .ex-detail-why::before{content:'💡 Por que esse exercício?';display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.db-week{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;flex-wrap:wrap}
+.db-week-label{font-size:12px;color:var(--muted);font-weight:600}
+#sess-label{white-space:nowrap}
+#sess-badge{max-width:62%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-summary{font-size:12.5px;color:var(--muted);padding:2px 2px 12px}
+.sess-summary-row{display:flex;justify-content:space-between;align-items:center}
+.sess-rest{margin-top:8px;font-size:12px;line-height:1.5;color:var(--muted)}
+.sess-rest strong{color:var(--text);font-weight:600}
+.sess-markall{width:100%;margin-top:10px;padding:11px;border-radius:var(--radius);border:1px dashed var(--border2);background:transparent;color:var(--text);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.sess-markall:active{background:var(--surface2)}
+.sess-summary strong{color:var(--text);font-weight:700}
+.ex-timer{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px}
+.ex-timer-val{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;min-width:72px;color:var(--text)}
+.ex-timer-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:inherit;font-weight:600;cursor:pointer}
+.ex-timer.running .ex-timer-val{color:var(--orange)}
+.ex-safety{font-size:12px;color:var(--muted);line-height:1.6;padding:10px 14px;border-left:3px solid var(--border2);margin-bottom:4px}
 
 /* ANIMAÇÕES */
 .fade-in{animation:fadeIn .4s ease both}
@@ -544,6 +563,8 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 .install-btn:hover{background:#d64709;transform:scale(1.02)}
 .install-btn:active{transform:scale(.98)}
 .install-btn:disabled{opacity:.5;cursor:default;transform:none}
+.install-btn-alt{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff}
+.install-btn-alt:hover{background:rgba(255,255,255,.08)}
 .install-skip{width:100%;padding:10px;background:transparent;color:rgba(240,240,238,.4);border:none;font-size:13px;font-family:inherit;cursor:pointer;transition:color .2s}
 .install-skip:hover{color:rgba(240,240,238,.7)}
 .install-success{text-align:center;padding:12px 0}
@@ -646,16 +667,12 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 <div class="install-overlay" id="install-overlay">
   <div class="install-backdrop" onclick="closeInstallModal()"></div>
   <div class="install-modal" id="install-modal">
-    <span class="install-modal-icon">📱</span>
-    <div class="install-modal-title">Instale o aplicativo<br>Corredor Sem Dor</div>
-    <div class="install-modal-text">A melhor experiência acontece usando o aplicativo instalado.</div>
-    <div class="install-benefits">
-      <div class="install-benefit"><span class="install-benefit-icon">⚡</span>Abertura instantânea</div>
-      <div class="install-benefit"><span class="install-benefit-icon">🖥</span>Tela cheia — sem navegador</div>
-      <div class="install-benefit"><span class="install-benefit-icon">🚀</span>Acesso muito mais rápido</div>
-      <div class="install-benefit"><span class="install-benefit-icon">📲</span>Experiência de app nativo</div>
+    <div class="install-modal-title">Baixe o app<br>Corredor Sem Dor</div>
+    <div class="install-modal-text">Entre com o mesmo e-mail e senha. Seu plano e seu progresso continuam lá.</div>
+    <div id="install-store-btns">
+      <button class="install-btn" data-store="ios" onclick="openAppStore()">Baixar na App Store</button>
+      <button class="install-btn install-btn-alt" data-store="android" onclick="openPlayStore()">Baixar no Google Play</button>
     </div>
-    <button class="install-btn" id="install-btn" onclick="handleInstall()">Instalar aplicativo</button>
     <button class="install-skip" onclick="dismissInstall()">Agora não</button>
   </div>
 </div>
@@ -1081,7 +1098,7 @@ const CATEGORY_ORDER = ['mobilidade','estabilidade','controle_motor','propulsao'
 const CONSEQUENCES = {
   tornozelo:{priority:'Restaurar mobilidade do tornozelo',
     cause:'Essa restrição impede que o tornozelo absorva impacto adequadamente durante a corrida.',
-    effect:'A carga sobre para o joelho, que passa a compensar a cada passada.'},
+    effect:'A carga sobe para o joelho, que passa a compensar a cada passada.'},
   quadril_mob:{priority:'Liberar a rotação do quadril',
     cause:'A falta de rotação no quadril limita a extensão da passada.',
     effect:'A pelve gira para compensar, sobrecarregando a lombar e o joelho oposto.'},
@@ -1513,7 +1530,7 @@ function renderDashboard() {
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Seu próximo treino</div>
       <div class="db-next-title">Treino ${['A','B','C'][next.idx]}</div>
       <div class="db-next-focus">${SESSION_INFO[next.idx].focus}</div>
-      <button class="btn-primary" style="width:100%">▶ Começar</button>
+      <button class="btn-primary" style="width:100%">▶ Começar treino</button>
     </div>`
 
   const monthsCards = PLAN_MONTHS.map((pm,i) => {
@@ -1545,9 +1562,11 @@ function renderDashboard() {
     ${nextCard}
 
     <div class="db-progress sr" data-delay="0">
-      <div class="db-progress-header"><span class="db-progress-title">Plano de Recuperação</span><span class="db-progress-pct" data-count="${progressPct}">0%</span></div>
+      <div class="db-progress-header"><span class="db-progress-title">Progresso do Mês ${currentPlanMonth+1}</span><span class="db-progress-pct" data-count="${progressPct}">0%</span></div>
       <div class="db-progress-track"><div class="db-progress-fill" style="width:0" data-target="${progressPct}"></div></div>
-      <div class="db-progress-sub">Semana ${getCurrentWeek()}</div>
+      <div class="db-week">
+        <span class="db-week-label">Semana ${getCurrentWeek()} de 4</span>
+      </div>
     </div>
 
     <div class="score-ring-wrap sr" data-delay="100">
@@ -1558,11 +1577,12 @@ function renderDashboard() {
       <div class="score-label">Índice Corporal — de 0 a 100</div>
       ${msg ? `<div style="margin-top:8px;line-height:1.4"><div style="font-size:11px;color:var(--muted)">Seu maior ganho virá de</div><div style="font-size:16px;font-weight:700;color:var(--orange)">${msg.toLowerCase()}</div></div>` : ''}
       <div class="subscores" style="margin-top:14px">${subHtml}</div>
+      <button class="btn-glass" style="width:100%;margin-top:14px" onclick="viewReport()">Ver meu relatório →</button>
     </div>
 
     <div class="db-meta sr" data-delay="200">
       <div class="db-meta-side"><div class="db-meta-label">Índice Atual</div><div class="db-meta-val">${overall}</div></div>
-      <div class="db-meta-arrow">↓</div>
+      <div class="db-meta-arrow">→</div>
       <div class="db-meta-side"><div class="db-meta-label">Meta do Mês</div><div class="db-meta-val" style="color:var(--glut)">${target}</div></div>
     </div>
 
@@ -1575,14 +1595,10 @@ function renderDashboard() {
       ${monthsCards}
     </div>
 
-    <div class="db-last-eval sr" data-delay="450">Última avaliação: ${lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString() : '—'}</div>
+    <div class="db-last-eval sr" data-delay="450">Última avaliação: ${lastCheckup ? new Date(parseInt(lastCheckup)).toLocaleDateString('pt-BR') : '—'}</div>
 
     <div class="sr" data-delay="500" style="display:flex;flex-direction:column;gap:8px">
       <button class="btn-glass" onclick="showBonuses()">Ver bônus →</button>
-    </div>
-
-    <div class="sr" data-delay="550" style="padding-top:8px;border-top:1px solid var(--border)">
-      <button class="btn-glass-outline" onclick="doLogout()" style="font-size:12px;width:100%">Sair da conta →</button>
     </div>`
 
   setTimeout(() => {
@@ -1804,11 +1820,10 @@ function renderExCard(exId, num, isEspecifico, isCritico, isExtra, readonly) {
   const ex = EX[exId]
   if (!ex) return ''
   const detail = getDetail(ex)
-  const tagStyle = TAG_COLORS[ex.tc] || ''
   const cardClass = isCritico ? 'ex-card critico' : isEspecifico ? 'ex-card especifico' : 'ex-card geral'
   const tagCrit = isCritico ? '<span class="ex-tag critico">★ Crítico</span>' : ''
   const tagExtra = isExtra ? '<span class="ex-extra-ast" title="Adicionado manualmente">*</span>' : ''
-  const playBtnHtml = `<div class="btn-play-big" title="Ver vídeo" onclick="event.stopPropagation();showExerciseDetail('${exId}')"></div>`
+  const playBtnHtml = `<div class="ex-play" onclick="event.stopPropagation();showExerciseDetail('${exId}')"><div class="btn-play-big" aria-label="Ver vídeo"></div><span class="ex-play-label">Ver vídeo</span></div>`
   const checkHtml = readonly
     ? '<div class="ex-check done" style="cursor:default">✓</div>'
     : `<div class="ex-check" onclick="event.stopPropagation();toggleExCheck('${exId}',this.parentElement)"></div>`
@@ -1817,8 +1832,7 @@ function renderExCard(exId, num, isEspecifico, isCritico, isExtra, readonly) {
     <div class="ex-body">
       <div class="ex-name">${ex.name}</div>
       <div class="ex-detail">${detail}</div>
-      <div class="ex-tags"><span class="ex-tag" style="${tagStyle}">${ex.tag}</span>${tagCrit}${tagExtra}</div>
-      <div class="ex-why">${ex.why}</div>
+      ${tagCrit ? `<div class="ex-tags">${tagCrit}</div>` : ''}
     </div>
     ${playBtnHtml}
   </div>`
@@ -1975,7 +1989,6 @@ const PWA = {
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault()
   PWA.deferredPrompt = e
-  document.getElementById('install-btn').textContent = 'Instalar aplicativo'
 })
 
 window.addEventListener('appinstalled', () => {
@@ -1987,8 +2000,18 @@ window.addEventListener('appinstalled', () => {
 
 function showInstallModal(force = false) {
   if (!force && localStorage.getItem('csd_install_dismissed')) return
-  const overlay = document.getElementById('install-overlay')
-  overlay.classList.add('open')
+  // Android: Google Play primeiro e em destaque; demais: App Store primeiro.
+  const wrap = document.getElementById('install-store-btns')
+  if (wrap) {
+    const ios = wrap.querySelector('[data-store="ios"]')
+    const and = wrap.querySelector('[data-store="android"]')
+    const androidFirst = /android/i.test(navigator.userAgent)
+    const [first, second] = androidFirst ? [and, ios] : [ios, and]
+    wrap.append(first, second)
+    first.classList.remove('install-btn-alt')
+    second.classList.add('install-btn-alt')
+  }
+  document.getElementById('install-overlay').classList.add('open')
 }
 
 function closeInstallModal() {
@@ -2638,9 +2661,8 @@ function computeNewTiers(freshCounts) {
 function currentMonthIdx() {
   return Math.max(0, Math.min(2, currentPlanMonth))
 }
-function showReport() {
-  // Já existia avaliação antes desta? (serve para diferenciar 1º check-up de reavaliação)
-  const hadCheckup = localStorage.getItem('csd_checkup') === '1' || !!localStorage.getItem('csd_firstCheckup')
+// Monta o HTML do relatório (sem efeitos colaterais: não grava nada).
+function buildReportHtml() {
   const { sigCounts, sigSources } = getActiveSignals()
   const sigs = Object.keys(sigCounts)
   const count = sigs.length
@@ -2681,7 +2703,10 @@ function showReport() {
     conclusao = 'Nenhuma compensação significativa detectada. Seu plano será focado em manutenção e otimização da sua função como corredor.'
   } else if (principal) {
     const c = CONSEQUENCES[criticalSignal]
-    conclusao = `Os testes indicam que sua dor <strong>provavelmente não se origina</strong> no local da queixa. Seu corpo apresenta uma limitação importante de <strong>${principal.label.toLowerCase()}</strong>.${c ? ' ' + c.cause + ' ' + c.effect : ''} Seu plano será priorizado para corrigir primeiro essa compensação.`
+    const abertura = odData.painToday === 'Sim'
+      ? 'Os testes indicam que sua dor <strong>provavelmente não se origina</strong> no local da queixa. '
+      : 'Os testes encontraram compensações que podem virar dor se não forem trabalhadas. '
+    conclusao = `${abertura}Seu corpo apresenta uma limitação importante de <strong>${principal.label.toLowerCase()}</strong>.${c ? ' ' + c.cause + ' ' + c.effect : ''} Seu plano será priorizado para corrigir primeiro essa compensação.`
   }
 
   const sigHtml = sigs.length > 0 ? `<div class="report-block fade-in fade-in-d2">
@@ -2691,10 +2716,10 @@ function showReport() {
       const qtd = sigCounts[sig]
       const isC = sig === criticalSignal
       return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <div style="width:8px;height:8px;border-radius:50%;background:${info.color};flex-shrink:0"></div>
+        <div style="width:8px;height:8px;border-radius:50%;background:${isC ? 'var(--torn)' : '#F59E0B'};flex-shrink:0"></div>
         <div style="flex:1"><span style="font-size:13px;font-weight:600;color:var(--text)">${info.label}</span>
         ${qtd >= 2 ? `<span style="font-size:10px;margin-left:6px;padding:1px 6px;border-radius:10px;background:rgba(251,146,60,.12);color:#FB923C">${isC ? '★ crítico' : qtd === 1 ? 'leve' : 'moderado'}</span>` : ''}</div>
-        ${isC ? '<span style="font-size:16px">!</span>' : ''}</div>`
+        ${isC ? '<span style="font-size:10px;font-weight:700;color:var(--torn);text-transform:uppercase;letter-spacing:.04em">Prioridade</span>' : ''}</div>`
     }).join('')}</div></div>` : ''
 
   const odReport = odData.painToday === 'Sim' ? `
@@ -2709,7 +2734,11 @@ function showReport() {
     <div style="font-size:14px;font-weight:600;color:var(--orange)">${goalText}</div>
   </div>` : ''
 
-  document.getElementById('report-content').innerHTML = `
+  return `
+    <div class="report-conclusion fade-in">
+      <div class="report-conclusion-title">O que encontramos</div>
+      <p>${conclusao}</p>
+    </div>
     ${sigHtml}
     ${odReport}
     <div class="report-block fade-in fade-in-d2">
@@ -2724,13 +2753,23 @@ function showReport() {
       <div class="subscores" style="margin-top:8px">${subHtml}</div>
     </div>
     <div class="report-block fade-in fade-in-d3">
-      <div class="report-block-title">mapa corporal</div>
       ${renderBodyMap(signalCounts)}
-    </div>
-    <div class="report-conclusion fade-in${sigs.length?' fade-in-d3':''}">
-      <div class="report-conclusion-title">📋 conclusão</div>
-      <p>${conclusao}</p>
     </div>`
+}
+
+// Reabre o relatório a partir do painel, sem regravar o check-up nem avançar o mês.
+function viewReport() {
+  getActiveSignals()
+  document.getElementById('report-content').innerHTML = buildReportHtml()
+  document.body.scrollTop = 0
+  showScreen('s-result')
+}
+
+function showReport() {
+  // Já existia avaliação antes desta? (serve para diferenciar 1º check-up de reavaliação)
+  const hadCheckup = localStorage.getItem('csd_checkup') === '1' || !!localStorage.getItem('csd_firstCheckup')
+  const { overall } = calculateIndex()
+  document.getElementById('report-content').innerHTML = buildReportHtml()
 
   localStorage.setItem('csd_checkup','1')
   localStorage.setItem('csd_lastCheckup',Date.now().toString())
@@ -3213,6 +3252,7 @@ async function toggleExCheck(exId, el) {
     check.textContent = done ? '✓' : ''
   }
   if (el) el.classList.toggle('checked', done)
+  updateSessionSummary()
 
   let result = false
   if (done) {
@@ -3221,7 +3261,10 @@ async function toggleExCheck(exId, el) {
 
   await saveSessionsToSupabase()
   await logExercise(exId, currentSessionIdx, done)
+  afterExerciseCheckResult(result)
+}
 
+function afterExerciseCheckResult(result) {
   if (result === 'clear') {
     setTimeout(() => showDoneAnimation(true), 400)
     setTimeout(goToDashboard, 600)
@@ -3462,9 +3505,79 @@ function showSessionFromPlan(sessIdx) {
       if (!extraNew.length) return
       const extraHtml = extraNew.map(id => renderExCard(id, n, false, false, true)).join('')
       wrap.insertAdjacentHTML('beforeend', extraHtml)
+      updateSessionSummary()
     } catch(e) { console.warn('[CSD] extras error:', e) }
   })()
   showScreen('s-session-detail')
+}
+
+// Resumo no topo do treino: tempo estimado e quantos exercícios já foram feitos.
+// Estimativa simples: ~4 min por exercício (séries + descanso + troca).
+function updateSessionSummary() {
+  const wrap = document.getElementById('sessao-exercises')
+  if (!wrap) return
+  const cards = wrap.querySelectorAll('.ex-card')
+  if (!cards.length) return
+  const done = wrap.querySelectorAll('.ex-card.checked').length
+  let el = document.getElementById('sess-summary')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'sess-summary'
+    el.className = 'sess-summary'
+    const tabs = wrap.firstElementChild
+    tabs ? tabs.after(el) : wrap.prepend(el)
+  }
+  const min = Math.max(10, Math.round(cards.length * 4 / 5) * 5)
+  const allDone = done === cards.length
+  el.innerHTML = `<div class="sess-summary-row"><span>⏱ ≈ ${min} min</span><span><strong>${done} de ${cards.length}</strong> feitos</span></div>
+    <div class="sess-rest"><strong>Descanso entre séries: 30 s.</strong> Se estiver muito puxado, descanse até 1 min.</div>
+    ${allDone ? '' : `<button class="sess-markall" onclick="confirmMarkSessionDone()">✓ Marcar treino como feito</button>`}`
+}
+
+// "Fiz o treino mas esqueci de marcar": marca todos os exercícios de uma vez.
+function confirmMarkSessionDone() {
+  const wrap = document.getElementById('sessao-exercises')
+  const pending = wrap ? wrap.querySelectorAll('.ex-card:not(.checked)').length : 0
+  if (!pending) return
+  const ov = document.createElement('div')
+  ov.className = 'ex-done-overlay'
+  ov.onclick = e => { if (e.target === ov) ov.remove() }
+  ov.innerHTML = `<div class="confirm-card" role="dialog" aria-modal="true">
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Marcar treino como feito?</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">${pending === 1 ? 'O exercício que falta será marcado' : `Os ${pending} exercícios que faltam serão marcados`} como feito${pending === 1 ? '' : 's'} hoje.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn-outline" onclick="this.closest('.ex-done-overlay').remove()">Cancelar</button>
+        <button class="btn-primary" onclick="this.closest('.ex-done-overlay').remove();markSessionDone()">Marcar como feito</button>
+      </div>
+    </div>`
+  document.body.appendChild(ov)
+}
+
+async function markSessionDone() {
+  const wrap = document.getElementById('sessao-exercises')
+  if (!wrap) return
+  const key = `sess_${currentSessionIdx}`
+  const checks = getSessionChecks()
+  if (!checks[key]) checks[key] = {}
+  const now = new Date().toISOString()
+  const newly = []
+  wrap.querySelectorAll('.ex-card').forEach(card => {
+    const id = card.dataset.exid
+    if (checks[key][id]) return
+    checks[key][id] = now
+    newly.push(id)
+    card.classList.add('checked')
+    const ch = card.querySelector('.ex-check')
+    if (ch) { ch.classList.add('done'); ch.textContent = '✓' }
+  })
+  if (!newly.length) return
+  localStorage.setItem('csd_sessionChecks', JSON.stringify(checks))
+  updateSessionSummary()
+  const sessIdx = currentSessionIdx
+  const result = handleSessionComplete()
+  await saveSessionsToSupabase()
+  await Promise.all(newly.map(id => logExercise(id, sessIdx, true)))
+  afterExerciseCheckResult(result)
 }
 
 // Pós-render da sessão: aplica checks gravados e o clique para abrir o detalhe do exercício.
@@ -3498,6 +3611,7 @@ function afterRenderSession(wrap, sessIdx) {
   // Sincroniza com o Supabase para o dashboard do admin espelhar o que o aluno
   // realmente viu no app (não altera a renderização local)
   try { saveSessionsToSupabase() } catch (e) { console.warn('[CSD] sync sessao:', e) }
+  updateSessionSummary()
 }
 
 function showExerciseDetail(id) {
@@ -3526,7 +3640,10 @@ function showExerciseDetail(id) {
   let detailHtml = `<div class="ex-detail-name">${ex.name}</div>`
   const detailText = getDetail(ex)
   if (detailText) detailHtml += `<div class="ex-detail-detail">${detailText}</div>`
+  const secs = parseExerciseSeconds(detailText)
+  if (secs) detailHtml += `<div class="ex-timer" id="ex-timer" data-secs="${secs}"><div class="ex-timer-val" id="ex-timer-val">${fmtSecs(secs)}</div><button class="ex-timer-btn" id="ex-timer-btn" onclick="toggleExTimer()">Iniciar cronômetro</button></div>`
   if (ex.why) detailHtml += `<div class="ex-detail-why">${ex.why}</div>`
+  detailHtml += `<div class="ex-safety">Faça no seu ritmo. Desconforto leve é esperado; se sentir dor forte, pontada ou piora, pare e procure um profissional.</div>`
   detailHtml += `<button class="btn-primary" style="margin-top:16px" onclick="checkFromDetail('${id}')">${isDone ? '✓ Concluído' : 'Marcar como concluído'}</button>`
   document.getElementById('ex-detail-body').innerHTML = detailHtml
   document.getElementById('ex-detail').classList.add('open')
@@ -3537,7 +3654,39 @@ async function checkFromDetail(exId) {
   await toggleExCheck(exId, card)
   closeExDetail()
 }
+// ── Cronômetro do exercício ──
+// Lê a duração da dose ("3 séries · 45s cada lado", "2 séries · 60 segundos").
+function parseExerciseSeconds(txt) {
+  // "s" só conta como segundos se não vier seguido de letra (evita "3 séries").
+  for (const m of String(txt || '').matchAll(/(\d+)\s*(?:segundos?|seg|s)(?![A-Za-zÀ-ÿ])/gi)) {
+    const n = parseInt(m[1])
+    if (n >= 10 && n <= 300) return n
+  }
+  return 0
+}
+function fmtSecs(n) { return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0') }
+let _exTimer = null
+function stopExTimer() { if (_exTimer) { clearInterval(_exTimer.id); _exTimer = null } }
+function toggleExTimer() {
+  const box = document.getElementById('ex-timer'); if (!box) return
+  const val = document.getElementById('ex-timer-val'), btn = document.getElementById('ex-timer-btn')
+  const total = parseInt(box.dataset.secs) || 0
+  if (_exTimer) { stopExTimer(); box.classList.remove('running'); btn.textContent = 'Recomeçar'; val.textContent = fmtSecs(total); return }
+  let left = total
+  box.classList.add('running'); btn.textContent = 'Parar'
+  _exTimer = { id: setInterval(() => {
+    left--
+    val.textContent = fmtSecs(Math.max(0, left))
+    if (left <= 0) {
+      stopExTimer(); box.classList.remove('running'); btn.textContent = 'Recomeçar'
+      try { navigator.vibrate && navigator.vibrate([200, 100, 200]) } catch (e) {}
+      val.textContent = 'Fim!'
+    }
+  }, 1000) }
+}
+
 function closeExDetail() {
+  stopExTimer()
   document.getElementById('ex-detail').classList.remove('open')
   document.body.style.overflow = ''
   const videoWrap = document.querySelector('.ex-detail-video')
@@ -3710,18 +3859,27 @@ function finishOnboarding() {
 }
 
 // ══ PROGRESSO ══
-function getCompletionPct() {
-  const checks = JSON.parse(localStorage.getItem('csd_sessionChecks') || '{}')
+// Treinos concluídos na semana atual (0–3). As marcações são zeradas quando o
+// Treino C fecha a semana, por isso só valem para a semana em andamento.
+function getWeekSessionsDone() {
+  const checks = getSessionChecks()
   const allEx = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
-  let completedSessions = 0
+  const done = [false, false, false]
   for (let i = 0; i < 3; i++) {
     const sChecks = checks[`sess_${i}`] || {}
     const exIds = allEx[`sess_${i}`]
-    if (!exIds || exIds.length === 0) continue
-    const allDone = exIds.every(id => sChecks[id])
-    if (allDone) completedSessions++
+    if (exIds && exIds.length && exIds.every(id => sChecks[id])) done[i] = true
   }
-  return Math.round((completedSessions / 3) * 100)
+  return done
+}
+
+// Progresso do MÊS: 4 semanas × 3 treinos = 12. Antes media só a semana atual
+// e voltava a 0% sempre que uma semana era concluída.
+function getCompletionPct() {
+  const weeks = Math.min(4, parseInt(completedWeeks || 0) || 0)
+  if (weeks >= 4) return 100
+  const thisWeek = getWeekSessionsDone().filter(Boolean).length
+  return Math.round(((weeks * 3 + thisWeek) / 12) * 100)
 }
 
 function getCurrentWeek() {
@@ -3922,6 +4080,38 @@ checkEmailRedirect()
 // Mantém o app em retrato fora do vídeo em tela cheia
 lockFsOrientation(false)
 
+// ══ VERSÃO MÍNIMA (só no app nativo) ══
+// APP_BUILD identifica o código embutido no app das lojas. Aumente a cada build
+// nova enviada à App Store / Play. Se um dia uma versão antiga parar de funcionar,
+// suba "min_build" em app-config.json (publicado no site) e o app antigo mostra
+// "Atualize o app" com o link da loja. Falha de rede = deixa entrar.
+const APP_BUILD = 5
+function esc(v) { return String(v ?? '').replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'})[c]) }
+async function checkMinVersion() {
+  const cap = window.Capacitor
+  if (!(cap && cap.isNativePlatform && cap.isNativePlatform())) return
+  try {
+    const r = await fetch('https://trailtropical.github.io/appcsd/app-config.json?t=' + Date.now(), { cache: 'no-store' })
+    if (!r.ok) return
+    const cfg = await r.json()
+    if (!(APP_BUILD < (parseInt(cfg.min_build) || 0))) return
+    const isAndroid = cap.getPlatform && cap.getPlatform() === 'android'
+    const url = isAndroid
+      ? 'https://play.google.com/store/apps/details?id=br.com.corredorsemdor'
+      : 'https://apps.apple.com/br/app/corredor-sem-dor/id6824963334'
+    const ov = document.createElement('div')
+    ov.className = 'ex-done-overlay'
+    ov.style.zIndex = '9999'
+    ov.innerHTML = `<div class="confirm-card" role="alertdialog" aria-modal="true">
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Atualize o app</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">${esc(cfg.message || 'Esta versão do Corredor Sem Dor não é mais compatível. Atualize para continuar seus treinos.')}</p>
+      <a class="btn-primary" style="display:block;text-align:center;text-decoration:none" href="${url}">Atualizar agora</a>
+    </div>`
+    document.body.appendChild(ov)
+  } catch (e) { console.warn('[CSD] checkMinVersion:', e) }
+}
+checkMinVersion()
+
 if (!_hasEmail && !_isRecovery) {
   (async () => {
     if (window._sbClient) {
@@ -3975,13 +4165,19 @@ if (!_hasEmail && !_isRecovery) {
     <div class="settings-item install-settings-row" style="cursor:pointer" onclick="closeSettings();closeInstallTutorial();showInstallModal(true)">
       <div class="settings-item-left">
         <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">📱</div>
-        <div class="settings-item-label">Instalar aplicativo</div>
+        <div class="settings-item-label">Baixar o app</div>
       </div>
     </div>
     <div class="settings-item" style="cursor:pointer" onclick="window.open('https://trailtropical.github.io/appcsd/privacy-policy.html','_blank')">
       <div class="settings-item-left">
         <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">🔒</div>
         <div class="settings-item-label">Política de Privacidade</div>
+      </div>
+    </div>
+    <div class="settings-item" style="cursor:pointer" onclick="window.open('https://trailtropical.github.io/appcsd/termos.html','_blank')">
+      <div class="settings-item-left">
+        <div class="settings-item-icon" style="background:var(--orange-dim);color:var(--orange)">📄</div>
+        <div class="settings-item-label">Termos de Uso</div>
       </div>
     </div>
     <div class="settings-item">
