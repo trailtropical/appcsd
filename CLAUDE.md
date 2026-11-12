@@ -175,7 +175,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 - `supabase/migrations/012_access_control.sql` aplicada (tabela `purchases`, flags `password_set`/`access_blocked`, tentativas).
 - Edge Functions deployadas: `first-access` (Verify JWT **off**), `hotmart-webhook`, `guru-webhook` (auth por `?key=` na URL).
 - E-mails transacionais (Resend): e-mail 1 prioriza **"Criar minha senha"** com `?email=` pré-preenchido; e-mail 2 leva aos downloads.
-- **Pendência conhecida:** o suporte a cópia oculta (`bcc`) no `guru-webhook` está no código (commit `1524a9f`), mas **não foi deployado** — o dono dispensou essa cópia.
+- Edge Functions `first-access`, `hotmart-webhook` e `guru-webhook` **deployadas em 12/nov** iguais ao commit `5b15ca4` (botão Android → Play Store). O `guru-webhook` inclui o suporte a `bcc` (commit `1524a9f`), inativo: só age se o payload trouxer `bcc`/`copy_to`.
 
 ### Correções recentes
 - **11/nov:** `admin.html` passou a reconstruir o plano com o mesmo motor do app (`effTier = max(tier, min(2, mês))`), resolvendo o caso "Copenhagen aparece no Treino C do aluno e não no painel". Também alinhados: `GEMEOS`, reforço do crítico filtrado por `!usedBefore`, fallback `baseExercisesForMonth` e preenchimento geral com giro por treino/mês.
@@ -220,7 +220,7 @@ Ordem cronológica do que foi feito (commits em `git log`):
 ## 13. Próximos passos planejados
 
 1. ~~Google Play~~ — aprovado em 12/nov.
-2. ~~Botão Android → Play Store~~ — feito na web e nos e-mails (não precisou de build nativo: a tela `s-app-download` não aparece no app nativo). Edge Functions precisam ser redeployadas pelo dashboard.
+2. ~~Botão Android → Play Store~~ — feito na web e nos e-mails (não precisou de build nativo: a tela `s-app-download` não aparece no app nativo). Edge Functions já redeployadas (12/nov).
 3. **Link "Termos de Uso" nas configurações do app** — próximo build nativo (**versionCode 5**).
 4. **Validar com dados reais** a divergência de plano relatada por uma aluna (comparar `sessions.signal_tiers`, `prev_signals`, `plan_month` e `checkups.answers` com o que o admin mostra). O motor já foi alinhado; falta confirmação em produção.
 5. **Limpar registros de teste** do banco quando conveniente: `guru:GURU-TESTE-999`, `guru:CORTESIA-COPIA-001`, `TESTE-001`, `guru:TESTE-ACESSO-001/002/003`.
