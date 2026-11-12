@@ -393,7 +393,11 @@ function adminLogout() { sb.auth.signOut(); currentUser=null; $('dash-screen').s
 function fmt(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '—' }
 function fmtShort(d) { return d ? new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '—' }
 function daysSince(d) { return d ? Math.floor((Date.now()-new Date(d))/86400000) : 999 }
-function initials(n,e) { if(n) return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); return (e||'?')[0].toUpperCase() }
+function initials(n,e) { if(n) return esc(n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()); return esc((e||'?')[0].toUpperCase()) }
+// Escapa texto escrito pelo aluno antes de ir para innerHTML (evita XSS no painel)
+function esc(v) { return String(v ?? '').replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'})[c]) }
+// Só aceita foto https:// (bloqueia javascript:, data: etc.)
+function safeUrl(u) { return /^https:\/\//i.test(String(u||'')) ? esc(u) : '' }
 function clamp(v,mn,mx) { return Math.max(mn,Math.min(mx,v)) }
 
 // ── DASHBOARD ──
@@ -480,22 +484,22 @@ function renderStudentList(list) {
     const badgeText = s.overall >= 70 ? 'Bom' : s.overall >= 30 ? 'Atenção' : s.overall > 0 ? 'Crítico' : 'Sem dados'
     const daysClass = ds <= 3 ? 'days-ok' : ds <= 7 ? 'days-warn' : 'days-crit'
     const alertClass = s.overall >= 70 && ds <= 3 ? 'alert-active' : s.overall >= 30 || ds <= 7 ? 'alert-warn' : 'alert-crit'
-    const photoHtml = s.photo_url ? `<img src="${s.photo_url}" alt="">` : initials(s.nome, s.email)
-    const painBar = s.pain > 0 ? `<span>Dor: <strong>${s.pain}/10</strong></span>` : ''
+    const photoHtml = safeUrl(s.photo_url) ? `<img src="${safeUrl(s.photo_url)}" alt="">` : initials(s.nome, s.email)
+    const painBar = s.pain > 0 ? `<span>Dor: <strong>${esc(s.pain)}/10</strong></span>` : ''
     return `<div class="student-card" onclick="openProfile('${s.id}')">
       <div class="student-avatar">${photoHtml}</div>
       <div class="student-info">
-        <div class="student-name">${s.nome || s.email.split('@')[0]}</div>
-        <div class="student-email">${s.email}</div>
+        <div class="student-name">${esc(s.nome || s.email.split('@')[0])}</div>
+        <div class="student-email">${esc(s.email)}</div>
         <div class="student-meta">
-          <span>Score: <strong>${s.overall||'—'}</strong></span>
+          <span>Score: <strong>${esc(s.overall||'—')}</strong></span>
           <span>Streak: <strong>${s.streak} dias</strong></span>
           ${painBar}
           <span>${s.nivel}</span>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0">
-        <div class="student-badge ${badgeClass}">${badgeText}${s.overall>0?' '+s.overall:''}</div>
+        <div class="student-badge ${badgeClass}">${badgeText}${s.overall>0?' '+esc(s.overall):''}</div>
         <div class="student-days ${daysClass}">${ds === 0 ? 'Hoje' : ds === 1 ? 'Ontem' : ds+'d'}</div>
       </div>
       <div class="student-alert ${alertClass}"></div>
@@ -509,7 +513,7 @@ function openProfile(userId) {
   const s = allStudents.find(x => x.id === userId)
   if (!s) return
   const $m = $('modal'); $m.classList.add('open')
-  const photoHtml = s.photo_url ? `<img src="${s.photo_url}" alt="">` : initials(s.nome, s.email)
+  const photoHtml = safeUrl(s.photo_url) ? `<img src="${safeUrl(s.photo_url)}" alt="">` : initials(s.nome, s.email)
   // Sinais marcados na última avaliação = "no que precisa trabalhar mais"
   const flagged = flaggedSignals(s)
   const foci = SIGNAL_ORDER2.filter(sig => flagged.has(sig)).map(sig => SIGNAL_LABELS[sig]?.d || SIGNAL_LABELS[sig]?.n || sig)
@@ -524,8 +528,8 @@ function openProfile(userId) {
     <button class="modal-close" onclick="closeModal()">&times;</button>
     <div class="modal-avatar">${photoHtml}</div>
     <div class="modal-hinfo">
-      <div class="modal-hname">${s.nome || 'Aluno'}</div>
-      <div class="modal-hemail">${s.email}${s.phone ? ' · '+s.phone : ''}</div>
+      <div class="modal-hname">${esc(s.nome || 'Aluno')}</div>
+      <div class="modal-hemail">${esc(s.email)}${s.phone ? ' · '+esc(s.phone) : ''}</div>
       ${fechasHtml}
     </div>
     <div class="hdr-right">
@@ -579,11 +583,11 @@ function renderTimeline(s, body) {
     const time = new Date(item.date).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
     let title='', detail=''
     if (item.type==='checkup') {
-      g.innerHTML += `<div class="tl-item"><div class="tl-dot checkup"><span></span></div><div class="tl-body"><div class="tl-title">📋 Check-up</div><div class="tl-meta">${date} ${time} · ${item.nivel}</div><div class="tl-detail">Score: ${item.overall||0}/100${item.scores&&typeof item.scores==='object'?' · '+Object.entries(item.scores).map(([k,v])=>k+':'+v).join(' · '):''}</div></div></div>`
+      g.innerHTML += `<div class="tl-item"><div class="tl-dot checkup"><span></span></div><div class="tl-body"><div class="tl-title">📋 Check-up</div><div class="tl-meta">${date} ${time} · ${esc(item.nivel)}</div><div class="tl-detail">Score: ${esc(item.overall||0)}/100${item.scores&&typeof item.scores==='object'?' · '+Object.entries(item.scores).map(([k,v])=>esc(k)+':'+esc(v)).join(' · '):''}</div></div></div>`
     } else if (item.type==='exercise') {
-      g.innerHTML += `<div class="tl-item"><div class="tl-dot exercise"><span></span></div><div class="tl-body"><div class="tl-title">🏋️ Exercício feito</div><div class="tl-meta">${date} ${time} · ${item.session||''}</div><div class="tl-detail">${item.id||''}</div></div></div>`
+      g.innerHTML += `<div class="tl-item"><div class="tl-dot exercise"><span></span></div><div class="tl-body"><div class="tl-title">🏋️ Exercício feito</div><div class="tl-meta">${date} ${time} · ${esc(item.session)}</div><div class="tl-detail">${esc(item.id)}</div></div></div>`
     } else if (item.type==='note') {
-      g.innerHTML += `<div class="tl-item"><div class="tl-dot note"><span></span></div><div class="tl-body"><div class="tl-title">📝 Observação</div><div class="tl-meta">${date} ${time}</div><div class="tl-detail">${item.text||''}</div></div></div>`
+      g.innerHTML += `<div class="tl-item"><div class="tl-dot note"><span></span></div><div class="tl-body"><div class="tl-title">📝 Observação</div><div class="tl-meta">${date} ${time}</div><div class="tl-detail">${esc(item.text)}</div></div></div>`
     }
   })
   body.innerHTML = ''; body.appendChild(g)

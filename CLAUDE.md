@@ -29,8 +29,11 @@ App **Corredor Sem Dor**: avaliação funcional + plano de reabilitação para c
 
 ### Web
 ```bash
-git add -A && git commit -m "..." && git push origin main
+git status            # confira: nada de keystore, PDF, planilha ou documento interno
+git add <arquivos>    # adicione só o que mudou — evite `git add -A`
+git commit -m "..." && git push origin main
 ```
+**Tudo que entra no git fica público** em `trailtropical.github.io/appcsd/<arquivo>` (inclusive `.md` e `.sql`).
 GitHub Pages publica `main` em ~1 min. Sempre confira com:
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" https://trailtropical.github.io/appcsd/
@@ -62,7 +65,7 @@ Para facilitar: `pbcopy < supabase/functions/<nome>/index.ts`.
 | `marketing.html` | Landing de vendas |
 | `sw.js`, `manifest.json`, ícones | PWA |
 | `supabase/functions/` | `first-access`, `hotmart-webhook`, `guru-webhook`, `admin-data` |
-| `native-app/` | Projeto Capacitor (iOS + Android) — `native-app/android` **não está no git** |
+| `native-app/` | Projeto Capacitor (iOS + Android) — `native-app/android` **não está no git** (ignorado no `.gitignore`) |
 | `PROJECT_CONTEXT.md`, `DATA_FLOW.md` | Docs profundos, porém **históricos (jul/2026)** — descrevem o app antes de Supabase Auth, pagamentos e apps nativos. Servem só como referência de lógica antiga; confira sempre o código |
 | `DEPLOY_ACESSO.md` | Passo a passo do fluxo de primeiro acesso |
 

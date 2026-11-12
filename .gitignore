@@ -7,3 +7,13 @@ native-app/.idea/
 
 # Xcode / build local
 native-app/build/
+
+# Android: projeto local + assinatura (NUNCA publicar — o site é público)
+native-app/android/
+*.jks
+*.keystore
+keystore.properties
+
+# Documentos internos/financeiros
+RESUMO_*
+*.pdf
