@@ -234,8 +234,13 @@ Ordem cronológica do que foi feito (commits em `git log`):
 5. **Limpar registros de teste** do banco quando conveniente: `guru:GURU-TESTE-999`, `guru:CORTESIA-COPIA-001`, `TESTE-001`, `guru:TESTE-ACESSO-001/002/003`.
 6. **Revisão jurídica** dos Termos de Uso (reembolso e responsabilidade) — recomendada, não bloqueante.
 7. **Monitorar** novos casos de `no_purchase` no primeiro acesso: quase sempre é compra com e-mail diferente do informado.
+8. **Miniaturas dos exercícios** (ideia aprovada, não feita): trocar o botão "Ver vídeo" do card por uma miniatura do **movimento** (não a capa com texto). Caminho testado em 12/nov: o embed `…/players/<vid>/v4/embed.html` aponta para um HLS público `cdn.converteai.net/…/main.m3u8`; `ffmpeg -ss 4 -i <video_1.m3u8> -frames:v 1` extrai o quadro (aos ~4 s já aparece o movimento sem o título). Plano: extrair quadro fixo de cada um dos 54 `vid`, recortar na pessoa, salvar ~320×180 em `assets/thumbs/<vid>.jpg` (vai junto no app, funciona offline), montar página de revisão para o dono aprovar/trocar. Fazer em **sessão nova** (gasta menos).
+9. **Pacote visual 3** (não feito): paleta curta (laranja + neutros; vermelho/âmbar/verde só para status), ícones de linha no lugar de emojis, fonte de título mais sóbria que a Syne, escala fixa de tamanhos/raios.
+10. **Senha da conta demo do Google (`nmendes1994`) exposta** neste repositório público: trocar a senha no Supabase/Play Console e tirá-la dos arquivos. A conta de revisão da Apple é outra e já está protegida contra exclusão (migration 011).
 
 ### Ideias descartadas / decisões fechadas
+- **Painel completo** (decisão do dono, 12/nov): manter no dashboard índice, subnotas, meta, mapa e meses — "um clique a menos" vale mais que tela enxuta. Sem fichas de Treino A/B/C no progresso.
+- **Card de exercício enxuto**: nome, dose, ★ Crítico e "Ver vídeo"; todos com a mesma cor (sem categoria nem "por quê" no card).
 - **Sem código de 6 dígitos** no primeiro acesso (validação é compra + `password_set` + rate limit).
 - **Sem link de compra no app nativo** (política Apple).
 - Após criar a senha, **não** entrar no check-up: mostrar a tela de download.
