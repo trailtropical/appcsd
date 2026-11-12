@@ -170,7 +170,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 
 ### No ar
 - **Web/PWA:** publicado em `main` (GitHub Pages), com o fluxo novo de primeiro acesso.
-- **iOS:** versão **1.0 (build 3)** publicada na App Store. **1.1.0 (build 6)** enviada ao App Store Connect em 12/nov (a build 5 já tinha sido usada antes). Próximo build iOS: **7**.
+- **iOS:** versão **1.0 (build 3)** publicada na App Store. **1.1.0 (build 5)** enviada para revisão da Apple em 12/nov, com lançamento automático após aprovação. A build 6 (mesmo conteúdo) também está no TestFlight, sem uso. Próximo build iOS: **7**.
 - **Android:** **1.1.0 (versionCode 5)** gerada em 12/nov (`app-release.aab`), aguardando envio ao Play. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
 - Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
