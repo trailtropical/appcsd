@@ -42,7 +42,7 @@ curl -s -o /dev/null -w "%{http_code}\n" https://trailtropical.github.io/appcsd/
 **Cache:** `index.html` tem um cache-buster na linha 7: `const v='34'`. **Ao publicar mudanças no app, incremente esse número** (`v='35'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
 
 ### Versão mínima do app nativo
-- `index.html` tem `const APP_BUILD = 5`: **aumente a cada build nova enviada às lojas** (iOS e Android usam o mesmo contador).
+- `index.html` tem `const APP_BUILD = 5`: **aumente a cada build nova enviada às lojas**. É um contador próprio do app (não precisa bater com o build da Apple nem com o versionCode do Android).
 - O app nativo lê `app-config.json` (no site). Se `APP_BUILD < min_build`, mostra "Atualize o app" com o link da loja. Para forçar atualização, suba `min_build` e publique. Falha de rede deixa entrar.
 - Só funciona a partir da build que tem esse código (APP_BUILD 5). Builds antigas (iOS 1.0 b3, Android vc4) não fazem a checagem.
 
@@ -170,7 +170,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 
 ### No ar
 - **Web/PWA:** publicado em `main` (GitHub Pages), com o fluxo novo de primeiro acesso.
-- **iOS:** versão **1.0 (build 3)** publicada na App Store. **1.1.0 (build 5)** preparada em 12/nov (projeto Xcode sincronizado), aguardando Archive/envio pelo dono.
+- **iOS:** versão **1.0 (build 3)** publicada na App Store. **1.1.0 (build 6)** enviada ao App Store Connect em 12/nov (a build 5 já tinha sido usada antes). Próximo build iOS: **7**.
 - **Android:** **1.1.0 (versionCode 5)** gerada em 12/nov (`app-release.aab`), aguardando envio ao Play. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
 - Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
