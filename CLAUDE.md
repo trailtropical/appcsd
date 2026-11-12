@@ -39,7 +39,7 @@ GitHub Pages publica `main` em ~1 min. Sempre confira com:
 curl -s -o /dev/null -w "%{http_code}\n" https://trailtropical.github.io/appcsd/
 ```
 
-**Cache:** `index.html` tem um cache-buster na linha 7: `const v='31'`. **Ao publicar mudanças no app, incremente esse número** (`v='32'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
+**Cache:** `index.html` tem um cache-buster na linha 7: `const v='32'`. **Ao publicar mudanças no app, incremente esse número** (`v='33'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
 
 ### Edge Functions
 O dono do projeto **não fornece token/CLI do Supabase**. Deploy é **manual pelo dashboard**:
@@ -166,7 +166,8 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 ### No ar
 - **Web/PWA:** publicado em `main` (GitHub Pages), com o fluxo novo de primeiro acesso.
 - **iOS:** versão **1.0 (build 3)** publicada na App Store.
-- **Android:** versão **1.0.1 (versionCode 4)** enviada ao Play, testada no teste aberto e **promovida para produção — aguardando análise/publicação do Google**.
+- **Android:** versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
+- Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
 - **Páginas legais:** Política de Privacidade, Termos de Uso (`termos.html`), Suporte e Exclusão de Conta publicadas.
 
@@ -218,9 +219,9 @@ Ordem cronológica do que foi feito (commits em `git log`):
 
 ## 13. Próximos passos planejados
 
-1. **Google Play (prioridade):** acompanhar a análise da versão de produção. Se reprovar, corrigir e gerar **versionCode 5**; se aprovar, nada a fazer.
-2. **Trocar o botão Android pelo link da Play Store** no e-mail e na tela `s-app-download` (hoje aponta para o PWA). Exige novo build (**versionCode 5**).
-3. **Link "Termos de Uso" nas configurações do app** — mesma oportunidade de build da versão 5.
+1. ~~Google Play~~ — aprovado em 12/nov.
+2. ~~Botão Android → Play Store~~ — feito na web e nos e-mails (não precisou de build nativo: a tela `s-app-download` não aparece no app nativo). Edge Functions precisam ser redeployadas pelo dashboard.
+3. **Link "Termos de Uso" nas configurações do app** — próximo build nativo (**versionCode 5**).
 4. **Validar com dados reais** a divergência de plano relatada por uma aluna (comparar `sessions.signal_tiers`, `prev_signals`, `plan_month` e `checkups.answers` com o que o admin mostra). O motor já foi alinhado; falta confirmação em produção.
 5. **Limpar registros de teste** do banco quando conveniente: `guru:GURU-TESTE-999`, `guru:CORTESIA-COPIA-001`, `TESTE-001`, `guru:TESTE-ACESSO-001/002/003`.
 6. **Revisão jurídica** dos Termos de Uso (reembolso e responsabilidade) — recomendada, não bloqueante.

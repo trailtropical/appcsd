@@ -8,6 +8,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || ""
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "noreply@seudominio.com"
 const APP_STORE_URL = Deno.env.get("APP_STORE_URL") || "https://apps.apple.com/br/app/corredor-sem-dor/id6824963334"
 const APP_URL = Deno.env.get("APP_URL") || "https://trailtropical.github.io/appcsd/"
+const PLAY_STORE_URL = Deno.env.get("PLAY_STORE_URL") || "https://play.google.com/store/apps/details?id=br.com.corredorsemdor"
 
 // Guru manda o status em minúsculas, mas já vi variações em maiúsculas.
 const APPROVED_STATUSES = [
@@ -296,11 +297,7 @@ serve(async (req) => {
           <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 18px 0;"></div>
 
           <p style="font-size: 11px; color: #8A8A87; margin: 0 0 6px;">Android</p>
-          <a href="${APP_URL}" style="display: block; background: #FFFFFF; color: #0F0F0E; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 24px; border-radius: 10px;">Instalar no Android →</a>
-          <p style="font-size: 11px; color: #8A8A87; margin: 10px 0 0; line-height: 1.6;">
-            Abra no <strong style="color:#F0F0EE">Chrome</strong>, toque nos <strong style="color:#F0F0EE">3 pontos (⋮)</strong> e escolha
-            <strong style="color:#F0F0EE">"Instalar app"</strong>.
-          </p>
+          <a href="${PLAY_STORE_URL}" style="display: block; background: #FFFFFF; color: #0F0F0E; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 24px; border-radius: 10px;">Baixar no Google Play →</a>
         </div>
 
         <p style="font-size: 12px; color: #5A5A57; margin: 24px 0 0; text-align: center;">Se você já tem conta, é só entrar com seu e-mail e senha. Dúvidas? Responda este e-mail.</p>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='31';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='32';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -622,7 +622,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div class="modal-title">Seu celular é:</div>
     <div class="modal-sub">Escolha o sistema do seu celular</div>
     <div class="modal-btns">
-      <button class="modal-btn android" onclick="installAndroid()"><span class="modal-btn-icon">🤖</span>Android</button>
+      <button class="modal-btn android" onclick="openPlayStore()"><span class="modal-btn-icon">🤖</span>Android</button>
       <button class="modal-btn ios" onclick="openAppStore()"><span class="modal-btn-icon">🍎</span>App Store</button>
     </div>
     <div class="ios-steps" id="ios-steps" style="display:none">
@@ -754,14 +754,7 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
     <div style="height:1px;background:var(--border2);margin:20px 0"></div>
 
     <div style="font-size:12px;color:var(--muted);margin:0 0 8px">Android</div>
-    <button class="btn-outline" onclick="installAndroidFromSuccess()">Instalar no Android</button>
-
-    <div id="dl-android-steps" style="display:none;font-size:12.5px;color:var(--text);line-height:1.7;margin-top:14px;padding:14px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px">
-      <div style="font-weight:600;margin-bottom:8px">Abra este link no Chrome do Android:</div>
-      <div>1. Toque nos <b>3 pontos (⋮)</b></div>
-      <div>2. Toque em <b>"Instalar app"</b> ou <b>"Adicionar à tela inicial"</b></div>
-      <div>3. Confirme em <b>"Instalar"</b></div>
-    </div>
+    <button class="btn-outline" onclick="openPlayStore()">Baixar no Google Play</button>
 
     <div class="login-footer" style="margin-top:20px">
       <a href="#" onclick="goToLoginAfterSignup();return false" style="color:var(--muted);text-decoration:none;font-size:12px">Prefiro entrar pelo navegador</a>
@@ -1942,6 +1935,11 @@ function showIosSteps() {
 function openAppStore() {
   closeDownloadModal()
   window.location.href = 'https://apps.apple.com/br/app/corredor-sem-dor/id6824963334'
+}
+
+function openPlayStore() {
+  closeDownloadModal()
+  window.location.href = 'https://play.google.com/store/apps/details?id=br.com.corredorsemdor'
 }
 
 // ══ PWA INSTALL SYSTEM ══
@@ -3865,24 +3863,7 @@ async function firstAccessSet() {
 
   // No navegador, para aqui e mostra como instalar o app.
   document.getElementById('dl-email').textContent = email
-  document.getElementById('dl-android-steps').style.display = 'none'
   showScreen('s-app-download')
-}
-
-async function installAndroidFromSuccess() {
-  if (PWA.canInstall && PWA.deferredPrompt) {
-    try {
-      await PWA.deferredPrompt.prompt()
-      const { outcome } = await PWA.deferredPrompt.userChoice
-      PWA.deferredPrompt = null
-      if (outcome === 'accepted') localStorage.setItem('csd_install_done', '1')
-      return
-    } catch (e) {
-      console.warn('[CSD] instalação automática indisponível:', e)
-    }
-  }
-  // Sem prompt do navegador: mostra o passo a passo.
-  document.getElementById('dl-android-steps').style.display = 'block'
 }
 
 function goToLoginAfterSignup() {
