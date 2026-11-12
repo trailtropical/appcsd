@@ -1,5 +1,8 @@
 # DATA_FLOW.md — Documento Técnico Completo: Fluxo de Dados
 
+> ⚠️ **DOCUMENTO HISTÓRICO — julho/2026.** Escrito quando a persistência no Supabase ainda era um **plano futuro** (ver seção final). Hoje o app usa Supabase Auth/Postgres, pagamentos Hotmart/Guru, Edge Functions e apps nativos — nada disso está aqui.
+> **Fonte atual de verdade:** [`CLAUDE.md`](CLAUDE.md). Use este arquivo só como referência da lógica de check-up/plano, conferindo sempre o código.
+
 > **Projeto:** Corredor Sem Dor (CSD)
 > **Arquivo fonte:** `index.html` (~2008 linhas, SPA monolítica)
 > **Deploy:** `https://github.com/trailtropical/appcsd`

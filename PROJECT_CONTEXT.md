@@ -1,5 +1,8 @@
 # PROJECT CONTEXT — Corredor Sem Dor (CSD)
 
+> ⚠️ **DOCUMENTO HISTÓRICO — julho/2026.** Este arquivo descreve a versão do app **antes** de: Supabase Auth, pagamentos Hotmart/Guru, fluxo de primeiro acesso, painel admin e apps nativos. Várias afirmações estão desatualizadas (ex.: "login MVP — qualquer email/senha", "~2000 linhas").
+> **Fonte atual de verdade:** [`CLAUDE.md`](CLAUDE.md). Não use este documento para decidir implementação sem conferir o código.
+
 > Arquivo único (`index.html`, ~2000 linhas) — HTML + CSS + JS embutidos.
 > Deploy: `https://github.com/trailtropical/appcsd`
 

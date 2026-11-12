@@ -63,7 +63,7 @@ Para facilitar: `pbcopy < supabase/functions/<nome>/index.ts`.
 | `sw.js`, `manifest.json`, ícones | PWA |
 | `supabase/functions/` | `first-access`, `hotmart-webhook`, `guru-webhook`, `admin-data` |
 | `native-app/` | Projeto Capacitor (iOS + Android) — `native-app/android` **não está no git** |
-| `PROJECT_CONTEXT.md`, `DATA_FLOW.md` | Docs profundos (parcialmente desatualizados: falam de ~2.000 linhas) |
+| `PROJECT_CONTEXT.md`, `DATA_FLOW.md` | Docs profundos, porém **históricos (jul/2026)** — descrevem o app antes de Supabase Auth, pagamentos e apps nativos. Servem só como referência de lógica antiga; confira sempre o código |
 | `DEPLOY_ACESSO.md` | Passo a passo do fluxo de primeiro acesso |
 
 ## 5. Fluxo de acesso (regra de negócio central)
