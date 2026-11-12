@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='33';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='34';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -665,13 +665,13 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 
 <!-- PWA INSTALL MODAL -->
 <div class="install-overlay" id="install-overlay">
-  <div class="install-backdrop" onclick="closeInstallModal()"></div>
+  <div class="install-backdrop" onclick="dismissInstall()"></div>
   <div class="install-modal" id="install-modal">
-    <div class="install-modal-title">Baixe o app<br>Corredor Sem Dor</div>
-    <div class="install-modal-text">Entre com o mesmo e-mail e senha. Seu plano e seu progresso continuam lá.</div>
+    <div class="install-modal-title" id="install-modal-title">Baixe o app<br>Corredor Sem Dor</div>
+    <div class="install-modal-text" id="install-modal-text">Entre com o mesmo e-mail e senha. Seu plano e seu progresso continuam lá.</div>
     <div id="install-store-btns">
-      <button class="install-btn" data-store="ios" onclick="openAppStore()">Baixar na App Store</button>
-      <button class="install-btn install-btn-alt" data-store="android" onclick="openPlayStore()">Baixar no Google Play</button>
+      <button class="install-btn" data-store="ios" onclick="storeButtonClick('ios')">Baixar na App Store</button>
+      <button class="install-btn install-btn-alt" data-store="android" onclick="storeButtonClick('android')">Baixar no Google Play</button>
     </div>
     <button class="install-skip" onclick="dismissInstall()">Agora não</button>
   </div>
@@ -1485,7 +1485,7 @@ function renderDashboard() {
       <div class="db-empty-sub">Complete o check-up de 7 testes para descobrir onde seu corpo está falhando na corrida.</div>
       <button class="btn-primary" onclick="showScreen('s-welcome')">Iniciar check-up →</button>
     </div>`
-    setTimeout(showInstallModal, 600)
+    setTimeout(maybeShowStoreInvite, 800)
     return
   }
 
@@ -1601,6 +1601,7 @@ function renderDashboard() {
       <button class="btn-glass" onclick="showBonuses()">Ver bônus →</button>
     </div>`
 
+  setTimeout(maybeShowStoreInvite, 800)
   setTimeout(() => {
     animateDashboard()
     // Sincronizar toggles de tema
@@ -1727,7 +1728,6 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active')
   window.scrollTo(0,0)
   if (id === 's-dashboard') setTimeout(animateDashboard, 200)
-  if (id === 's-welcome') setTimeout(showInstallModal, 600)
 }
 
 function animateDashboard() {
@@ -1998,19 +1998,37 @@ window.addEventListener('appinstalled', () => {
   if (btn) btn.textContent = '✓ Instalado'
 })
 
-function showInstallModal(force = false) {
-  if (!force && localStorage.getItem('csd_install_dismissed')) return
-  // Android: Google Play primeiro e em destaque; demais: App Store primeiro.
+// Modal das lojas. store = null → menu "Baixar o app" (as duas lojas);
+// store = 'ios' | 'android' → convite automático (só a loja do aparelho).
+let _storeInviteMode = null
+function showInstallModal(force = false, store = null) {
+  _storeInviteMode = store
   const wrap = document.getElementById('install-store-btns')
+  const title = document.getElementById('install-modal-title')
+  const text = document.getElementById('install-modal-text')
   if (wrap) {
     const ios = wrap.querySelector('[data-store="ios"]')
     const and = wrap.querySelector('[data-store="android"]')
-    const androidFirst = /android/i.test(navigator.userAgent)
-    const [first, second] = androidFirst ? [and, ios] : [ios, and]
-    wrap.append(first, second)
-    first.classList.remove('install-btn-alt')
-    second.classList.add('install-btn-alt')
+    if (store) {
+      ios.style.display = store === 'ios' ? '' : 'none'
+      and.style.display = store === 'android' ? '' : 'none'
+      ios.classList.remove('install-btn-alt'); and.classList.remove('install-btn-alt')
+    } else {
+      // Android: Google Play primeiro e em destaque; demais: App Store primeiro.
+      ios.style.display = ''; and.style.display = ''
+      const androidFirst = /android/i.test(navigator.userAgent)
+      const [first, second] = androidFirst ? [and, ios] : [ios, and]
+      wrap.append(first, second)
+      first.classList.remove('install-btn-alt')
+      second.classList.add('install-btn-alt')
+    }
   }
+  if (title) title.innerHTML = store === 'ios'
+    ? 'O Corredor Sem Dor<br>já está na App Store'
+    : store === 'android' ? 'O Corredor Sem Dor<br>já está no Google Play' : 'Baixe o app<br>Corredor Sem Dor'
+  if (text) text.textContent = store
+    ? 'Baixe o app e entre com o mesmo e-mail e senha. Seu plano e seu progresso continuam lá.'
+    : 'Entre com o mesmo e-mail e senha. Seu plano e seu progresso continuam lá.'
   document.getElementById('install-overlay').classList.add('open')
 }
 
@@ -2018,8 +2036,43 @@ function closeInstallModal() {
   document.getElementById('install-overlay').classList.remove('open')
 }
 
+// Estado do convite automático: { dismiss: nº de "Agora não", done: tocou em baixar }
+function getStoreInvite() {
+  try { return JSON.parse(localStorage.getItem('csd_store_invite') || '{}') || {} } catch (e) { return {} }
+}
+function setStoreInvite(st) {
+  try { localStorage.setItem('csd_store_invite', JSON.stringify(st)) } catch (e) {}
+}
+
+// Convite para trocar o site/PWA pelo app da loja: só no navegador do celular,
+// nunca no app nativo; no máximo uma vez por abertura do app; para de aparecer
+// depois de 3 "Agora não" ou quando o aluno toca em baixar.
+function maybeShowStoreInvite() {
+  const cap = window.Capacitor
+  if (cap && cap.isNativePlatform && cap.isNativePlatform()) return
+  const store = /android/i.test(navigator.userAgent) ? 'android' : (isIOS() ? 'ios' : null)
+  if (!store) return
+  const st = getStoreInvite()
+  if (st.done || (st.dismiss || 0) >= 3) return
+  try {
+    if (sessionStorage.getItem('csd_store_invite_shown')) return
+    sessionStorage.setItem('csd_store_invite_shown', '1')
+  } catch (e) {}
+  const ov = document.getElementById('install-overlay')
+  if (!ov || ov.classList.contains('open')) return
+  showInstallModal(true, store)
+}
+
+function storeButtonClick(store) {
+  if (_storeInviteMode) { const st = getStoreInvite(); st.done = true; setStoreInvite(st) }
+  closeInstallModal()
+  store === 'android' ? openPlayStore() : openAppStore()
+}
+
 function dismissInstall() {
-  localStorage.setItem('csd_install_dismissed', Date.now().toString())
+  if (_storeInviteMode) {
+    const st = getStoreInvite(); st.dismiss = (st.dismiss || 0) + 1; setStoreInvite(st)
+  }
   closeInstallModal()
 }
 
