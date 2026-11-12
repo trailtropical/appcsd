@@ -171,7 +171,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 ### No ar
 - **Web/PWA:** publicado em `main` (GitHub Pages), com o fluxo novo de primeiro acesso.
 - **iOS:** versão **1.0 (build 3)** publicada na App Store. **1.1.0 (build 5)** enviada para revisão da Apple em 12/nov, com lançamento automático após aprovação. A build 6 (mesmo conteúdo) também está no TestFlight, sem uso. Próximo build iOS: **7**.
-- **Android:** **1.1.0 (versionCode 5)** gerada em 12/nov (`app-release.aab`), aguardando envio ao Play. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
+- **Android:** **1.1.0 (versionCode 5)** enviada para revisão do Google em 12/nov (produção, 100%, todos os países). Próximo versionCode: **6**. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
 - Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
 - **Páginas legais:** Política de Privacidade, Termos de Uso (`termos.html`), Suporte e Exclusão de Conta publicadas.
@@ -226,9 +226,9 @@ Ordem cronológica do que foi feito (commits em `git log`):
 
 ## 13. Próximos passos planejados
 
-1. ~~Google Play~~ — aprovado em 12/nov.
+1. **Acompanhar a revisão da 1.1.0** nas duas lojas (iOS build 5, Android vc 5), enviadas em 12/nov. iOS lança automático ao aprovar. Se reprovar: iOS próximo build 7, Android próximo versionCode 6.
 2. ~~Botão Android → Play Store~~ — feito na web e nos e-mails (não precisou de build nativo: a tela `s-app-download` não aparece no app nativo). Edge Functions já redeployadas (12/nov).
-3. **Link "Termos de Uso" nas configurações do app** — próximo build nativo (**versionCode 5**).
+3. ~~Link "Termos de Uso" nas configurações~~ — incluído na 1.1.0.
 4. **Validar com dados reais** a divergência de plano relatada por uma aluna (comparar `sessions.signal_tiers`, `prev_signals`, `plan_month` e `checkups.answers` com o que o admin mostra). O motor já foi alinhado; falta confirmação em produção.
 5. **Limpar registros de teste** do banco quando conveniente: `guru:GURU-TESTE-999`, `guru:CORTESIA-COPIA-001`, `TESTE-001`, `guru:TESTE-ACESSO-001/002/003`.
 6. **Revisão jurídica** dos Termos de Uso (reembolso e responsabilidade) — recomendada, não bloqueante.
