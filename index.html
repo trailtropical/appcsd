@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='34';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='35';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -1429,9 +1429,17 @@ function getPersonalizedMsg() {
 
 function getNextSession() {
   const checks = getSessionChecks()
+  const allEx = (() => { try { return JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}') } catch(e) { return {} } })()
   const days = ['Segunda-feira','Quarta-feira','Sexta-feira']
   for (let i = 0; i < 3; i++) {
     const s = checks[`sess_${i}`]
+    // Quando o app já sabe a lista do treino (prescritos + extras), decide por ela:
+    // marcação velha de exercício que saiu do treino não trava mais o avanço.
+    const exIds = allEx[`sess_${i}`]
+    if (Array.isArray(exIds) && exIds.length) {
+      if (!exIds.every(id => s && s[id])) return { idx: i, label: 'Próximo', day: days[i] }
+      continue
+    }
     if (!s || Object.keys(s).length === 0) return { idx: i, label: 'Próximo', day: days[i] }
     if (!Object.keys(s).every(k => s[k])) return { idx: i, label: 'Próximo', day: days[i] }
   }
@@ -3556,9 +3564,14 @@ function showSessionFromPlan(sessIdx) {
       if (!Array.isArray(extras) || !extras.length) return
       const extraNew = extras.map(e => e.exercise_id).filter(id => EX[id] && !finalIds.includes(id))
       if (!extraNew.length) return
+      // O aluno pode ter trocado de treino enquanto os extras carregavam
+      if (currentSessionIdx !== sessIdx || !document.getElementById('s-session-detail').classList.contains('active')) return
       const extraHtml = extraNew.map(id => renderExCard(id, n, false, false, true)).join('')
       wrap.insertAdjacentHTML('beforeend', extraHtml)
-      updateSessionSummary()
+      // Reaplica os ✓ (inclusive nos extras, que chegam depois) e grava a lista
+      // completa do treino. Antes o extra já marcado aparecia vazio e o toque
+      // seguinte o DESMARCAVA, travando o próximo treino e o fechamento da semana.
+      afterRenderSession(wrap, sessIdx)
     } catch(e) { console.warn('[CSD] extras error:', e) }
   })()
   showScreen('s-session-detail')
