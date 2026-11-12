@@ -122,7 +122,7 @@ Regra do motor: sinal **em treino** acompanha o mês do plano → `max(tier_grav
 
 ```bash
 cd native-app
-./build-www.sh              # monta www/ a partir do index.html e esconde UI de instalação
+./build-www.sh              # monta www/ a partir do index.html, esconde UI de instalação e troca textos sobre compra por textos neutros (falha se não achar)
 npx cap sync android        # copia para android/app/src/main/assets/public
 ```
 
@@ -130,7 +130,7 @@ Build do AAB (JDK 21):
 ```bash
 cd native-app/android
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
-  ./gradlew bundleRelease -PAPP_VERSION_CODE=5 -PAPP_VERSION_NAME=1.0.2
+  ./gradlew bundleRelease -PAPP_VERSION_CODE=6 -PAPP_VERSION_NAME=1.1.1
 ```
 - Saída: `native-app/android/app/build/outputs/bundle/release/app-release.aab`
 - **versionCode é permanente**: nunca reuse um número já enviado ao Play
@@ -170,8 +170,8 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 
 ### No ar
 - **Web/PWA:** publicado em `main` (GitHub Pages), com o fluxo novo de primeiro acesso.
-- **iOS:** versão **1.0 (build 3)** publicada na App Store.
-- **Android:** versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
+- **iOS:** versão **1.0 (build 3)** publicada na App Store. **1.1.0 (build 5)** preparada em 12/nov (projeto Xcode sincronizado), aguardando Archive/envio pelo dono.
+- **Android:** **1.1.0 (versionCode 5)** gerada em 12/nov (`app-release.aab`), aguardando envio ao Play. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
 - Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
 - **Páginas legais:** Política de Privacidade, Termos de Uso (`termos.html`), Suporte e Exclusão de Conta publicadas.
