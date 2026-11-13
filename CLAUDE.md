@@ -170,8 +170,8 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 
 ### No ar
 - **Web/PWA:** publicado em `main` (GitHub Pages), com o fluxo novo de primeiro acesso.
-- **iOS:** **1.1.0 (build 5)** aprovada e publicada. **1.1.1 (build 7, APP_BUILD 6)** enviada ao App Store Connect em 13/nov (falta mandar para revisão no site). Próximo build iOS: **8**.
-- **Android:** **1.1.0 (versionCode 5)** enviada em 12/nov. **1.1.1 (versionCode 6)** gerada em 13/nov (`app-release.aab`), falta subir no Play Console. Próximo versionCode: **7**. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
+- **iOS:** **1.1.0 (build 5)** aprovada e publicada. **1.1.1 (build 7, APP_BUILD 6)** enviada para revisão da Apple em 13/nov (lançamento automático após aprovação). Próximo build iOS: **8**.
+- **Android:** **1.1.0 (versionCode 5)** publicada em produção. **1.1.1 (versionCode 7**, mesmo número do build iOS; o 6 foi pulado e nunca enviado) enviada para revisão do Google em 13/nov (produção, 100%). Próximo versionCode: **8**. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
 - Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
 - **App Store Connect:** declaração de **comerciante** (DSA/UE) preenchida em 12/nov (contato público na UE: dados da empresa + trailtropicalpodcast@gmail.com).
@@ -184,7 +184,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 - Edge Functions `first-access`, `hotmart-webhook` e `guru-webhook` **deployadas em 12/nov** iguais ao commit `5b15ca4` (botão Android → Play Store). O `guru-webhook` inclui o suporte a `bcc` (commit `1524a9f`), inativo: só age se o payload trouxer `bcc`/`copy_to`.
 
 ### Correções recentes
-- **13/nov (web v=36, iOS 1.1.1 b7, Android vc6):** treino "mudava todo" ao trocar o atalho/PWA pelo app da loja (mês 2+): aparelho novo usava `session_exercises` (treinos do mês ATUAL) como se fosse o mês anterior e excluía os exercícios do aluno. Corrigido; e a lista de cada mês passou a ser salva em `sessions.session_exercises._planos` (`{"0":M1,"1":M2,"2":M3}`), restaurada em qualquer aparelho e usada pelo admin no mês atual. App nativo descarta 1× a lista do mês sem `_planos` (`csd_fix_lista_v1`) para corrigir quem já foi afetado na 1.1.0. Orientação até a atualização: usar o atalho.
+- **13/nov (web v=36, iOS 1.1.1 b7, Android 1.1.1 vc7):** treino "mudava todo" ao trocar o atalho/PWA pelo app da loja (mês 2+): aparelho novo usava `session_exercises` (treinos do mês ATUAL) como se fosse o mês anterior e excluía os exercícios do aluno. Corrigido; e a lista de cada mês passou a ser salva em `sessions.session_exercises._planos` (`{"0":M1,"1":M2,"2":M3}`), restaurada em qualquer aparelho e usada pelo admin no mês atual. App nativo descarta 1× a lista do mês sem `_planos` (`csd_fix_lista_v1`) para corrigir quem já foi afetado na 1.1.0. Orientação até a atualização: usar o atalho.
 - **12/nov (web v=34):** convite "já está na App Store / no Google Play" para quem usa o site/PWA no celular (`maybeShowStoreInvite`): só a loja do aparelho, nunca no app nativo nem no computador, 1× por abertura, para após 3 "Agora não" ou ao tocar em baixar (`localStorage.csd_store_invite`).
 - **12/nov (UX, web v=33):** painel com "Progresso do Mês" (12 treinos/mês; antes media só a semana e voltava a 0% ao fechar a semana) e "Semana X de 4"; relatório começa pela conclusão (`buildReportHtml` sem efeitos; `viewReport()` reabre pelo painel sem regravar); treino com tempo estimado, contador de feitos, descanso (30 s, até 1 min) e "Marcar treino como feito"; cards de exercício simplificados (nome, dose, ★ Crítico, "Ver vídeo"); cronômetro no detalhe dos exercícios em segundos; convite "Baixar App" leva às lojas; Termos nas configurações; checagem de versão mínima (`APP_BUILD`/`app-config.json`).
 - **11/nov:** `admin.html` passou a reconstruir o plano com o mesmo motor do app (`effTier = max(tier, min(2, mês))`), resolvendo o caso "Copenhagen aparece no Treino C do aluno e não no painel". Também alinhados: `GEMEOS`, reforço do crítico filtrado por `!usedBefore`, fallback `baseExercisesForMonth` e preenchimento geral com giro por treino/mês.
@@ -228,7 +228,7 @@ Ordem cronológica do que foi feito (commits em `git log`):
 
 ## 13. Próximos passos planejados
 
-1. **Acompanhar a revisão da 1.1.0** nas duas lojas (iOS build 5, Android vc 5), enviadas em 12/nov. iOS lança automático ao aprovar. Se reprovar: iOS próximo build 7, Android próximo versionCode 6.
+1. **Acompanhar a revisão da 1.1.1** nas duas lojas (iOS build 7, Android vc 7), enviadas em 13/nov. Se reprovar: iOS próximo build 8, Android próximo versionCode 8. Manter o mesmo número de build nas duas lojas.
 2. ~~Botão Android → Play Store~~ — feito na web e nos e-mails (não precisou de build nativo: a tela `s-app-download` não aparece no app nativo). Edge Functions já redeployadas (12/nov).
 3. ~~Link "Termos de Uso" nas configurações~~ — incluído na 1.1.0.
 4. **Validar com dados reais** a divergência de plano relatada por uma aluna (comparar `sessions.signal_tiers`, `prev_signals`, `plan_month` e `checkups.answers` com o que o admin mostra). O motor já foi alinhado; falta confirmação em produção.
