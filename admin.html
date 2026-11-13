@@ -839,9 +839,19 @@ function rebuildPlanForStudent(s) {
     if (ids.length===0) baseExercisesForMonth(monthIdx, nivel).forEach(addEx)
     return ids
   })
+  // Lista do mês gravada pelo app (_planos[mês] em session_exercises): é a que o
+  // aluno VÊ em qualquer aparelho (o app restaura ela no login). Se existir para o
+  // mês atual, usamos ela no lugar da gerada — senão o painel divergia de quem
+  // tinha lista feita por versão antiga do motor.
+  let baseSessoes = sessoes
+  const plSaved = readSessionField(s, 'session_exercises', {})?._planos?.[monthIdx]
+  if (Array.isArray(plSaved) && plSaved.length >= 3 &&
+      plSaved.slice(0, 3).every(a => Array.isArray(a)) && plSaved.slice(0, 3).some(a => a.length)) {
+    baseSessoes = plSaved.slice(0, 3)
+  }
   const MIN = 5, MAX = 6
   const geralFill = geralOrdemIds(nivel).filter(id => EX_NAME[id])
-  return sessoes.map((specific, sessIdx) => {
+  return baseSessoes.map((specific, sessIdx) => {
     let kept = specific.filter(id => {
       const fk = id.replace(/_assist$/,'')
       return id && EX_NAME[id] && !((blockedFam[fk] || new Set()).has(id))
