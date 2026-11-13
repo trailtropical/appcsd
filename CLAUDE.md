@@ -39,10 +39,10 @@ GitHub Pages publica `main` em ~1 min. Sempre confira com:
 curl -s -o /dev/null -w "%{http_code}\n" https://trailtropical.github.io/appcsd/
 ```
 
-**Cache:** `index.html` tem um cache-buster na linha 7: `const v='34'`. **Ao publicar mudanças no app, incremente esse número** (`v='35'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
+**Cache:** `index.html` tem um cache-buster na linha 7: `const v='36'`. **Ao publicar mudanças no app, incremente esse número** (`v='37'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
 
 ### Versão mínima do app nativo
-- `index.html` tem `const APP_BUILD = 5`: **aumente a cada build nova enviada às lojas**. É um contador próprio do app (não precisa bater com o build da Apple nem com o versionCode do Android).
+- `index.html` tem `const APP_BUILD = 6`: **aumente a cada build nova enviada às lojas**. É um contador próprio do app (não precisa bater com o build da Apple nem com o versionCode do Android).
 - O app nativo lê `app-config.json` (no site). Se `APP_BUILD < min_build`, mostra "Atualize o app" com o link da loja. Para forçar atualização, suba `min_build` e publique. Falha de rede deixa entrar.
 - Só funciona a partir da build que tem esse código (APP_BUILD 5). Builds antigas (iOS 1.0 b3, Android vc4) não fazem a checagem.
 
@@ -164,14 +164,14 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 
 ---
 
-## 11. Estado atual — 12/nov/2026
+## 11. Estado atual — 13/nov/2026
 
 > Esta seção envelhece. Atualize a data e os itens ao concluir marcos relevantes.
 
 ### No ar
 - **Web/PWA:** publicado em `main` (GitHub Pages), com o fluxo novo de primeiro acesso.
-- **iOS:** versão **1.0 (build 3)** publicada na App Store. **1.1.0 (build 5)** enviada para revisão da Apple em 12/nov, com lançamento automático após aprovação. A build 6 (mesmo conteúdo) também está no TestFlight, sem uso. Próximo build iOS: **7**.
-- **Android:** **1.1.0 (versionCode 5)** enviada para revisão do Google em 12/nov (produção, 100%, todos os países). Próximo versionCode: **6**. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
+- **iOS:** **1.1.0 (build 5)** aprovada e publicada. **1.1.1 (build 7, APP_BUILD 6)** enviada ao App Store Connect em 13/nov (falta mandar para revisão no site). Próximo build iOS: **8**.
+- **Android:** **1.1.0 (versionCode 5)** enviada em 12/nov. **1.1.1 (versionCode 6)** gerada em 13/nov (`app-release.aab`), falta subir no Play Console. Próximo versionCode: **7**. Anterior: versão **1.0.1 (versionCode 4)** **aprovada e publicada na Play Store**: https://play.google.com/store/apps/details?id=br.com.corredorsemdor
 - Botões "Android" (tela `s-app-download` e e-mails de compra/senha criada) apontam para a Play Store (antes: PWA).
 - **Play Console:** países/regiões = **todos**; declaração de **comerciante** (DSA/UE) preenchida com Trail Tropical.
 - **App Store Connect:** declaração de **comerciante** (DSA/UE) preenchida em 12/nov (contato público na UE: dados da empresa + trailtropicalpodcast@gmail.com).
@@ -184,6 +184,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 - Edge Functions `first-access`, `hotmart-webhook` e `guru-webhook` **deployadas em 12/nov** iguais ao commit `5b15ca4` (botão Android → Play Store). O `guru-webhook` inclui o suporte a `bcc` (commit `1524a9f`), inativo: só age se o payload trouxer `bcc`/`copy_to`.
 
 ### Correções recentes
+- **13/nov (web v=36, iOS 1.1.1 b7, Android vc6):** treino "mudava todo" ao trocar o atalho/PWA pelo app da loja (mês 2+): aparelho novo usava `session_exercises` (treinos do mês ATUAL) como se fosse o mês anterior e excluía os exercícios do aluno. Corrigido; e a lista de cada mês passou a ser salva em `sessions.session_exercises._planos` (`{"0":M1,"1":M2,"2":M3}`), restaurada em qualquer aparelho e usada pelo admin no mês atual. App nativo descarta 1× a lista do mês sem `_planos` (`csd_fix_lista_v1`) para corrigir quem já foi afetado na 1.1.0. Orientação até a atualização: usar o atalho.
 - **12/nov (web v=34):** convite "já está na App Store / no Google Play" para quem usa o site/PWA no celular (`maybeShowStoreInvite`): só a loja do aparelho, nunca no app nativo nem no computador, 1× por abertura, para após 3 "Agora não" ou ao tocar em baixar (`localStorage.csd_store_invite`).
 - **12/nov (UX, web v=33):** painel com "Progresso do Mês" (12 treinos/mês; antes media só a semana e voltava a 0% ao fechar a semana) e "Semana X de 4"; relatório começa pela conclusão (`buildReportHtml` sem efeitos; `viewReport()` reabre pelo painel sem regravar); treino com tempo estimado, contador de feitos, descanso (30 s, até 1 min) e "Marcar treino como feito"; cards de exercício simplificados (nome, dose, ★ Crítico, "Ver vídeo"); cronômetro no detalhe dos exercícios em segundos; convite "Baixar App" leva às lojas; Termos nas configurações; checagem de versão mínima (`APP_BUILD`/`app-config.json`).
 - **11/nov:** `admin.html` passou a reconstruir o plano com o mesmo motor do app (`effTier = max(tier, min(2, mês))`), resolvendo o caso "Copenhagen aparece no Treino C do aluno e não no painel". Também alinhados: `GEMEOS`, reforço do crítico filtrado por `!usedBefore`, fallback `baseExercisesForMonth` e preenchimento geral com giro por treino/mês.
@@ -236,7 +237,8 @@ Ordem cronológica do que foi feito (commits em `git log`):
 7. **Monitorar** novos casos de `no_purchase` no primeiro acesso: quase sempre é compra com e-mail diferente do informado.
 8. **Miniaturas dos exercícios** (ideia aprovada, não feita): trocar o botão "Ver vídeo" do card por uma miniatura do **movimento** (não a capa com texto). Caminho testado em 12/nov: o embed `…/players/<vid>/v4/embed.html` aponta para um HLS público `cdn.converteai.net/…/main.m3u8`; `ffmpeg -ss 4 -i <video_1.m3u8> -frames:v 1` extrai o quadro (aos ~4 s já aparece o movimento sem o título). Plano: extrair quadro fixo de cada um dos 54 `vid`, recortar na pessoa, salvar ~320×180 em `assets/thumbs/<vid>.jpg` (vai junto no app, funciona offline), montar página de revisão para o dono aprovar/trocar. Fazer em **sessão nova** (gasta menos).
 9. **Pacote visual 3** (não feito): paleta curta (laranja + neutros; vermelho/âmbar/verde só para status), ícones de linha no lugar de emojis, fonte de título mais sóbria que a Syne, escala fixa de tamanhos/raios.
-10. **Senha da conta demo do Google (`nmendes1994`) exposta** neste repositório público: trocar a senha no Supabase/Play Console e tirá-la dos arquivos. A conta de revisão da Apple é outra e já está protegida contra exclusão (migration 011).
+10. **Histórico de meses no admin**: mostrar `_planos` (listas M1/M2/M3) + exercícios marcados (`exercise_logs`) por mês. Os dados já são gravados desde 13/nov (v36 / 1.1.1); falta a tela.
+11. **Senha da conta demo do Google (`nmendes1994`) exposta** neste repositório público: trocar a senha no Supabase/Play Console e tirá-la dos arquivos. A conta de revisão da Apple é outra e já está protegida contra exclusão (migration 011).
 
 ### Ideias descartadas / decisões fechadas
 - **Painel completo** (decisão do dono, 12/nov): manter no dashboard índice, subnotas, meta, mapa e meses — "um clique a menos" vale mais que tela enxuta. Sem fichas de Treino A/B/C no progresso.
