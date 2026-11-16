@@ -164,7 +164,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 
 ---
 
-## 11. Estado atual — 13/nov/2026
+## 11. Estado atual — 16/nov/2026
 
 > Esta seção envelhece. Atualize a data e os itens ao concluir marcos relevantes.
 
@@ -182,6 +182,10 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 - Edge Functions deployadas: `first-access` (Verify JWT **off**), `hotmart-webhook`, `guru-webhook` (auth por `?key=` na URL).
 - E-mails transacionais (Resend): e-mail 1 prioriza **"Criar minha senha"** com `?email=` pré-preenchido; e-mail 2 leva aos downloads.
 - Edge Functions `first-access`, `hotmart-webhook` e `guru-webhook` **deployadas em 12/nov** iguais ao commit `5b15ca4` (botão Android → Play Store). O `guru-webhook` inclui o suporte a `bcc` (commit `1524a9f`), inativo: só age se o payload trouxer `bcc`/`copy_to`.
+
+- **E-mails de senha (Supabase Auth) saem pelo Resend desde 16/nov:** Authentication → Emails → SMTP Settings com `smtp.resend.com`, porta 465, usuário `resend`, remetente `corredorsemdor@trailtropical.com.br` (domínio verificado no Resend: `trailtropical.com.br`; **nunca** usar `@gmail.com` como remetente, o Resend recusa e o "esqueci minha senha" para). Limite: **30 e-mails/h** (antes 2/h no envio embutido). Se a chave do Resend for trocada, atualizar também nesse SMTP.
+- **Modelo "Reset password" traduzido (16/nov):** assunto "Redefinir sua senha — Corredor Sem Dor", HTML no visual dos e-mails de compra com o logo `logo-csd-quad.jpg`. O modelo vive só no dashboard (Authentication → Emails → Templates), não no repositório. Os outros modelos do Supabase continuam no padrão em inglês (não são usados pelo fluxo atual).
+- **Aluno antigo (anterior a 5/nov) sem linha em `purchases`:** o primeiro acesso responde `no_purchase` mesmo ele já tendo conta e senha. O caminho dele é "Já tenho conta" / "Esqueci minha senha". Só gravar compra de cortesia + `password_set = false` se precisar recriar a senha pelo "Primeiro acesso".
 
 ### Correções recentes
 - **13/nov (web v=36, iOS 1.1.1 b7, Android 1.1.1 vc7):** treino "mudava todo" ao trocar o atalho/PWA pelo app da loja (mês 2+): aparelho novo usava `session_exercises` (treinos do mês ATUAL) como se fosse o mês anterior e excluía os exercícios do aluno. Corrigido; e a lista de cada mês passou a ser salva em `sessions.session_exercises._planos` (`{"0":M1,"1":M2,"2":M3}`), restaurada em qualquer aparelho e usada pelo admin no mês atual. App nativo descarta 1× a lista do mês sem `_planos` (`csd_fix_lista_v1`) para corrigir quem já foi afetado na 1.1.0. Orientação até a atualização: usar o atalho.
