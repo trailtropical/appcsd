@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='36';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='37';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -495,6 +495,9 @@ html,body{background:linear-gradient(180deg,#F8F8F6 0%,#EFEFEA 100%);min-height:
 /* EXERCÍCIO DETALHE */
 .ex-detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;overflow-y:auto}
 .ex-detail-overlay.open{display:flex}
+/* Nada encolhe dentro do detalhe: com letra grande/tela baixa o conteúdo passa da altura
+   e a caixa do vídeo (overflow:hidden) era esmagada até sumir. A tela rola no lugar. */
+.ex-detail-overlay>*{flex-shrink:0}
 .ex-detail-video{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:16px 20px 0;cursor:pointer;overflow:hidden;position:relative}
 .ex-detail-video.has-video{height:auto;aspect-ratio:16/9}
 .ex-detail-video.has-video iframe{width:100%;height:100%;border:none}
@@ -3337,7 +3340,11 @@ function handleSessionComplete() {
   const checks = getSessionChecks()[`sess_${currentSessionIdx}`] || {}
   const allDone = Array.from(domCards).every(c => checks[c.dataset.exid])
   if (!allDone) return false
-  if (currentSessionIdx === 2) {
+  // A semana só fecha com os TRÊS treinos (A, B e C) completos, em qualquer ordem.
+  // Antes bastava completar o Treino C: 4× o C liberava a reavaliação sem A e B.
+  const feitos = getWeekSessionsDone()
+  feitos[currentSessionIdx] = true
+  if (feitos.every(Boolean)) {
     completedWeeks = Math.min(4, completedWeeks + 1)
     const monthDone = completedWeeks === 4
     localStorage.setItem('csd_completedWeeks', completedWeeks.toString())
@@ -3979,8 +3986,8 @@ function finishOnboarding() {
 }
 
 // ══ PROGRESSO ══
-// Treinos concluídos na semana atual (0–3). As marcações são zeradas quando o
-// Treino C fecha a semana, por isso só valem para a semana em andamento.
+// Treinos concluídos na semana atual (0–3). As marcações são zeradas quando os
+// três treinos fecham a semana, por isso só valem para a semana em andamento.
 function getWeekSessionsDone() {
   const checks = getSessionChecks()
   const allEx = JSON.parse(localStorage.getItem('csd_sessionExercises') || '{}')
@@ -4205,7 +4212,7 @@ lockFsOrientation(false)
 // nova enviada à App Store / Play. Se um dia uma versão antiga parar de funcionar,
 // suba "min_build" em app-config.json (publicado no site) e o app antigo mostra
 // "Atualize o app" com o link da loja. Falha de rede = deixa entrar.
-const APP_BUILD = 6
+const APP_BUILD = 7
 function esc(v) { return String(v ?? '').replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'})[c]) }
 async function checkMinVersion() {
   const cap = window.Capacitor
