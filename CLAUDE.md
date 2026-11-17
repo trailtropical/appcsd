@@ -39,10 +39,10 @@ GitHub Pages publica `main` em ~1 min. Sempre confira com:
 curl -s -o /dev/null -w "%{http_code}\n" https://trailtropical.github.io/appcsd/
 ```
 
-**Cache:** `index.html` tem um cache-buster na linha 7: `const v='36'`. **Ao publicar mudanças no app, incremente esse número** (`v='37'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
+**Cache:** `index.html` tem um cache-buster na linha 7: `const v='37'`. **Ao publicar mudanças no app, incremente esse número** (`v='38'`, ...). Sem isso, alunos com o PWA instalado continuam vendo a versão antiga. Também existe `sw.js` com `CACHE_NAME = 'csd-v19'` (só assets estáticos).
 
 ### Versão mínima do app nativo
-- `index.html` tem `const APP_BUILD = 6`: **aumente a cada build nova enviada às lojas**. É um contador próprio do app (não precisa bater com o build da Apple nem com o versionCode do Android).
+- `index.html` tem `const APP_BUILD = 7`: **aumente a cada build nova enviada às lojas**. É um contador próprio do app (não precisa bater com o build da Apple nem com o versionCode do Android).
 - O app nativo lê `app-config.json` (no site). Se `APP_BUILD < min_build`, mostra "Atualize o app" com o link da loja. Para forçar atualização, suba `min_build` e publique. Falha de rede deixa entrar.
 - Só funciona a partir da build que tem esse código (APP_BUILD 5). Builds antigas (iOS 1.0 b3, Android vc4) não fazem a checagem.
 
@@ -130,7 +130,7 @@ Build do AAB (JDK 21):
 ```bash
 cd native-app/android
 JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
-  ./gradlew bundleRelease -PAPP_VERSION_CODE=6 -PAPP_VERSION_NAME=1.1.1
+  ./gradlew bundleRelease -PAPP_VERSION_CODE=8 -PAPP_VERSION_NAME=1.1.2
 ```
 - Saída: `native-app/android/app/build/outputs/bundle/release/app-release.aab`
 - **versionCode é permanente**: nunca reuse um número já enviado ao Play
@@ -164,7 +164,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 
 ---
 
-## 11. Estado atual — 16/nov/2026
+## 11. Estado atual — 16/nov/2026 (noite)
 
 > Esta seção envelhece. Atualize a data e os itens ao concluir marcos relevantes.
 
@@ -188,6 +188,8 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
 - **Aluno antigo (anterior a 5/nov) sem linha em `purchases`:** o primeiro acesso responde `no_purchase` mesmo ele já tendo conta e senha. O caminho dele é "Já tenho conta" / "Esqueci minha senha". Só gravar compra de cortesia + `password_set = false` se precisar recriar a senha pelo "Primeiro acesso".
 
 ### Correções recentes
+- **16/nov (web v=37, iOS 1.1.2 b8, Android 1.1.2 vc8, APP_BUILD 7):** (1) vídeo "sumia" na tela do exercício com letra grande/tela baixa: `.ex-detail-overlay` é flex em coluna e a caixa do vídeo (overflow:hidden) era esmagada até ~2 px quando o conteúdo passava da altura; corrigido com `.ex-detail-overlay>*{flex-shrink:0}`. Sintoma relatado: "clico em Ver vídeo e nada aparece" / "pula o vídeo e mostra direto o cronômetro". (2) a semana fechava só com o Treino C completo (4× o C liberava a reavaliação em poucos dias); agora `handleSessionComplete` exige A, B e C. Continua **sem trava de dias**: 12 treinos em 12 dias ainda liberam a reavaliação (decisão fica para a 2.0).
+- **16/nov — pendente:** Android 1.1.2 (vc 8) enviado para revisão do Google (produção, 100%). iOS 1.1.2 (build 8) enviado ao App Store Connect por `xcodebuild -exportArchive` (upload ok), mas **falta criar a versão 1.1.2 no painel e enviar para revisão** (exige login do dono). Próximo build/versionCode: **9**.
 - **13/nov (web v=36, iOS 1.1.1 b7, Android 1.1.1 vc7):** treino "mudava todo" ao trocar o atalho/PWA pelo app da loja (mês 2+): aparelho novo usava `session_exercises` (treinos do mês ATUAL) como se fosse o mês anterior e excluía os exercícios do aluno. Corrigido; e a lista de cada mês passou a ser salva em `sessions.session_exercises._planos` (`{"0":M1,"1":M2,"2":M3}`), restaurada em qualquer aparelho e usada pelo admin no mês atual. App nativo descarta 1× a lista do mês sem `_planos` (`csd_fix_lista_v1`) para corrigir quem já foi afetado na 1.1.0. Orientação até a atualização: usar o atalho.
 - **12/nov (web v=34):** convite "já está na App Store / no Google Play" para quem usa o site/PWA no celular (`maybeShowStoreInvite`): só a loja do aparelho, nunca no app nativo nem no computador, 1× por abertura, para após 3 "Agora não" ou ao tocar em baixar (`localStorage.csd_store_invite`).
 - **12/nov (UX, web v=33):** painel com "Progresso do Mês" (12 treinos/mês; antes media só a semana e voltava a 0% ao fechar a semana) e "Semana X de 4"; relatório começa pela conclusão (`buildReportHtml` sem efeitos; `viewReport()` reabre pelo painel sem regravar); treino com tempo estimado, contador de feitos, descanso (30 s, até 1 min) e "Marcar treino como feito"; cards de exercício simplificados (nome, dose, ★ Crítico, "Ver vídeo"); cronômetro no detalhe dos exercícios em segundos; convite "Baixar App" leva às lojas; Termos nas configurações; checagem de versão mínima (`APP_BUILD`/`app-config.json`).
