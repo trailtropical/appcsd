@@ -717,13 +717,22 @@ function geralOrdemIds(nivel) {
   return [vm, 'g_cocoras', 'g_prancha', 'g_panturrilha', 'g_terra', 'g_equilibrio', 'g_stepdown']
 }
 // Exercícios do plano base quando o treino fica vazio (idêntico ao baseExercisesForMonth do app).
+// Testes do check-up que nunca entram no programa (igual ao FORA_DO_PLANO do app).
+const FORA_DO_PLANO = new Set(['g_equilibrio'])
 function baseExercisesForMonth(monthIdx, nivel) {
   const classic = ['e_prop_fechado', 'e_agach_ponta']
   if (!monthIdx || monthIdx <= 0) return classic
   const pool = geralOrdemIds(nivel).filter(id => EX_NAME[id])
   if (!pool.length) return classic
   const off = (monthIdx * 3) % pool.length
-  return [pool[off], pool[(off + 2) % pool.length]]
+  const out = []
+  ;[off, off + 2].forEach(start => {
+    for (let k = 0; k < pool.length; k++) {
+      const id = pool[(start + k) % pool.length]
+      if (!FORA_DO_PLANO.has(id) && !out.includes(id)) { out.push(id); break }
+    }
+  })
+  return out
 }
 
 // Reconstrói o plano atual do aluno → [[a_ids],[b_ids],[c_ids]] finais (5–6, como o app renderiza)
@@ -854,7 +863,7 @@ function rebuildPlanForStudent(s) {
   return baseSessoes.map((specific, sessIdx) => {
     let kept = specific.filter(id => {
       const fk = id.replace(/_assist$/,'')
-      return id && EX_NAME[id] && !((blockedFam[fk] || new Set()).has(id))
+      return id && EX_NAME[id] && !FORA_DO_PLANO.has(id) && !((blockedFam[fk] || new Set()).has(id))
     })
     const keptNames = new Set(kept.map(id => EX_NAME[id]))
     if (kept.length > MAX) {
@@ -868,6 +877,7 @@ function rebuildPlanForStudent(s) {
       while (kept.length < MIN && i < pool.length) {
         const id = pool[(i + offset) % pool.length]
         i++
+        if (FORA_DO_PLANO.has(id)) continue
         if (!kept.includes(id)) { kept.push(id); keptNames.add(EX_NAME[id]) }
       }
     }

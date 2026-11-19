@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script>(()=>{const v='37';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
+<script>(()=>{const v='38';if(localStorage.getItem('csd_cache_version')!==v){if('caches'in window)caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))));if('serviceWorker'in navigator)navigator.serviceWorker.getRegistration().then(r=>r?.unregister());localStorage.setItem('csd_cache_version',v);if(!/type=recovery|access_token/.test(location.hash||''))location.href='./index.html'+location.search+(location.search?'&':'?')+'t='+Date.now()}})()</script>
 <meta name="theme-color" content="#0F0F0E">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
@@ -1307,13 +1307,32 @@ function getGeralOrdem() {
 
 // Plano base (aluno sem nenhum achado). No M1 é o par histórico; nos meses
 // seguintes gira pelo bloco geral para NUNCA repetir o mês anterior inteiro.
+// Exercícios que são TESTE do check-up e nunca entram no programa de treino
+// (mesmo estando no bloco geral do Ritual de Corrida).
+const FORA_DO_PLANO = new Set(['g_equilibrio'])
+// Trava automática: qualquer exercício que use o MESMO vídeo de um teste do
+// check-up também fica fora do plano (vídeo de teste nunca vira exercício).
+;(() => {
+  const vidsTeste = new Set()
+  TESTS.forEach(t => { const m = /players\/([0-9a-f]+)\//.exec(t.videoEmbed || ''); if (m) vidsTeste.add(m[1]) })
+  Object.keys(EX).forEach(id => { if (EX[id].vid && vidsTeste.has(EX[id].vid)) FORA_DO_PLANO.add(id) })
+})()
+
 function baseExercisesForMonth(monthIdx) {
   const classic = ['e_prop_fechado','e_agach_ponta']
   if (!monthIdx || monthIdx <= 0) return classic
   const pool = getGeralOrdem().flatMap(b => b.ids).filter(id => EX[id])
   if (!pool.length) return classic
   const off = (monthIdx * 3) % pool.length
-  return [pool[off], pool[(off + 2) % pool.length]]
+  // Mesmas posições de sempre; se cair num exercício fora do plano, usa o próximo.
+  const out = []
+  ;[off, off + 2].forEach(start => {
+    for (let k = 0; k < pool.length; k++) {
+      const id = pool[(start + k) % pool.length]
+      if (!FORA_DO_PLANO.has(id) && !out.includes(id)) { out.push(id); break }
+    }
+  })
+  return out
 }
 
 const SESSION_INFO = [
@@ -3567,7 +3586,7 @@ function showSessionFromPlan(sessIdx) {
   // bloqueia variante _assist e respeita "nunca em 3 treinos"). NÃO re-adicionamos
   // excedentes por sinal aqui, pois isso reintroduziria o mesmo exercício em 3 treinos.
   // Completamos apenas com exercícios gerais diversificados (não interferem na regra).
-    let kept = specific.filter(id => id && EX[id] && !(blockedFam[famKey(id)] && blockedFam[famKey(id)].has(id)))
+    let kept = specific.filter(id => id && EX[id] && !FORA_DO_PLANO.has(id) && !(blockedFam[famKey(id)] && blockedFam[famKey(id)].has(id)))
     // Fase 2: bloqueios do admin (protocol_blocks) ANTES do preenchimento —
     // assim o preenchimento compensa e a sessão não encolhe abaixo do mínimo.
     if (window._blocks && window._blocks.size) {
@@ -3591,6 +3610,8 @@ function showSessionFromPlan(sessIdx) {
       while (kept.length < MIN && i < pool.length) {
         const id = pool[(i + offset) % pool.length]
         i++
+        // Pula teste do check-up sem mudar o giro dos outros treinos.
+        if (FORA_DO_PLANO.has(id)) continue
         if (!kept.includes(id)) { kept.push(id); keptNames.add(EX[id].name) }
       }
     }
