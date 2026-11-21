@@ -32,6 +32,13 @@ function normalizeEmail(value: string) {
   return (value || "").trim().toLowerCase()
 }
 
+// O acesso ao app vem do "Corredor Sem Dor". O upsell "Programa de
+// Acompanhamento - Corredor Sem Dor" é outro produto: reembolso dele
+// não tira o acesso ao app.
+function isAppProduct(productName: string) {
+  return !/acompanhamento/i.test(productName || "")
+}
+
 serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 })
@@ -121,6 +128,25 @@ serve(async (req) => {
 
     // ── 2. Reembolso / chargeback: bloqueia o acesso ────────
     if (isRefunded) {
+      // Reembolso de outro produto (ex.: upsell): não mexe no acesso ao app.
+      if (!isAppProduct(productName)) {
+        console.log("[hotmart] Reembolso de outro produto, acesso mantido:", email, productName)
+        return json({ success: true, status, email, blocked: false, reason: "other_product" })
+      }
+
+      // Recompra: se o aluno tem outra compra aprovada do app, mantém o acesso.
+      const { data: otherApproved } = await supabase
+        .from("purchases")
+        .select("transaction_id, product")
+        .eq("email", email)
+        .eq("status", "approved")
+        .neq("transaction_id", transactionId)
+      const hasOtherAppPurchase = (otherApproved || []).some(p => isAppProduct(p.product))
+      if (hasOtherAppPurchase) {
+        console.log("[hotmart] Reembolso, mas há outra compra aprovada do app; acesso mantido:", email)
+        return json({ success: true, status, email, blocked: false, reason: "other_purchase" })
+      }
+
       const { error: blockError } = await supabase
         .from("profiles")
         .update({ access_blocked: true })
